@@ -2965,7 +2965,7 @@
     const editId      = document.getElementById('goalEditId').value;
 
     const payload = { title, description, target_date, color, status, progress,
-                      frequency: horizon }; // reusamos campo frequency para el horizonte
+                      horizon: horizon }; // reusamos campo frequency para el horizonte
 
     if (editId) {
       const { error } = await sb.from('goals').update(payload).eq('id', editId);
@@ -3004,7 +3004,7 @@
     const prog = g.progress || 0;
     document.getElementById('goalProgress').value = prog;
     document.getElementById('goalProgressLabel').textContent = prog + '%';
-    document.getElementById('goalHorizon').value = g.frequency || 'short';
+    document.getElementById('goalHorizon').value = g.horizon || 'short';
     document.getElementById('goalModalTitle').textContent = 'Editar objetivo';
     openModal('goalModal');
   }
@@ -3051,7 +3051,7 @@
 
     const el = document.getElementById('goalsPageContent');
     el.innerHTML = horizons.map(h => {
-      const goals = all.filter(g => (g.frequency || 'short') === h.key);
+      const goals = all.filter(g => (g.horizon || 'short') === h.key);
       const cards = goals.length
         ? goals.map(g => {
             const gJson = JSON.stringify(g).replace(/"/g, '&quot;');
