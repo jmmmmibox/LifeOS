@@ -1603,18 +1603,21 @@
 
         <!-- NOTAS -->
         <div class="page" id="page-notes">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <div>
               <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Notas</h2>
               <p style="font-size:13px;color:var(--text-2);margin-top:2px">Ideas, aprendizajes, pensamientos</p>
             </div>
-            <button class="btn btn-primary" onclick="openModal('noteModal')">+ Nueva nota</button>
+            <button class="btn btn-primary" onclick="openNewNote()">+ Nueva nota</button>
+          </div>
+          <div style="margin-bottom:18px">
+            <input type="text" id="notesSearch" class="form-input" placeholder="Buscar por palabra o concepto..." oninput="filterNotes()">
           </div>
           <div id="notesPageContent">
             <div class="empty-state" style="padding:60px">
               <div class="empty-icon">◻</div>
               <p>Sin notas</p>
-              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('noteModal')">Escribir primera nota</button>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openNewNote()">Escribir primera nota</button>
             </div>
           </div>
         </div>
@@ -1900,21 +1903,22 @@
 
 <!-- MODAL: Nota -->
 <div class="modal-overlay" id="noteModal">
-  <div class="modal">
+  <div class="modal" style="max-width:540px">
     <div class="modal-header">
-      <span class="modal-title">Nueva nota</span>
-      <button class="modal-close" onclick="closeModal('noteModal')">×</button>
+      <span class="modal-title" id="noteModalTitle">Nueva nota</span>
+      <button class="modal-close" onclick="closeNoteModal()">×</button>
     </div>
+    <input type="hidden" id="noteEditId">
     <div class="form-group">
       <label class="form-label">Título (opcional)</label>
       <input type="text" id="noteTitle" class="form-input" placeholder="Título de la nota">
     </div>
     <div class="form-group">
       <label class="form-label">Contenido</label>
-      <textarea id="noteContent" class="form-textarea" style="min-height:120px" placeholder="Escribe tu idea..."></textarea>
+      <textarea id="noteContent" class="form-textarea" style="min-height:160px" placeholder="Escribe tu idea..."></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('noteModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeNoteModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveNote()">Guardar</button>
     </div>
   </div>
@@ -3126,13 +3130,112 @@
   async function saveNote() {
     const content = document.getElementById('noteContent').value.trim();
     if (!content) return showToast('Escribe algo');
-    const title = document.getElementById('noteTitle').value.trim();
-    const { error } = await sb.from('notes').insert({ user_id: currentUser.id, title, content });
-    if (error) return showToast('Error al guardar');
-    closeModal('noteModal');
-    document.getElementById('noteContent').value = '';
-    showToast('Nota guardada ✓');
+    const title  = document.getElementById('noteTitle').value.trim();
+    const editId = document.getElementById('noteEditId').value;
+
+    if (editId) {
+      const { error } = await sb.from('notes').update({ title, content, updated_at: new Date().toISOString() }).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Nota actualizada ✓');
+    } else {
+      const { error } = await sb.from('notes').insert({ user_id: currentUser.id, title, content });
+      if (error) return showToast('Error al guardar');
+      showToast('Nota guardada ✓');
+    }
+    closeNoteModal();
     loadNotesPage();
+  }
+
+  function openNewNote() {
+    document.getElementById('noteEditId').value = '';
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteContent').value = '';
+    document.getElementById('noteModalTitle').textContent = 'Nueva nota';
+    openModal('noteModal');
+  }
+
+  function openEditNote(n) {
+    document.getElementById('noteEditId').value = n.id;
+    document.getElementById('noteTitle').value = n.title || '';
+    document.getElementById('noteContent').value = n.content || '';
+    document.getElementById('noteModalTitle').textContent = 'Editar nota';
+    openModal('noteModal');
+  }
+
+  function closeNoteModal() {
+    closeModal('noteModal');
+    document.getElementById('noteEditId').value = '';
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteContent').value = '';
+  }
+
+  async function deleteNote(id) {
+    if (!confirm('¿Eliminar esta nota?')) return;
+    await sb.from('notes').delete().eq('id', id);
+    showToast('Nota eliminada');
+    loadNotesPage();
+  }
+
+  let allNotes = [];
+
+  async function loadNotesPage() {
+    const { data } = await sb.from('notes').select('*')
+      .eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    allNotes = data || [];
+    // Mantener filtro activo si hay texto
+    const search = document.getElementById('notesSearch')?.value || '';
+    renderNotes(search ? allNotes.filter(n => notesMatchSearch(n, search)) : allNotes);
+  }
+
+  function filterNotes() {
+    const search = document.getElementById('notesSearch').value.toLowerCase().trim();
+    renderNotes(search ? allNotes.filter(n => notesMatchSearch(n, search)) : allNotes);
+  }
+
+  function notesMatchSearch(n, search) {
+    return (n.title || '').toLowerCase().includes(search) ||
+           (n.content || '').toLowerCase().includes(search);
+  }
+
+  function highlightText(text, search) {
+    if (!search || !text) return text || '';
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'),
+      '<mark style="background:#fef08a;border-radius:2px;padding:0 1px">$1</mark>');
+  }
+
+  function renderNotes(notes) {
+    const el = document.getElementById('notesPageContent');
+    const search = document.getElementById('notesSearch')?.value.toLowerCase().trim() || '';
+
+    if (!notes.length) {
+      el.innerHTML = allNotes.length
+        ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">◻</div><p>Sin resultados para "${search}"</p></div>`
+        : `<div class="empty-state" style="padding:60px"><div class="empty-icon">◻</div><p>Sin notas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openNewNote()">Escribir primera nota</button></div>`;
+      return;
+    }
+
+    el.innerHTML = `
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">${notes.length} nota${notes.length !== 1 ? 's' : ''}${search ? ` para "${search}"` : ''}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">` +
+      notes.map(n => {
+        const nJson    = JSON.stringify(n).replace(/"/g, '&quot;');
+        const titleHtml   = highlightText(n.title, search);
+        const contentHtml = highlightText(n.content?.slice(0, 220), search);
+        const date = new Date(n.updated_at || n.created_at).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+        return `
+        <div class="card" style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+            ${n.title ? `<div style="font-weight:600;font-size:14px;flex:1;line-height:1.3">${titleHtml}</div>` : '<div style="flex:1"></div>'}
+            <div style="display:flex;gap:3px;flex-shrink:0;margin-left:8px">
+              <button class="icon-btn" onclick="openEditNote(JSON.parse(this.dataset.n))" data-n="${nJson}" title="Editar">✎</button>
+              <button class="icon-btn danger" onclick="deleteNote('${n.id}')" title="Eliminar">🗑</button>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.6;flex:1">${contentHtml}${(n.content?.length || 0) > 220 ? '…' : ''}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:10px;padding-top:8px;border-top:1px solid var(--border-soft)">${date}</div>
+        </div>`;
+      }).join('') + `</div>`;
   }
 
   async function saveBook() {
@@ -3281,23 +3384,6 @@
     showToast('Tarea completada ✓');
     loadTasksPage();
     if (currentPage === 'dashboard') loadDashTasks();
-  }
-
-  async function loadNotesPage() {
-    const { data } = await sb.from('notes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const el = document.getElementById('notesPageContent');
-    if (!data?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◻</div><p>Sin notas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('noteModal')">Primera nota</button></div>`;
-      return;
-    }
-    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">` +
-      data.map(n => `
-        <div class="card" style="cursor:pointer" onclick="">
-          ${n.title ? `<div style="font-weight:600;font-size:14px;margin-bottom:8px">${n.title}</div>` : ''}
-          <div style="font-size:13px;color:var(--text-2);line-height:1.6">${n.content.slice(0, 200)}${n.content.length > 200 ? '...' : ''}</div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:10px">${new Date(n.created_at).toLocaleDateString('es-ES')}</div>
-        </div>`).join('') +
-      `</div>`;
   }
 
   async function loadBooksPage() {
