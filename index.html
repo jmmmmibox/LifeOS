@@ -1624,18 +1624,34 @@
 
         <!-- LECTURA -->
         <div class="page" id="page-books">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <div>
               <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Lectura</h2>
               <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tu biblioteca personal</p>
             </div>
-            <button class="btn btn-primary" onclick="openModal('bookModal')">+ Añadir libro</button>
+            <button class="btn btn-primary" onclick="openNewBook()">+ Añadir libro</button>
+          </div>
+          <!-- Stats rápidas -->
+          <div id="booksSummary" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap"></div>
+          <!-- Filtros -->
+          <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+            <input type="text" id="booksSearch" class="form-input" placeholder="Buscar título, autor, género..." style="flex:1;min-width:180px" oninput="filterBooks()">
+            <select id="booksStatusFilter" class="form-select" style="width:150px" onchange="filterBooks()">
+              <option value="">Todos los estados</option>
+              <option value="to_read">Por leer</option>
+              <option value="reading">Leyendo</option>
+              <option value="done">Leídos</option>
+            </select>
+            <select id="booksGenreFilter" class="form-select" style="width:150px" onchange="filterBooks()">
+              <option value="">Todos los géneros</option>
+            </select>
+            <button class="btn btn-ghost" onclick="clearBooksFilters()">Limpiar</button>
           </div>
           <div id="booksPageContent">
             <div class="empty-state" style="padding:60px">
               <div class="empty-icon">▣</div>
               <p>Tu biblioteca está vacía</p>
-              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('bookModal')">Añadir primer libro</button>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openNewBook()">Añadir primer libro</button>
             </div>
           </div>
         </div>
@@ -1926,20 +1942,27 @@
 
 <!-- MODAL: Libro -->
 <div class="modal-overlay" id="bookModal">
-  <div class="modal">
+  <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <span class="modal-title">Añadir libro</span>
-      <button class="modal-close" onclick="closeModal('bookModal')">×</button>
+      <span class="modal-title" id="bookModalTitle">Añadir libro</span>
+      <button class="modal-close" onclick="closeBookModal()">×</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Título</label>
-      <input type="text" id="bookTitle" class="form-input" placeholder="Título del libro">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Autor</label>
-      <input type="text" id="bookAuthor" class="form-input" placeholder="Autor">
+    <input type="hidden" id="bookEditId">
+    <div class="form-row">
+      <div class="form-group" style="flex:2">
+        <label class="form-label">Título</label>
+        <input type="text" id="bookTitle" class="form-input" placeholder="Título del libro">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Género</label>
+        <input type="text" id="bookGenre" class="form-input" placeholder="Ej: Inversión">
+      </div>
     </div>
     <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Autor</label>
+        <input type="text" id="bookAuthor" class="form-input" placeholder="Autor">
+      </div>
       <div class="form-group">
         <label class="form-label">Estado</label>
         <select id="bookStatus" class="form-select">
@@ -1948,13 +1971,33 @@
           <option value="done">Leído</option>
         </select>
       </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Páginas leídas</label>
+        <input type="number" id="bookCurrentPage" class="form-input" placeholder="0" min="0">
+      </div>
       <div class="form-group">
         <label class="form-label">Páginas totales</label>
         <input type="number" id="bookPages" class="form-input" placeholder="300">
       </div>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fecha inicio</label>
+        <input type="date" id="bookStarted" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha fin</label>
+        <input type="date" id="bookFinished" class="form-input">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Enlace Drive (archivo)</label>
+      <input type="url" id="bookDriveUrl" class="form-input" placeholder="https://drive.google.com/...">
+    </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('bookModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeBookModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveBook()">Guardar</button>
     </div>
   </div>
@@ -3239,18 +3282,222 @@
   }
 
   async function saveBook() {
-    const title = document.getElementById('bookTitle').value.trim();
+    const title        = document.getElementById('bookTitle').value.trim();
     if (!title) return showToast('Escribe un título');
-    const author = document.getElementById('bookAuthor').value;
-    const status = document.getElementById('bookStatus').value;
-    const total_pages = parseInt(document.getElementById('bookPages').value) || null;
-    const started_at = status === 'reading' ? todayStr() : null;
-    const { error } = await sb.from('books').insert({ user_id: currentUser.id, title, author, status, total_pages, started_at });
-    if (error) return showToast('Error al guardar');
-    closeModal('bookModal');
-    document.getElementById('bookTitle').value = '';
-    showToast('Libro añadido ✓');
+    const author       = document.getElementById('bookAuthor').value.trim();
+    const genre        = document.getElementById('bookGenre').value.trim();
+    const status       = document.getElementById('bookStatus').value;
+    const current_page = parseInt(document.getElementById('bookCurrentPage').value) || 0;
+    const total_pages  = parseInt(document.getElementById('bookPages').value) || null;
+    const started_at   = document.getElementById('bookStarted').value || null;
+    const finished_at  = document.getElementById('bookFinished').value || null;
+    const drive_url    = document.getElementById('bookDriveUrl').value.trim() || null;
+    const editId       = document.getElementById('bookEditId').value;
+
+    const payload = { title, author, genre, status, current_page, total_pages,
+                      started_at, finished_at, drive_url };
+
+    if (editId) {
+      const { error } = await sb.from('books').update(payload).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Libro actualizado ✓');
+    } else {
+      const { error } = await sb.from('books').insert({ user_id: currentUser.id, ...payload });
+      if (error) return showToast('Error al guardar');
+      showToast('Libro añadido ✓');
+    }
+    closeBookModal();
     loadBooksPage();
+    if (currentPage === 'dashboard') loadDashBook();
+  }
+
+  function openNewBook() {
+    document.getElementById('bookEditId').value = '';
+    document.getElementById('bookTitle').value = '';
+    document.getElementById('bookAuthor').value = '';
+    document.getElementById('bookGenre').value = '';
+    document.getElementById('bookStatus').value = 'to_read';
+    document.getElementById('bookCurrentPage').value = '';
+    document.getElementById('bookPages').value = '';
+    document.getElementById('bookStarted').value = '';
+    document.getElementById('bookFinished').value = '';
+    document.getElementById('bookDriveUrl').value = '';
+    document.getElementById('bookModalTitle').textContent = 'Añadir libro';
+    openModal('bookModal');
+  }
+
+  function openEditBook(b) {
+    document.getElementById('bookEditId').value = b.id;
+    document.getElementById('bookTitle').value = b.title || '';
+    document.getElementById('bookAuthor').value = b.author || '';
+    document.getElementById('bookGenre').value = b.genre || '';
+    document.getElementById('bookStatus').value = b.status || 'to_read';
+    document.getElementById('bookCurrentPage').value = b.current_page || '';
+    document.getElementById('bookPages').value = b.total_pages || '';
+    document.getElementById('bookStarted').value = b.started_at || '';
+    document.getElementById('bookFinished').value = b.finished_at || '';
+    document.getElementById('bookDriveUrl').value = b.drive_url || '';
+    document.getElementById('bookModalTitle').textContent = 'Editar libro';
+    openModal('bookModal');
+  }
+
+  function closeBookModal() {
+    closeModal('bookModal');
+    document.getElementById('bookEditId').value = '';
+  }
+
+  async function deleteBook(id) {
+    if (!confirm('¿Eliminar este libro?')) return;
+    await sb.from('books').delete().eq('id', id);
+    showToast('Libro eliminado');
+    loadBooksPage();
+  }
+
+  let allBooks = [];
+
+  async function loadBooksPage() {
+    const { data } = await sb.from('books').select('*')
+      .eq('user_id', currentUser.id).order('title', { ascending: true });
+    allBooks = data || [];
+
+    // Poblar filtro géneros
+    const genres = [...new Set(allBooks.map(b => b.genre).filter(Boolean))].sort();
+    const genreSelect = document.getElementById('booksGenreFilter');
+    const currentGenre = genreSelect.value;
+    genreSelect.innerHTML = '<option value="">Todos los géneros</option>' +
+      genres.map(g => `<option value="${g}" ${g === currentGenre ? 'selected' : ''}>${g}</option>`).join('');
+
+    // Stats
+    const reading  = allBooks.filter(b => b.status === 'reading').length;
+    const done     = allBooks.filter(b => b.status === 'done').length;
+    const to_read  = allBooks.filter(b => b.status === 'to_read').length;
+    const pagesRead = allBooks.reduce((s, b) => s + (b.current_page || 0), 0);
+    document.getElementById('booksSummary').innerHTML = `
+      <div class="goals-summary-card"><div class="goals-summary-label">Total</div><div class="goals-summary-value">${allBooks.length}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Leyendo</div><div class="goals-summary-value">${reading}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Leídos</div><div class="goals-summary-value">${done}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Por leer</div><div class="goals-summary-value">${to_read}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Páginas leídas</div><div class="goals-summary-value">${pagesRead.toLocaleString()}</div></div>`;
+
+    filterBooks();
+  }
+
+  function clearBooksFilters() {
+    document.getElementById('booksSearch').value = '';
+    document.getElementById('booksStatusFilter').value = '';
+    document.getElementById('booksGenreFilter').value = '';
+    filterBooks();
+  }
+
+  function filterBooks() {
+    const search = document.getElementById('booksSearch')?.value.toLowerCase().trim() || '';
+    const status = document.getElementById('booksStatusFilter')?.value || '';
+    const genre  = document.getElementById('booksGenreFilter')?.value || '';
+
+    const filtered = allBooks.filter(b => {
+      const matchSearch = !search ||
+        (b.title || '').toLowerCase().includes(search) ||
+        (b.author || '').toLowerCase().includes(search) ||
+        (b.genre || '').toLowerCase().includes(search);
+      const matchStatus = !status || b.status === status;
+      const matchGenre  = !genre  || b.genre === genre;
+      return matchSearch && matchStatus && matchGenre;
+    });
+
+    renderBooks(filtered, search);
+  }
+
+  function renderBooks(books, search = '') {
+    const el = document.getElementById('booksPageContent');
+    if (!books.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:40px"><div class="empty-icon">▣</div><p>${allBooks.length ? 'Sin resultados' : 'Tu biblioteca está vacía'}</p></div>`;
+      return;
+    }
+
+    const statusColors = { reading: '#4f46e5', to_read: '#f59e0b', done: '#10b981' };
+    const statusLabels = { reading: 'Leyendo', to_read: 'Por leer', done: 'Leído' };
+    const statusBg     = { reading: '#eef2ff', to_read: '#fffbeb', done: '#ecfdf5' };
+
+    // Agrupar por estado: leyendo primero
+    const order = ['reading', 'to_read', 'done'];
+    const groups = {};
+    order.forEach(s => groups[s] = []);
+    books.forEach(b => groups[b.status]?.push(b));
+
+    el.innerHTML = `<div style="font-size:12px;color:var(--text-3);margin-bottom:14px">${books.length} libro${books.length !== 1 ? 's' : ''}</div>` +
+      order.filter(s => groups[s].length).map(status => `
+      <div style="margin-bottom:28px">
+        <div style="font-size:11px;font-weight:700;color:${statusColors[status]};text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${statusColors[status]}"></span>
+          ${statusLabels[status]} · ${groups[status].length}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">
+          ${groups[status].map(b => {
+            const pct = b.total_pages && b.current_page ? Math.round((b.current_page / b.total_pages) * 100) : 0;
+            const bJson = JSON.stringify(b).replace(/"/g, '&quot;');
+
+            // Días de lectura
+            let daysHtml = '';
+            if (b.started_at) {
+              const end = b.finished_at ? new Date(b.finished_at) : new Date();
+              const days = Math.ceil((end - new Date(b.started_at)) / 86400000);
+              daysHtml = `<span style="font-size:11px;color:var(--text-3)">📅 ${days} días</span>`;
+            }
+
+            const titleHtml = search
+              ? b.title.replace(new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),
+                  '<mark style="background:#fef08a;border-radius:2px;padding:0 1px">$1</mark>')
+              : b.title;
+
+            return `
+            <div class="card" style="border-top:3px solid ${statusColors[status]}">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:600;font-size:14px;line-height:1.3;margin-bottom:2px">${titleHtml}</div>
+                  <div style="font-size:12px;color:var(--text-2)">${b.author || 'Sin autor'}</div>
+                </div>
+                <div style="display:flex;gap:3px;flex-shrink:0;margin-left:8px">
+                  ${b.drive_url ? `<a href="${b.drive_url}" target="_blank" class="icon-btn" title="Abrir en Drive">📂</a>` : ''}
+                  <button class="icon-btn" onclick="openEditBook(JSON.parse(this.dataset.b))" data-b="${bJson}" title="Editar">✎</button>
+                  <button class="icon-btn danger" onclick="deleteBook('${b.id}')" title="Eliminar">🗑</button>
+                </div>
+              </div>
+              ${b.genre ? `<span style="font-size:10px;font-weight:600;color:${statusColors[status]};background:${statusBg[status]};padding:2px 7px;border-radius:10px">${b.genre}</span>` : ''}
+              ${status === 'reading' || status === 'done' ? `
+                <div style="margin-top:10px">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-bottom:4px">
+                    <span>${b.current_page || 0} / ${b.total_pages || '?'} pág.</span>
+                    <span>${pct}%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width:${pct}%;background:${statusColors[status]}"></div>
+                  </div>
+                </div>
+                ${status === 'reading' ? `
+                  <input type="number" placeholder="Actualizar página" min="0" max="${b.total_pages || 9999}"
+                    style="width:100%;margin-top:8px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:var(--font)"
+                    onchange="updateBookPage('${b.id}', this.value)">` : ''}
+              ` : ''}
+              ${b.started_at || b.finished_at ? `
+                <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                  ${b.started_at ? `<span style="font-size:11px;color:var(--text-3)">Inicio: ${b.started_at}</span>` : ''}
+                  ${b.finished_at ? `<span style="font-size:11px;color:var(--text-3)">Fin: ${b.finished_at}</span>` : ''}
+                  ${daysHtml}
+                </div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  async function updateBookPage(id, page) {
+    const p = parseInt(page);
+    await sb.from('books').update({ current_page: p }).eq('id', id);
+    showToast('Progreso guardado ✓');
+    // Recargar silenciosamente
+    const idx = allBooks.findIndex(b => b.id === id);
+    if (idx !== -1) allBooks[idx].current_page = p;
+    filterBooks();
     if (currentPage === 'dashboard') loadDashBook();
   }
 
@@ -3384,53 +3631,6 @@
     showToast('Tarea completada ✓');
     loadTasksPage();
     if (currentPage === 'dashboard') loadDashTasks();
-  }
-
-  async function loadBooksPage() {
-    const { data } = await sb.from('books').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const el = document.getElementById('booksPageContent');
-    if (!data?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">▣</div><p>Tu biblioteca está vacía</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('bookModal')">Añadir libro</button></div>`;
-      return;
-    }
-
-    const groups = { reading: [], to_read: [], done: [] };
-    data.forEach(b => groups[b.status]?.push(b));
-
-    const statusLabels = { reading: 'Leyendo', to_read: 'Por leer', done: 'Leídos' };
-
-    el.innerHTML = ['reading', 'to_read', 'done'].filter(s => groups[s].length).map(status => `
-      <div style="margin-bottom:24px">
-        <div style="font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">${statusLabels[status]} (${groups[status].length})</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
-          ${groups[status].map(b => {
-            const pct = b.total_pages && b.current_page ? Math.round((b.current_page / b.total_pages) * 100) : 0;
-            return `<div class="card">
-              <div style="display:flex;gap:12px">
-                <div class="book-cover">📖</div>
-                <div style="flex:1">
-                  <div style="font-weight:600;font-size:14px;margin-bottom:2px">${b.title}</div>
-                  <div style="font-size:12px;color:var(--text-2);margin-bottom:8px">${b.author || 'Sin autor'}</div>
-                  ${status === 'reading' ? `
-                    <div class="progress-bar" style="margin-bottom:4px"><div class="progress-fill green" style="width:${pct}%"></div></div>
-                    <div style="font-size:11px;color:var(--text-3)">${b.current_page || 0}/${b.total_pages || '?'} pág.</div>
-                    <input type="number" placeholder="Página actual" value="${b.current_page || 0}" min="0" max="${b.total_pages || 9999}"
-                      style="width:100%;margin-top:8px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px"
-                      onchange="updateBookPage('${b.id}', this.value)">
-                  ` : ''}
-                  ${b.rating ? `<div style="font-size:12px;color:var(--amber);margin-top:4px">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}</div>` : ''}
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`).join('');
-  }
-
-  async function updateBookPage(id, page) {
-    await sb.from('books').update({ current_page: parseInt(page) }).eq('id', id);
-    showToast('Progreso guardado ✓');
-    if (currentPage === 'dashboard') loadDashBook();
   }
 
   async function loadFinancesPage() {
