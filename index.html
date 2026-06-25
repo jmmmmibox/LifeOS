@@ -854,6 +854,246 @@
       z-index: 99;
     }
     .sidebar-overlay.open { display: block; }
+
+    /* =============================================
+       HÁBITOS — estilos mejorados
+    ============================================= */
+    .habits-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .habits-layout { grid-template-columns: 1fr; }
+    }
+
+    .habit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+
+    .habit-card.done { border-color: var(--green); background: var(--green-soft); }
+
+    .habit-icon-box {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+    }
+
+    .habit-card-info { flex: 1; min-width: 0; }
+    .habit-card-name { font-size: 13.5px; font-weight: 550; color: var(--text); }
+    .habit-card-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+    .habit-card-actions {
+      display: flex; gap: 4px; align-items: center;
+    }
+
+    .habit-toggle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: white;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .habit-card.done .habit-toggle { background: var(--green); border-color: var(--green); }
+
+    .icon-btn {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: var(--text-2);
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--text); }
+    .icon-btn.danger:hover { background: var(--red-soft); color: var(--red); border-color: var(--red); }
+
+    /* Calendario de hábitos */
+    .habits-calendar { }
+
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .cal-month {
+      font-size: 15px; font-weight: 600; color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .cal-nav {
+      display: flex; gap: 4px;
+    }
+
+    .cal-nav-btn {
+      width: 30px; height: 30px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer; font-size: 14px; color: var(--text-2);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .cal-nav-btn:hover { background: var(--bg); }
+
+    .cal-legend {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+
+    .cal-legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-2);
+    }
+
+    .cal-legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+
+    .cal-day-label {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 0 6px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+      background: var(--bg);
+      position: relative;
+      min-height: 36px;
+    }
+
+    .cal-day.today {
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      font-weight: 700;
+    }
+
+    .cal-day.other-month { opacity: 0.3; }
+
+    .cal-dots {
+      display: flex; gap: 1px; flex-wrap: wrap;
+      justify-content: center;
+      max-width: 28px;
+    }
+
+    .cal-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+    }
+
+    /* Gráficas */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .stat-card-label { font-size: 11px; color: var(--text-3); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -1px; }
+    .stat-card-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .bar-chart { display: flex; gap: 6px; align-items: flex-end; height: 80px; margin-top: 8px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .bar-fill { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.4s ease; }
+    .bar-label { font-size: 9px; color: var(--text-3); }
+
+    .habit-rate-row {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .habit-rate-item { }
+    .habit-rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .habit-rate-name { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .habit-rate-pct { font-size: 12px; font-weight: 600; color: var(--text-2); }
+
+    /* Tabs dentro de hábitos */
+    .habits-tabs {
+      display: flex; gap: 4px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    .habits-tab {
+      padding: 6px 16px;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px; font-weight: 450;
+      color: var(--text-2);
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+
+    .habits-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 550;
+      box-shadow: var(--shadow);
+    }
+
+    /* Selector de días de la semana */
+    .days-selector {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+
+    .day-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px; font-weight: 500; color: var(--text-2);
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+    .day-btn.selected { background: var(--accent); border-color: var(--accent); color: white; }
   </style>
 </head>
 <body>
@@ -1098,20 +1338,47 @@
           </div>
         </div>
 
-        <!-- HÁBITOS -->
+        <!-- HABITOS -->
         <div class="page" id="page-habits">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <div>
-              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Hábitos</h2>
-              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Construye tu mejor versión cada día</p>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Habitos</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Construye tu mejor version cada dia</p>
             </div>
-            <button class="btn btn-primary" onclick="openModal('habitModal')">+ Nuevo hábito</button>
+            <button class="btn btn-primary" onclick="openModal('habitModal')">+ Nuevo habito</button>
           </div>
-          <div id="habitsPageContent">
-            <div class="empty-state" style="padding:60px">
-              <div class="empty-icon">✦</div>
-              <p>Aún no tienes hábitos</p>
-              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer hábito</button>
+          <div class="habits-tabs">
+            <button class="habits-tab active" onclick="switchHabitsTab('hoy')">Hoy</button>
+            <button class="habits-tab" onclick="switchHabitsTab('calendario')">Calendario</button>
+            <button class="habits-tab" onclick="switchHabitsTab('estadisticas')">Estadisticas</button>
+          </div>
+          <div id="habitsTabHoy">
+            <div id="habitsPageContent">
+              <div class="empty-state" style="padding:60px">
+                <div class="empty-icon">+</div>
+                <p>Aun no tienes habitos</p>
+                <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer habito</button>
+              </div>
+            </div>
+          </div>
+          <div id="habitsTabCalendario" style="display:none">
+            <div class="card">
+              <div class="cal-header">
+                <span class="cal-month" id="calMonthLabel"></span>
+                <div class="cal-nav">
+                  <button class="cal-nav-btn" onclick="changeCalMonth(-1)">&#8249;</button>
+                  <button class="cal-nav-btn" onclick="changeCalMonth(1)">&#8250;</button>
+                </div>
+              </div>
+              <div class="cal-legend" id="calLegend"></div>
+              <div class="cal-grid" id="calGrid"></div>
+            </div>
+          </div>
+          <div id="habitsTabEstadisticas" style="display:none">
+            <div class="stats-grid" id="habitsStatsCards"></div>
+            <div class="card">
+              <div class="card-title">Cumplimiento por habito -- ultimos 30 dias</div>
+              <div class="habit-rate-row" id="habitsRateList"></div>
             </div>
           </div>
         </div>
@@ -1277,29 +1544,54 @@
   </div>
 </div>
 
-<!-- MODAL: Nuevo hábito -->
+<!-- MODAL: Nuevo habito -->
 <div class="modal-overlay" id="habitModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
-      <span class="modal-title">Nuevo hábito</span>
-      <button class="modal-close" onclick="closeModal('habitModal')">×</button>
+      <span class="modal-title" id="habitModalTitle">Nuevo habito</span>
+      <button class="modal-close" onclick="closeHabitModal()">x</button>
     </div>
+    <input type="hidden" id="habitEditId">
     <div class="form-group">
       <label class="form-label">Nombre</label>
-      <input type="text" id="habitName" class="form-input" placeholder="Ej: Meditación">
+      <input type="text" id="habitName" class="form-input" placeholder="Ej: Meditacion">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Icono</label>
-        <input type="text" id="habitIcon" class="form-input" placeholder="🧘" maxlength="2">
+        <label class="form-label">Icono (emoji)</label>
+        <input type="text" id="habitIcon" class="form-input" placeholder="e.g. meditation" maxlength="2">
       </div>
       <div class="form-group">
         <label class="form-label">Color</label>
         <input type="color" id="habitColor" class="form-input" value="#4f46e5" style="height:38px;padding:4px">
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Frecuencia</label>
+      <select id="habitFrequency" class="form-select" onchange="toggleFreqOptions()">
+        <option value="daily">Diario</option>
+        <option value="weekly">Dias especificos</option>
+        <option value="times">X veces por semana</option>
+      </select>
+    </div>
+    <div id="freqDaysRow" style="display:none" class="form-group">
+      <label class="form-label">Dias de la semana</label>
+      <div class="days-selector">
+        <button type="button" class="day-btn" data-day="1" onclick="toggleDay(this)">L</button>
+        <button type="button" class="day-btn" data-day="2" onclick="toggleDay(this)">M</button>
+        <button type="button" class="day-btn" data-day="3" onclick="toggleDay(this)">X</button>
+        <button type="button" class="day-btn" data-day="4" onclick="toggleDay(this)">J</button>
+        <button type="button" class="day-btn" data-day="5" onclick="toggleDay(this)">V</button>
+        <button type="button" class="day-btn" data-day="6" onclick="toggleDay(this)">S</button>
+        <button type="button" class="day-btn" data-day="0" onclick="toggleDay(this)">D</button>
+      </div>
+    </div>
+    <div id="freqTimesRow" style="display:none" class="form-group">
+      <label class="form-label">Veces por semana</label>
+      <input type="number" id="habitTarget" class="form-input" min="1" max="7" value="3" placeholder="3">
+    </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('habitModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeHabitModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveHabit()">Guardar</button>
     </div>
   </div>
@@ -2006,12 +2298,263 @@
     if (!name) return showToast('Escribe un nombre');
     const icon = document.getElementById('habitIcon').value || '⭐';
     const color = document.getElementById('habitColor').value;
-    const { error } = await sb.from('habits').insert({ user_id: currentUser.id, name, icon, color });
-    if (error) return showToast('Error al guardar');
-    closeModal('habitModal');
-    document.getElementById('habitName').value = '';
-    showToast('Hábito creado ✓');
+    const frequency = document.getElementById('habitFrequency').value;
+    const target = parseInt(document.getElementById('habitTarget')?.value) || 1;
+    const editId = document.getElementById('habitEditId').value;
+
+    // Recoger dias seleccionados si frecuencia = weekly
+    let freqData = frequency;
+    if (frequency === 'weekly') {
+      const days = [...document.querySelectorAll('.day-btn.selected')].map(b => b.dataset.day);
+      freqData = 'days:' + days.join(',');
+    } else if (frequency === 'times') {
+      freqData = 'times:' + target;
+    }
+
+    if (editId) {
+      const { error } = await sb.from('habits').update({ name, icon, color, frequency: freqData, target }).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Habito actualizado');
+    } else {
+      const { error } = await sb.from('habits').insert({ user_id: currentUser.id, name, icon, color, frequency: freqData, target });
+      if (error) return showToast('Error al guardar');
+      showToast('Habito creado');
+    }
+    closeHabitModal();
     loadHabitsPage();
+    if (currentPage === 'dashboard') loadDashHabits();
+  }
+
+  function closeHabitModal() {
+    closeModal('habitModal');
+    document.getElementById('habitEditId').value = '';
+    document.getElementById('habitName').value = '';
+    document.getElementById('habitIcon').value = '';
+    document.getElementById('habitColor').value = '#4f46e5';
+    document.getElementById('habitFrequency').value = 'daily';
+    document.getElementById('habitModalTitle').textContent = 'Nuevo habito';
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+    toggleFreqOptions();
+  }
+
+  function toggleFreqOptions() {
+    const freq = document.getElementById('habitFrequency').value;
+    document.getElementById('freqDaysRow').style.display = freq === 'weekly' ? 'block' : 'none';
+    document.getElementById('freqTimesRow').style.display = freq === 'times' ? 'block' : 'none';
+  }
+
+  function toggleDay(btn) { btn.classList.toggle('selected'); }
+
+  function openEditHabit(h) {
+    document.getElementById('habitEditId').value = h.id;
+    document.getElementById('habitName').value = h.name;
+    document.getElementById('habitIcon').value = h.icon || '';
+    document.getElementById('habitColor').value = h.color || '#4f46e5';
+    document.getElementById('habitModalTitle').textContent = 'Editar habito';
+
+    // Parsear frecuencia guardada
+    const freq = h.frequency || 'daily';
+    if (freq.startsWith('days:')) {
+      document.getElementById('habitFrequency').value = 'weekly';
+      const days = freq.replace('days:', '').split(',');
+      document.querySelectorAll('.day-btn').forEach(b => {
+        if (days.includes(b.dataset.day)) b.classList.add('selected');
+      });
+    } else if (freq.startsWith('times:')) {
+      document.getElementById('habitFrequency').value = 'times';
+      document.getElementById('habitTarget').value = freq.replace('times:', '');
+    } else {
+      document.getElementById('habitFrequency').value = 'daily';
+    }
+    toggleFreqOptions();
+    openModal('habitModal');
+  }
+
+  async function deleteHabit(id) {
+    if (!confirm('Eliminar este habito y todos sus registros?')) return;
+    await sb.from('habit_logs').delete().eq('habit_id', id);
+    await sb.from('habits').delete().eq('id', id);
+    showToast('Habito eliminado');
+    loadHabitsPage();
+    if (currentPage === 'dashboard') loadDashHabits();
+  }
+
+  // ---- TABS DE HABITOS ----
+  let currentHabitsTab = 'hoy';
+
+  function switchHabitsTab(tab) {
+    currentHabitsTab = tab;
+    document.querySelectorAll('.habits-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('habitsTabHoy').style.display = tab === 'hoy' ? 'block' : 'none';
+    document.getElementById('habitsTabCalendario').style.display = tab === 'calendario' ? 'block' : 'none';
+    document.getElementById('habitsTabEstadisticas').style.display = tab === 'estadisticas' ? 'block' : 'none';
+    if (tab === 'calendario') renderHabitsCalendar();
+    if (tab === 'estadisticas') renderHabitsStats();
+  }
+
+  // ---- CALENDARIO ----
+  let calYear = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+
+  function changeCalMonth(dir) {
+    calMonth += dir;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    renderHabitsCalendar();
+  }
+
+  async function renderHabitsCalendar() {
+    const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    document.getElementById('calMonthLabel').textContent = months[calMonth] + ' ' + calYear;
+
+    const { data: habits } = await sb.from('habits').select('id,name,color,icon').eq('user_id', currentUser.id).eq('active', true);
+    if (!habits?.length) {
+      document.getElementById('calGrid').innerHTML = '<div style="grid-column:span 7;text-align:center;padding:20px;color:var(--text-3)">Sin habitos configurados</div>';
+      return;
+    }
+
+    // Leyenda
+    document.getElementById('calLegend').innerHTML = habits.map(h =>
+      `<div class="cal-legend-item"><div class="cal-legend-dot" style="background:${h.color}"></div>${h.icon || ''} ${h.name}</div>`
+    ).join('');
+
+    // Obtener logs del mes
+    const startDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+    const endDate   = `${calYear}-${String(calMonth+1).padStart(2,'0')}-31`;
+    const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
+      .eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate);
+
+    // Mapa: date -> [habit_ids completados]
+    const logMap = {};
+    logs?.forEach(l => {
+      if (!l.completed) return;
+      if (!logMap[l.date]) logMap[l.date] = [];
+      logMap[l.date].push(l.habit_id);
+    });
+
+    // Construir grid
+    const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Dom
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayStr2 = todayStr();
+
+    // Ajustar: semana empieza en Lunes
+    const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+
+    let html = ['L','M','X','J','V','S','D'].map(d => `<div class="cal-day-label">${d}</div>`).join('');
+
+    // Celdas vacías al inicio
+    for (let i = 0; i < startOffset; i++) {
+      html += `<div class="cal-day other-month"></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = dateStr === todayStr2;
+      const completedHabits = logMap[dateStr] || [];
+
+      const dots = habits.map(h => {
+        const done = completedHabits.includes(h.id);
+        return `<div class="cal-dot" style="background:${done ? h.color : 'var(--border)'}"></div>`;
+      }).join('');
+
+      html += `<div class="cal-day ${isToday ? 'today' : ''}">
+        <span>${d}</span>
+        <div class="cal-dots">${dots}</div>
+      </div>`;
+    }
+
+    document.getElementById('calGrid').innerHTML = html;
+  }
+
+  // ---- ESTADISTICAS ----
+  async function renderHabitsStats() {
+    const { data: habits } = await sb.from('habits').select('*').eq('user_id', currentUser.id).eq('active', true);
+    if (!habits?.length) {
+      document.getElementById('habitsStatsCards').innerHTML = '<p style="color:var(--text-3);font-size:13px">Sin habitos para mostrar estadisticas.</p>';
+      document.getElementById('habitsRateList').innerHTML = '';
+      return;
+    }
+
+    // Logs ultimos 30 dias
+    const today = new Date();
+    const d30ago = new Date(); d30ago.setDate(d30ago.getDate() - 29);
+    const start30 = d30ago.toISOString().split('T')[0];
+
+    const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
+      .eq('user_id', currentUser.id).gte('date', start30).eq('completed', true);
+
+    const totalCompletions = logs?.length || 0;
+    const uniqueDays = new Set(logs?.map(l => l.date)).size;
+
+    // Mejor racha global
+    const logsByHabit = {};
+    habits.forEach(h => logsByHabit[h.id] = new Set());
+    logs?.forEach(l => logsByHabit[l.habit_id]?.add(l.date));
+
+    let bestStreak = 0;
+    habits.forEach(h => {
+      const s = calcStreak(logsByHabit[h.id]);
+      if (s > bestStreak) bestStreak = s;
+    });
+
+    // Tasa global
+    const globalRate = habits.length > 0 && uniqueDays > 0
+      ? Math.round((totalCompletions / (habits.length * 30)) * 100)
+      : 0;
+
+    document.getElementById('habitsStatsCards').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-card-label">Tasa global</div>
+        <div class="stat-card-value">${globalRate}%</div>
+        <div class="stat-card-sub">Ultimos 30 dias</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Completados</div>
+        <div class="stat-card-value">${totalCompletions}</div>
+        <div class="stat-card-sub">Total en 30 dias</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Mejor racha</div>
+        <div class="stat-card-value">${bestStreak}</div>
+        <div class="stat-card-sub">Dias consecutivos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Habitos activos</div>
+        <div class="stat-card-value">${habits.length}</div>
+        <div class="stat-card-sub">Configurados</div>
+      </div>`;
+
+    // Tasa por habito
+    document.getElementById('habitsRateList').innerHTML = habits.map(h => {
+      const count = logsByHabit[h.id]?.size || 0;
+      const rate = Math.round((count / 30) * 100);
+      const streak = calcStreak(logsByHabit[h.id]);
+      return `<div class="habit-rate-item">
+        <div class="habit-rate-header">
+          <span class="habit-rate-name">
+            <span style="width:10px;height:10px;border-radius:50%;background:${h.color};display:inline-block"></span>
+            ${h.icon || ''} ${h.name}
+          </span>
+          <span class="habit-rate-pct">${rate}% · racha ${streak}d</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${rate}%;background:${h.color}"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function calcStreak(datesSet) {
+    if (!datesSet || datesSet.size === 0) return 0;
+    let streak = 0;
+    const d = new Date();
+    while (true) {
+      const s = d.toISOString().split('T')[0];
+      if (datesSet.has(s)) { streak++; d.setDate(d.getDate() - 1); }
+      else break;
+    }
+    return streak;
   }
 
   async function saveTask() {
@@ -2117,21 +2660,30 @@
 
     const el = document.getElementById('habitsPageContent');
     if (!habits?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">✦</div><p>Aún no tienes hábitos</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer hábito</button></div>`;
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">+</div><p>Aun no tienes habitos</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer habito</button></div>`;
       return;
     }
 
-    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">` +
+    const freqLabel = (f) => {
+      if (!f || f === 'daily') return 'Diario';
+      if (f.startsWith('days:')) return 'Dias especificos';
+      if (f.startsWith('times:')) return f.replace('times:','') + 'x por semana';
+      return f;
+    };
+
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">` +
       habits.map(h => {
         const done = logMap[h.id]?.completed;
-        return `<div class="card" style="cursor:pointer;border-color:${done ? 'var(--green)' : 'var(--border)'}" onclick="toggleHabitPage('${h.id}', ${done})">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:40px;height:40px;border-radius:10px;background:${h.color}20;display:flex;align-items:center;justify-content:center;font-size:20px">${h.icon || '⭐'}</div>
-            <div style="flex:1">
-              <div style="font-weight:550;font-size:14px;color:var(--text)">${h.name}</div>
-              <div style="font-size:12px;color:var(--text-3);margin-top:2px">${done ? '✓ Completado hoy' : 'Pendiente'}</div>
-            </div>
-            <div style="width:28px;height:28px;border-radius:50%;border:2px solid ${done ? 'var(--green)' : 'var(--border)'};background:${done ? 'var(--green)' : 'transparent'};display:flex;align-items:center;justify-content:center;color:white;font-size:13px">${done ? '✓' : ''}</div>
+        return `<div class="habit-card ${done ? 'done' : ''}">
+          <div class="habit-icon-box" style="background:${h.color}20">${h.icon || ''}</div>
+          <div class="habit-card-info">
+            <div class="habit-card-name">${h.name}</div>
+            <div class="habit-card-meta">${freqLabel(h.frequency)}</div>
+          </div>
+          <div class="habit-card-actions">
+            <button class="icon-btn" onclick="openEditHabit(${JSON.stringify(h).replace(/"/g,'&quot;')})" title="Editar">&#9998;</button>
+            <button class="icon-btn danger" onclick="deleteHabit('${h.id}')" title="Eliminar">&#128465;</button>
+            <button class="habit-toggle" onclick="toggleHabitPage('${h.id}', ${!!done})">${done ? '&#10003;' : ''}</button>
           </div>
         </div>`;
       }).join('') + `</div>`;
@@ -2145,8 +2697,9 @@
     } else {
       await sb.from('habit_logs').insert({ user_id: currentUser.id, habit_id: habitId, date: todayStr(), completed: newDone });
     }
-    showToast(newDone ? 'Hábito completado ✓' : 'Desmarcado');
+    showToast(newDone ? 'Completado' : 'Desmarcado');
     loadHabitsPage();
+    if (currentPage === 'dashboard') loadDashHabits();
   }
 
   async function loadTasksPage() {
