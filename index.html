@@ -965,55 +965,117 @@
       width: 10px; height: 10px; border-radius: 50%;
     }
 
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 3px;
+    /* Calendario por filas */
+    .cal-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow-x: auto;
+      display: block;
     }
 
-    .cal-day-label {
-      text-align: center;
+    .cal-th {
       font-size: 10px;
       font-weight: 600;
       color: var(--text-3);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      padding: 4px 0 6px;
+      padding: 0 0 10px;
+      text-align: center;
+      min-width: 28px;
     }
 
-    .cal-day {
-      aspect-ratio: 1;
-      border-radius: 6px;
+    .cal-th-habit {
+      text-align: left;
+      padding-right: 14px;
+      min-width: 130px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-bottom: 10px;
+    }
+
+    .cal-habit-label {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px 6px 0;
+      white-space: nowrap;
+    }
+
+    .cal-habit-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .cal-habit-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 110px;
+    }
+
+    .cal-cell {
+      padding: 3px 2px;
+      text-align: center;
+    }
+
+    .cal-cell-inner {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      margin: 0 auto;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2px;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: var(--bg);
-      position: relative;
-      min-height: 36px;
+      font-size: 10px;
+      transition: transform 0.1s;
     }
 
-    .cal-day.today {
-      background: var(--accent-soft);
+    .cal-cell-inner.done {
+      color: white;
+      font-weight: 600;
+    }
+
+    .cal-cell-inner.empty {
+      background: var(--border-soft);
+    }
+
+    .cal-cell-inner.future {
+      background: transparent;
+    }
+
+    .cal-cell-inner.today-col {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .cal-day-num {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-align: center;
+      padding: 0 2px 4px;
+    }
+
+    .cal-day-num.today-num {
       color: var(--accent-text);
       font-weight: 700;
     }
 
-    .cal-day.other-month { opacity: 0.3; }
-
-    .cal-dots {
-      display: flex; gap: 1px; flex-wrap: wrap;
-      justify-content: center;
-      max-width: 28px;
-    }
-
-    .cal-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
+    .cal-streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--amber);
+      margin-left: 6px;
     }
 
     /* Gráficas */
@@ -1362,7 +1424,7 @@
             </div>
           </div>
           <div id="habitsTabCalendario" style="display:none">
-            <div class="card">
+            <div class="card" style="overflow-x:auto">
               <div class="cal-header">
                 <span class="cal-month" id="calMonthLabel"></span>
                 <div class="cal-nav">
@@ -1370,8 +1432,7 @@
                   <button class="cal-nav-btn" onclick="changeCalMonth(1)">&#8250;</button>
                 </div>
               </div>
-              <div class="cal-legend" id="calLegend"></div>
-              <div class="cal-grid" id="calGrid"></div>
+              <div id="calTableWrap"></div>
             </div>
           </div>
           <div id="habitsTabEstadisticas" style="display:none">
@@ -2409,15 +2470,12 @@
     document.getElementById('calMonthLabel').textContent = months[calMonth] + ' ' + calYear;
 
     const { data: habits } = await sb.from('habits').select('id,name,color,icon').eq('user_id', currentUser.id).eq('active', true);
+    const wrap = document.getElementById('calTableWrap');
+
     if (!habits?.length) {
-      document.getElementById('calGrid').innerHTML = '<div style="grid-column:span 7;text-align:center;padding:20px;color:var(--text-3)">Sin habitos configurados</div>';
+      wrap.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Sin habitos configurados</div>';
       return;
     }
-
-    // Leyenda
-    document.getElementById('calLegend').innerHTML = habits.map(h =>
-      `<div class="cal-legend-item"><div class="cal-legend-dot" style="background:${h.color}"></div>${h.icon || ''} ${h.name}</div>`
-    ).join('');
 
     // Obtener logs del mes
     const startDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
@@ -2425,46 +2483,70 @@
     const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
       .eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate);
 
-    // Mapa: date -> [habit_ids completados]
+    // Mapa: habit_id -> Set de fechas completadas
     const logMap = {};
-    logs?.forEach(l => {
-      if (!l.completed) return;
-      if (!logMap[l.date]) logMap[l.date] = [];
-      logMap[l.date].push(l.habit_id);
-    });
+    habits.forEach(h => logMap[h.id] = new Set());
+    logs?.forEach(l => { if (l.completed) logMap[l.habit_id]?.add(l.date); });
 
-    // Construir grid
-    const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Dom
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayD = new Date();
     const todayStr2 = todayStr();
+    const isCurrentMonth = calYear === todayD.getFullYear() && calMonth === todayD.getMonth();
+    const todayDay = todayD.getDate();
 
-    // Ajustar: semana empieza en Lunes
-    const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
-
-    let html = ['L','M','X','J','V','S','D'].map(d => `<div class="cal-day-label">${d}</div>`).join('');
-
-    // Celdas vacías al inicio
-    for (let i = 0; i < startOffset; i++) {
-      html += `<div class="cal-day other-month"></div>`;
-    }
-
+    // Construir tabla
+    // Cabecera: días del mes
+    let headNums = '<tr><th class="cal-th-habit"></th>';
     for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const isToday = dateStr === todayStr2;
-      const completedHabits = logMap[dateStr] || [];
-
-      const dots = habits.map(h => {
-        const done = completedHabits.includes(h.id);
-        return `<div class="cal-dot" style="background:${done ? h.color : 'var(--border)'}"></div>`;
-      }).join('');
-
-      html += `<div class="cal-day ${isToday ? 'today' : ''}">
-        <span>${d}</span>
-        <div class="cal-dots">${dots}</div>
-      </div>`;
+      const isToday = isCurrentMonth && d === todayDay;
+      headNums += `<th class="cal-th"><div class="cal-day-num ${isToday ? 'today-num' : ''}">${d}</div></th>`;
     }
+    headNums += '<th class="cal-th" style="min-width:50px;padding-left:10px">Racha</th></tr>';
 
-    document.getElementById('calGrid').innerHTML = html;
+    // Filas por hábito
+    const rows = habits.map(h => {
+      const streak = calcStreak(logMap[h.id]);
+      let cells = '';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const done = logMap[h.id].has(dateStr);
+        const isFuture = isCurrentMonth && d > todayDay;
+        const isToday = isCurrentMonth && d === todayDay;
+
+        let cls = 'cal-cell-inner';
+        let style = '';
+        let content = '';
+
+        if (isFuture) {
+          cls += ' future';
+        } else if (done) {
+          cls += ' done' + (isToday ? ' today-col' : '');
+          style = `background:${h.color}`;
+          content = '&#10003;';
+        } else {
+          cls += ' empty' + (isToday ? ' today-col' : '');
+        }
+
+        cells += `<td class="cal-cell"><div class="${cls}" style="${style}">${content}</div></td>`;
+      }
+
+      const streakHtml = streak > 0
+        ? `<span class="cal-streak-badge">&#128293; ${streak}d</span>`
+        : '<span style="font-size:11px;color:var(--text-3)">—</span>';
+
+      return `<tr>
+        <td>
+          <div class="cal-habit-label">
+            <div class="cal-habit-dot" style="background:${h.color}"></div>
+            <span class="cal-habit-name">${h.icon || ''} ${h.name}</span>
+          </div>
+        </td>
+        ${cells}
+        <td style="padding-left:10px;white-space:nowrap">${streakHtml}</td>
+      </tr>`;
+    }).join('');
+
+    wrap.innerHTML = `<table class="cal-table"><thead>${headNums}</thead><tbody>${rows}</tbody></table>`;
   }
 
   // ---- ESTADISTICAS ----
