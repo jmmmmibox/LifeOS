@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life OS</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* =============================================
+       DESIGN SYSTEM — Life OS
+       Paleta: Blanco limpio, grises suaves, azul índigo como acento
+    ============================================= */
+    :root {
+      --bg:          #f8f8f6;
+      --surface:     #ffffff;
+      --border:      #e8e8e4;
+      --border-soft: #f0f0ec;
+      --text:        #1a1a1a;
+      --text-2:      #6b6b6b;
+      --text-3:      #a0a0a0;
+      --accent:      #4f46e5;
+      --accent-soft: #eef2ff;
+      --accent-text: #3730a3;
+      --green:       #10b981;
+      --green-soft:  #ecfdf5;
+      --red:         #ef4444;
+      --red-soft:    #fef2f2;
+      --amber:       #f59e0b;
+      --amber-soft:  #fffbeb;
+      --sidebar-w:   240px;
+      --radius:      10px;
+      --radius-sm:   6px;
+      --shadow:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:   0 4px 12px rgba(0,0,0,0.08);
+      --font:        'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* =============================================
+       LAYOUT
+    ============================================= */
+    #app { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.25s ease;
+    }
+
+    .sidebar-logo {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 400;
+    }
+
+    /* NAV */
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 8px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 4px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 8px 8px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 13.5px;
+      font-weight: 450;
+      transition: all 0.15s;
+      user-select: none;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      font-weight: 550;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    /* SIDEBAR BOTTOM */
+    .sidebar-bottom {
+      padding: 12px 8px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topbar-date {
+      font-size: 12px;
+      color: var(--text-3);
+      font-weight: 450;
+    }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* PAGE CONTENT */
+    .page-content {
+      padding: 28px;
+      flex: 1;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* =============================================
+       COMPONENTS
+    ============================================= */
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent-text); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .badge-green { background: var(--green-soft); color: var(--green); }
+    .badge-red { background: var(--red-soft); color: var(--red); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); }
+    .badge-accent { background: var(--accent-soft); color: var(--accent-text); }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.green { background: var(--green); }
+
+    /* Divider */
+    .divider { border: none; border-top: 1px solid var(--border-soft); margin: 16px 0; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-3);
+    }
+    .empty-state .empty-icon { font-size: 28px; margin-bottom: 8px; }
+    .empty-state p { font-size: 13px; }
+
+    /* =============================================
+       DASHBOARD
+    ============================================= */
+    .dashboard-greeting {
+      margin-bottom: 24px;
+    }
+
+    .dashboard-greeting h1 {
+      font-size: 22px;
+      font-weight: 650;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .dashboard-greeting p {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 2px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .dashboard-grid .col-2 { grid-column: span 2; }
+    .dashboard-grid .col-3 { grid-column: span 3; }
+
+    /* Widget: Hábitos hoy */
+    .habit-check-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .habit-check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .habit-check-item:hover { border-color: var(--accent); }
+
+    .habit-check-item.done {
+      background: var(--green-soft);
+      border-color: transparent;
+    }
+
+    .habit-checkbox {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .habit-check-item.done .habit-checkbox {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+      font-size: 10px;
+    }
+
+    .habit-name {
+      font-size: 13px;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .habit-check-item.done .habit-name {
+      color: var(--text-2);
+      text-decoration: line-through;
+    }
+
+    .habit-streak {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    /* Widget: Tareas hoy */
+    .task-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .task-item:hover { border-color: var(--accent); }
+    .task-item.done { opacity: 0.5; }
+
+    .task-check {
+      width: 16px; height: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .task-item.done .task-check {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      font-size: 9px;
+    }
+
+    .task-title {
+      font-size: 13px;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .task-item.done .task-title { text-decoration: line-through; }
+
+    .task-priority {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .priority-high { background: var(--red); }
+    .priority-medium { background: var(--amber); }
+    .priority-low { background: var(--green); }
+
+    /* Widget: Mood */
+    .mood-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mood-btn {
+      flex: 1;
+      min-width: 40px;
+      padding: 10px 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-size: 20px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .mood-btn:hover, .mood-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: scale(1.08);
+    }
+
+    .mood-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-3);
+      margin-top: 3px;
+      font-family: var(--font);
+    }
+
+    /* Widget: Libro actual */
+    .book-widget {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .book-cover {
+      width: 52px; height: 72px;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .book-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+    .book-info { flex: 1; }
+    .book-title-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .book-author { font-size: 12px; color: var(--text-2); margin-bottom: 10px; }
+    .book-pages { font-size: 11px; color: var(--text-3); margin-top: 6px; }
+
+    /* Widget: Finanzas */
+    .finance-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .finance-stat {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+    }
+
+    .finance-stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+    .finance-stat-value { font-size: 18px; font-weight: 650; color: var(--text); letter-spacing: -0.5px; }
+    .finance-stat-value.positive { color: var(--green); }
+    .finance-stat-value.negative { color: var(--red); }
+
+    /* Widget: Objetivos */
+    .goal-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .goal-item { }
+    .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .goal-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .goal-pct { font-size: 12px; color: var(--text-2); }
+
+    /* =============================================
+       QUICK CAPTURE
+    ============================================= */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+      transition: all 0.2s;
+      z-index: 200;
+    }
+
+    .fab:hover { transform: scale(1.08); background: var(--accent-text); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(2px);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 24px;
+      width: 480px;
+      max-width: 95vw;
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title { font-size: 15px; font-weight: 600; color: var(--text); }
+
+    .modal-close {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-2);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .modal-close:hover { background: var(--border); }
+
+    /* Quick Capture tabs */
+    .qc-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+
+    .qc-tab {
+      flex: 1;
+      padding: 6px;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-2);
+      transition: all 0.15s;
+      font-family: var(--font);
+    }
+
+    .qc-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500;
+      box-shadow: var(--shadow);
+    }
+
+    /* Forms */
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-2);
+      margin-bottom: 5px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      font-family: var(--font);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    /* =============================================
+       AUTH SCREEN
+    ============================================= */
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo .logo-icon {
+      width: 40px; height: 40px;
+      font-size: 20px;
+    }
+
+    .auth-logo .logo-text { font-size: 20px; }
+
+    .auth-title {
+      font-size: 22px;
+      font-weight: 650;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 28px;
+    }
+
+    .auth-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 20px;
+    }
+
+    .auth-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: white;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 999;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* =============================================
+       MOBILE
+    ============================================= */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-3);
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+
+    .mobile-nav-item.active { color: var(--accent); }
+    .mobile-nav-item .m-icon { font-size: 20px; }
+    .mobile-nav-item .m-label { font-size: 10px; font-weight: 500; }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      padding: 4px;
+      color: var(--text-2);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-md); }
+      .main { margin-left: 0; }
+      .topbar { padding: 0 16px; }
+      .page-content { padding: 16px 16px 80px; }
+      .mobile-nav { display: block; }
+      .hamburger { display: block; }
+      .fab { bottom: 80px; right: 16px; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .dashboard-grid .col-2 { grid-column: span 1; }
+      .dashboard-grid .col-3 { grid-column: span 1; }
+      .finance-row { flex-direction: column; }
+    }
+
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 99;
+    }
+    .sidebar-overlay.open { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">L</div>
+      <div>
+        <div class="logo-text">Life OS</div>
+        <div class="logo-sub">Tu sistema personal</div>
+      </div>
+    </div>
+
+    <div id="loginView">
+      <h2 class="auth-title">Bienvenido de vuelta</h2>
+      <p class="auth-subtitle">Inicia sesión para continuar</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="handleLogin()">
+        Entrar
+      </button>
+      <div class="auth-footer">
+        ¿Sin cuenta? <a href="#" onclick="showRegister()">Crear una</a>
+      </div>
+    </div>
+
+    <div id="registerView" style="display:none">
+      <h2 class="auth-title">Crea tu cuenta</h2>
+      <p class="auth-subtitle">Empieza a gestionar tu vida</p>
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input type="text" id="regName" class="form-input" placeholder="Tu nombre">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="regEmail" class="form-input" placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" id="regPassword" class="form-input" placeholder="Mínimo 6 caracteres">
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="handleRegister()">
+        Crear cuenta
+      </button>
+      <div class="auth-footer">
+        ¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Iniciar sesión</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none">
+  <div id="app">
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <div class="logo-icon">L</div>
+          <div>
+            <div class="logo-text">Life OS</div>
+            <div class="logo-sub">Sistema Personal</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-label">Principal</div>
+          <button class="nav-item active" onclick="navigate('dashboard')">
+            <span class="nav-icon">⊞</span> Dashboard
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Diario</div>
+          <button class="nav-item" onclick="navigate('habits')">
+            <span class="nav-icon">✦</span> Hábitos
+          </button>
+          <button class="nav-item" onclick="navigate('tasks')">
+            <span class="nav-icon">✓</span> Tareas
+          </button>
+          <button class="nav-item" onclick="navigate('journal')">
+            <span class="nav-icon">◎</span> Journal
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Crecimiento</div>
+          <button class="nav-item" onclick="navigate('goals')">
+            <span class="nav-icon">◈</span> Objetivos
+          </button>
+          <button class="nav-item" onclick="navigate('notes')">
+            <span class="nav-icon">◻</span> Notas
+          </button>
+          <button class="nav-item" onclick="navigate('books')">
+            <span class="nav-icon">▣</span> Lectura
+          </button>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Finanzas</div>
+          <button class="nav-item" onclick="navigate('finances')">
+            <span class="nav-icon">◆</span> Finanzas
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" onclick="handleLogout()">
+          <span class="nav-icon">→</span> Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="toggleSidebar()">☰</button>
+          <span class="page-title" id="pageTitle">Dashboard</span>
+        </div>
+        <div class="topbar-right">
+          <span class="topbar-date" id="topbarDate"></span>
+          <div class="avatar" id="userAvatar">J</div>
+        </div>
+      </header>
+
+      <div class="page-content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="dashboard-greeting">
+            <h1 id="greetingText">Buenos días, Juanma</h1>
+            <p id="greetingSubtitle">Aquí tienes tu día</p>
+          </div>
+
+          <div class="dashboard-grid">
+
+            <!-- Hábitos hoy -->
+            <div class="card">
+              <div class="card-title">
+                Hábitos de hoy
+                <span id="habitsProgress" class="badge badge-accent">0/0</span>
+              </div>
+              <div class="habit-check-list" id="dashHabitsList">
+                <div class="empty-state">
+                  <div class="empty-icon">✦</div>
+                  <p>Sin hábitos aún</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tareas hoy -->
+            <div class="card">
+              <div class="card-title">
+                Tareas de hoy
+                <button class="btn btn-ghost btn-sm" onclick="navigate('tasks')">Ver todas</button>
+              </div>
+              <div class="task-list" id="dashTasksList">
+                <div class="empty-state">
+                  <div class="empty-icon">✓</div>
+                  <p>Sin tareas pendientes</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mood del día -->
+            <div class="card">
+              <div class="card-title">¿Cómo estás hoy?</div>
+              <div class="mood-row">
+                <button class="mood-btn" onclick="setMood(1)" data-mood="1">😞<span class="mood-label">Mal</span></button>
+                <button class="mood-btn" onclick="setMood(2)" data-mood="2">😕<span class="mood-label">Regular</span></button>
+                <button class="mood-btn" onclick="setMood(3)" data-mood="3">😐<span class="mood-label">Neutro</span></button>
+                <button class="mood-btn" onclick="setMood(4)" data-mood="4">🙂<span class="mood-label">Bien</span></button>
+                <button class="mood-btn" onclick="setMood(5)" data-mood="5">😄<span class="mood-label">Genial</span></button>
+              </div>
+            </div>
+
+            <!-- Libro actual -->
+            <div class="card">
+              <div class="card-title">
+                Leyendo ahora
+                <button class="btn btn-ghost btn-sm" onclick="navigate('books')">Biblioteca</button>
+              </div>
+              <div id="dashCurrentBook">
+                <div class="empty-state">
+                  <div class="empty-icon">▣</div>
+                  <p>No hay libro activo</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Objetivos activos -->
+            <div class="card col-2">
+              <div class="card-title">
+                Objetivos activos
+                <button class="btn btn-ghost btn-sm" onclick="navigate('goals')">Ver todos</button>
+              </div>
+              <div class="goal-list" id="dashGoalsList">
+                <div class="empty-state">
+                  <div class="empty-icon">◈</div>
+                  <p>Sin objetivos definidos</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Finanzas del mes -->
+            <div class="card col-3">
+              <div class="card-title">
+                Finanzas — <span id="dashFinanceMonth"></span>
+                <button class="btn btn-ghost btn-sm" onclick="navigate('finances')">Ver detalle</button>
+              </div>
+              <div class="finance-row">
+                <div class="finance-stat">
+                  <div class="finance-stat-label">Ingresos</div>
+                  <div class="finance-stat-value positive" id="dashIncome">0 €</div>
+                </div>
+                <div class="finance-stat">
+                  <div class="finance-stat-label">Gastos</div>
+                  <div class="finance-stat-value negative" id="dashExpenses">0 €</div>
+                </div>
+                <div class="finance-stat">
+                  <div class="finance-stat-label">Balance</div>
+                  <div class="finance-stat-value" id="dashBalance">0 €</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- HÁBITOS -->
+        <div class="page" id="page-habits">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Hábitos</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Construye tu mejor versión cada día</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('habitModal')">+ Nuevo hábito</button>
+          </div>
+          <div id="habitsPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">✦</div>
+              <p>Aún no tienes hábitos</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer hábito</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAREAS -->
+        <div class="page" id="page-tasks">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Tareas</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Hoy y próximos días</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('taskModal')">+ Nueva tarea</button>
+          </div>
+          <div id="tasksPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">✓</div>
+              <p>Sin tareas pendientes</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('taskModal')">Añadir tarea</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- JOURNAL -->
+        <div class="page" id="page-journal">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Journal</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px" id="journalDateLabel"></p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('journalModal')">+ Entrada de hoy</button>
+          </div>
+          <div id="journalPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">◎</div>
+              <p>Aún no hay entradas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- OBJETIVOS -->
+        <div class="page" id="page-goals">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Objetivos</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tus grandes metas</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('goalModal')">+ Nuevo objetivo</button>
+          </div>
+          <div id="goalsPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">◈</div>
+              <p>Sin objetivos definidos</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('goalModal')">Crear objetivo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTAS -->
+        <div class="page" id="page-notes">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Notas</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Ideas, aprendizajes, pensamientos</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('noteModal')">+ Nueva nota</button>
+          </div>
+          <div id="notesPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">◻</div>
+              <p>Sin notas</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('noteModal')">Escribir primera nota</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LECTURA -->
+        <div class="page" id="page-books">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Lectura</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tu biblioteca personal</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('bookModal')">+ Añadir libro</button>
+          </div>
+          <div id="booksPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">▣</div>
+              <p>Tu biblioteca está vacía</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('bookModal')">Añadir primer libro</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FINANZAS -->
+        <div class="page" id="page-finances">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Finanzas</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Control de ingresos y gastos</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('transactionModal')">+ Nueva transacción</button>
+          </div>
+          <div id="financesPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">◆</div>
+              <p>Sin transacciones este mes</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('transactionModal')">Añadir transacción</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- page-content -->
+    </main>
+
+  </div><!-- #app -->
+</div><!-- #mainApp -->
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-items">
+    <button class="mobile-nav-item active" onclick="navigate('dashboard')">
+      <span class="m-icon">⊞</span>
+      <span class="m-label">Inicio</span>
+    </button>
+    <button class="mobile-nav-item" onclick="navigate('habits')">
+      <span class="m-icon">✦</span>
+      <span class="m-label">Hábitos</span>
+    </button>
+    <button class="mobile-nav-item" onclick="navigate('tasks')">
+      <span class="m-icon">✓</span>
+      <span class="m-label">Tareas</span>
+    </button>
+    <button class="mobile-nav-item" onclick="navigate('journal')">
+      <span class="m-icon">◎</span>
+      <span class="m-label">Journal</span>
+    </button>
+    <button class="mobile-nav-item" onclick="navigate('goals')">
+      <span class="m-icon">◈</span>
+      <span class="m-label">Metas</span>
+    </button>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openQuickCapture()" title="Captura rápida">+</button>
+
+<!-- QUICK CAPTURE MODAL -->
+<div class="modal-overlay" id="quickCaptureModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Captura rápida</span>
+      <button class="modal-close" onclick="closeModal('quickCaptureModal')">×</button>
+    </div>
+    <div class="qc-tabs">
+      <button class="qc-tab active" onclick="switchQCTab('tarea')">✓ Tarea</button>
+      <button class="qc-tab" onclick="switchQCTab('nota')">◻ Nota</button>
+      <button class="qc-tab" onclick="switchQCTab('habito')">✦ Hábito</button>
+      <button class="qc-tab" onclick="switchQCTab('gasto')">◆ Gasto</button>
+    </div>
+    <div id="qcContent">
+      <!-- dinámico -->
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nuevo hábito -->
+<div class="modal-overlay" id="habitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nuevo hábito</span>
+      <button class="modal-close" onclick="closeModal('habitModal')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input type="text" id="habitName" class="form-input" placeholder="Ej: Meditación">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Icono</label>
+        <input type="text" id="habitIcon" class="form-input" placeholder="🧘" maxlength="2">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <input type="color" id="habitColor" class="form-input" value="#4f46e5" style="height:38px;padding:4px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('habitModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveHabit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nueva tarea -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nueva tarea</span>
+      <button class="modal-close" onclick="closeModal('taskModal')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Título</label>
+      <input type="text" id="taskTitle" class="form-input" placeholder="¿Qué tienes que hacer?">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Prioridad</label>
+        <select id="taskPriority" class="form-select">
+          <option value="low">Baja</option>
+          <option value="medium" selected>Media</option>
+          <option value="high">Alta</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha límite</label>
+        <input type="date" id="taskDueDate" class="form-input">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTask()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Journal -->
+<div class="modal-overlay" id="journalModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">Entrada de hoy</span>
+      <button class="modal-close" onclick="closeModal('journalModal')">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Estado de ánimo (1–5)</label>
+        <input type="number" id="journalMood" class="form-input" min="1" max="5" placeholder="3">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Energía (1–5)</label>
+        <input type="number" id="journalEnergy" class="form-input" min="1" max="5" placeholder="3">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reflexión libre</label>
+      <textarea id="journalContent" class="form-textarea" placeholder="¿Cómo ha ido el día?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">¿Qué salió bien hoy?</label>
+      <textarea id="journalWins" class="form-textarea" style="min-height:60px" placeholder="Logros del día..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">¿Qué haré mañana?</label>
+      <textarea id="journalTomorrow" class="form-textarea" style="min-height:60px" placeholder="Intenciones para mañana..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('journalModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveJournal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Objetivo -->
+<div class="modal-overlay" id="goalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nuevo objetivo</span>
+      <button class="modal-close" onclick="closeModal('goalModal')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Título</label>
+      <input type="text" id="goalTitle" class="form-input" placeholder="¿Qué quieres lograr?">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <textarea id="goalDesc" class="form-textarea" style="min-height:60px" placeholder="Describe tu objetivo..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fecha límite</label>
+        <input type="date" id="goalDate" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <input type="color" id="goalColor" class="form-input" value="#4f46e5" style="height:38px;padding:4px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('goalModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveGoal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nota -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nueva nota</span>
+      <button class="modal-close" onclick="closeModal('noteModal')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Título (opcional)</label>
+      <input type="text" id="noteTitle" class="form-input" placeholder="Título de la nota">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contenido</label>
+      <textarea id="noteContent" class="form-textarea" style="min-height:120px" placeholder="Escribe tu idea..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('noteModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNote()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Libro -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Añadir libro</span>
+      <button class="modal-close" onclick="closeModal('bookModal')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Título</label>
+      <input type="text" id="bookTitle" class="form-input" placeholder="Título del libro">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Autor</label>
+      <input type="text" id="bookAuthor" class="form-input" placeholder="Autor">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="bookStatus" class="form-select">
+          <option value="to_read">Por leer</option>
+          <option value="reading">Leyendo</option>
+          <option value="done">Leído</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Páginas totales</label>
+        <input type="number" id="bookPages" class="form-input" placeholder="300">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bookModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveBook()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Transacción -->
+<div class="modal-overlay" id="transactionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nueva transacción</span>
+      <button class="modal-close" onclick="closeModal('transactionModal')">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select id="txType" class="form-select">
+          <option value="income">Ingreso</option>
+          <option value="expense">Gasto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Importe (€)</label>
+        <input type="number" id="txAmount" class="form-input" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <input type="text" id="txCategory" class="form-input" placeholder="Alimentación, Ocio...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input type="date" id="txDate" class="form-input">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input type="text" id="txDesc" class="form-input" placeholder="Descripción opcional">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('transactionModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTransaction()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // =============================================
+  // SUPABASE
+  // =============================================
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://sldhqxsxegtulsyrsjil.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGhxeHN4ZWd0dWxzeXJzamlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNzU4MDQsImV4cCI6MjA5Nzk1MTgwNH0.HIeuyXSYNI0zldxdVonGDBB8lRXlThFIRh0YnCu4a4k'
+  );
+
+  let currentUser = null;
+  let currentPage = 'dashboard';
+
+  // =============================================
+  // INIT
+  // =============================================
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      showApp();
+    } else {
+      document.getElementById('authScreen').style.display = 'flex';
+    }
+
+    sb.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        currentUser = session.user;
+        showApp();
+      } else {
+        currentUser = null;
+        showAuth();
+      }
+    });
+  }
+
+  function showApp() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('mobileNav').style.display = 'block';
+    setTopbarDate();
+    setGreeting();
+    loadDashboard();
+  }
+
+  function showAuth() {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('mobileNav').style.display = 'none';
+  }
+
+  // =============================================
+  // AUTH
+  // =============================================
+  async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) return showToast('Rellena todos los campos');
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) showToast('Error: ' + error.message);
+  }
+
+  async function handleRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    if (!name || !email || !password) return showToast('Rellena todos los campos');
+    const { error } = await sb.auth.signUp({
+      email, password,
+      options: { data: { full_name: name } }
+    });
+    if (error) showToast('Error: ' + error.message);
+    else showToast('Cuenta creada. Revisa tu email.');
+  }
+
+  async function handleLogout() {
+    await sb.auth.signOut();
+    showAuth();
+  }
+
+  function showRegister() {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('registerView').style.display = 'block';
+  }
+
+  function showLogin() {
+    document.getElementById('registerView').style.display = 'none';
+    document.getElementById('loginView').style.display = 'block';
+  }
+
+  // =============================================
+  // NAVIGATION
+  // =============================================
+  const pageTitles = {
+    dashboard: 'Dashboard',
+    habits: 'Hábitos',
+    tasks: 'Tareas',
+    journal: 'Journal',
+    goals: 'Objetivos',
+    notes: 'Notas',
+    books: 'Lectura',
+    finances: 'Finanzas'
+  };
+
+  function navigate(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+
+    document.getElementById('page-' + page)?.classList.add('active');
+    document.querySelector(`.nav-item[onclick="navigate('${page}')"]`)?.classList.add('active');
+    document.querySelector(`.mobile-nav-item[onclick="navigate('${page}')"]`)?.classList.add('active');
+
+    document.getElementById('pageTitle').textContent = pageTitles[page] || page;
+    currentPage = page;
+    closeSidebar();
+
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'habits') loadHabitsPage();
+    if (page === 'tasks') loadTasksPage();
+    if (page === 'journal') loadJournalPage();
+    if (page === 'goals') loadGoalsPage();
+    if (page === 'notes') loadNotesPage();
+    if (page === 'books') loadBooksPage();
+    if (page === 'finances') loadFinancesPage();
+  }
+
+  // =============================================
+  // UI HELPERS
+  // =============================================
+  function setTopbarDate() {
+    const now = new Date();
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('topbarDate').textContent =
+      now.toLocaleDateString('es-ES', options);
+  }
+
+  function setGreeting() {
+    const hour = new Date().getHours();
+    let greeting = hour < 13 ? 'Buenos días' : hour < 20 ? 'Buenas tardes' : 'Buenas noches';
+    const name = currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Juanma';
+    document.getElementById('greetingText').textContent = `${greeting}, ${name}`;
+    document.getElementById('greetingSubtitle').textContent = getTodayPhrase();
+    document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+
+    const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    document.getElementById('dashFinanceMonth').textContent = months[new Date().getMonth()];
+
+    const jLabel = document.getElementById('journalDateLabel');
+    if (jLabel) jLabel.textContent = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+
+  function getTodayPhrase() {
+    const phrases = [
+      'Aquí tienes tu día.',
+      'Cada día es una nueva oportunidad.',
+      'Pequeños pasos, grandes resultados.',
+      'Hoy es un buen día para avanzar.',
+      'Enfócate en lo que importa.'
+    ];
+    return phrases[new Date().getDay() % phrases.length];
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // =============================================
+  // QUICK CAPTURE
+  // =============================================
+  const qcTemplates = {
+    tarea: `
+      <div class="form-group">
+        <input type="text" id="qcInput" class="form-input" placeholder="¿Qué tienes que hacer?" autofocus>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <select id="qcPriority" class="form-select">
+            <option value="low">Prioridad baja</option>
+            <option value="medium" selected>Prioridad media</option>
+            <option value="high">Prioridad alta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <input type="date" id="qcDate" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('quickCaptureModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="qcSaveTarea()">Guardar tarea</button>
+      </div>`,
+    nota: `
+      <div class="form-group">
+        <textarea id="qcInput" class="form-textarea" placeholder="Escribe tu idea..." autofocus></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('quickCaptureModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="qcSaveNota()">Guardar nota</button>
+      </div>`,
+    habito: `
+      <div class="form-group">
+        <input type="text" id="qcInput" class="form-input" placeholder="Nombre del hábito" autofocus>
+      </div>
+      <div class="form-group">
+        <input type="text" id="qcIcon" class="form-input" placeholder="Icono (emoji)">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('quickCaptureModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="qcSaveHabito()">Guardar hábito</button>
+      </div>`,
+    gasto: `
+      <div class="form-row">
+        <div class="form-group">
+          <input type="number" id="qcInput" class="form-input" placeholder="Importe €" autofocus>
+        </div>
+        <div class="form-group">
+          <input type="text" id="qcCategory" class="form-input" placeholder="Categoría">
+        </div>
+      </div>
+      <div class="form-group">
+        <input type="text" id="qcDesc" class="form-input" placeholder="Descripción">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('quickCaptureModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="qcSaveGasto()">Guardar gasto</button>
+      </div>`
+  };
+
+  let currentQCTab = 'tarea';
+
+  function openQuickCapture() {
+    currentQCTab = 'tarea';
+    document.querySelectorAll('.qc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.qc-tab')[0].classList.add('active');
+    document.getElementById('qcContent').innerHTML = qcTemplates.tarea;
+    openModal('quickCaptureModal');
+    setTimeout(() => document.getElementById('qcInput')?.focus(), 100);
+  }
+
+  function switchQCTab(tab) {
+    currentQCTab = tab;
+    document.querySelectorAll('.qc-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('qcContent').innerHTML = qcTemplates[tab];
+    setTimeout(() => document.getElementById('qcInput')?.focus(), 100);
+  }
+
+  async function qcSaveTarea() {
+    const title = document.getElementById('qcInput').value.trim();
+    if (!title) return showToast('Escribe una tarea');
+    const priority = document.getElementById('qcPriority').value;
+    const due_date = document.getElementById('qcDate').value || null;
+    const { error } = await sb.from('tasks').insert({ user_id: currentUser.id, title, priority, due_date });
+    if (error) return showToast('Error al guardar');
+    closeModal('quickCaptureModal');
+    showToast('Tarea guardada ✓');
+    if (currentPage === 'tasks') loadTasksPage();
+    if (currentPage === 'dashboard') loadDashboard();
+  }
+
+  async function qcSaveNota() {
+    const content = document.getElementById('qcInput').value.trim();
+    if (!content) return showToast('Escribe algo');
+    const { error } = await sb.from('notes').insert({ user_id: currentUser.id, content });
+    if (error) return showToast('Error al guardar');
+    closeModal('quickCaptureModal');
+    showToast('Nota guardada ✓');
+    if (currentPage === 'notes') loadNotesPage();
+  }
+
+  async function qcSaveHabito() {
+    const name = document.getElementById('qcInput').value.trim();
+    if (!name) return showToast('Escribe un nombre');
+    const icon = document.getElementById('qcIcon').value || '⭐';
+    const { error } = await sb.from('habits').insert({ user_id: currentUser.id, name, icon });
+    if (error) return showToast('Error al guardar');
+    closeModal('quickCaptureModal');
+    showToast('Hábito creado ✓');
+    if (currentPage === 'habits') loadHabitsPage();
+    if (currentPage === 'dashboard') loadDashboard();
+  }
+
+  async function qcSaveGasto() {
+    const amount = parseFloat(document.getElementById('qcInput').value);
+    if (!amount) return showToast('Introduce un importe');
+    const category = document.getElementById('qcCategory').value || 'Sin categoría';
+    const description = document.getElementById('qcDesc').value;
+    const { error } = await sb.from('transactions').insert({
+      user_id: currentUser.id, type: 'expense', amount, category, description, date: todayStr()
+    });
+    if (error) return showToast('Error al guardar');
+    closeModal('quickCaptureModal');
+    showToast('Gasto guardado ✓');
+    if (currentPage === 'finances') loadFinancesPage();
+    if (currentPage === 'dashboard') loadDashboard();
+  }
+
+  // =============================================
+  // DASHBOARD
+  // =============================================
+  async function loadDashboard() {
+    await Promise.all([
+      loadDashHabits(),
+      loadDashTasks(),
+      loadDashBook(),
+      loadDashGoals(),
+      loadDashFinances(),
+      loadTodayMood()
+    ]);
+  }
+
+  async function loadDashHabits() {
+    const { data: habits } = await sb.from('habits').select('*').eq('user_id', currentUser.id).eq('active', true);
+    if (!habits?.length) return;
+
+    const { data: logs } = await sb.from('habit_logs').select('*')
+      .eq('user_id', currentUser.id).eq('date', todayStr());
+
+    const logMap = {};
+    logs?.forEach(l => logMap[l.habit_id] = l);
+
+    const done = habits.filter(h => logMap[h.id]?.completed).length;
+    document.getElementById('habitsProgress').textContent = `${done}/${habits.length}`;
+
+    document.getElementById('dashHabitsList').innerHTML = habits.map(h => {
+      const isDone = logMap[h.id]?.completed;
+      return `<div class="habit-check-item ${isDone ? 'done' : ''}" onclick="toggleHabitDash('${h.id}', ${isDone})">
+        <div class="habit-checkbox">${isDone ? '✓' : ''}</div>
+        <span class="habit-name">${h.icon || '⭐'} ${h.name}</span>
+      </div>`;
+    }).join('');
+  }
+
+  async function toggleHabitDash(habitId, currentDone) {
+    const newDone = !currentDone;
+    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).single();
+    if (existing.data) {
+      await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.data.id);
+    } else {
+      await sb.from('habit_logs').insert({ user_id: currentUser.id, habit_id: habitId, date: todayStr(), completed: newDone });
+    }
+    loadDashHabits();
+  }
+
+  async function loadDashTasks() {
+    const { data: tasks } = await sb.from('tasks').select('*')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'pending')
+      .lte('due_date', todayStr())
+      .order('priority', { ascending: false })
+      .limit(5);
+
+    // También tareas sin fecha pero de hoy
+    const { data: tasks2 } = await sb.from('tasks').select('*')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'pending')
+      .is('due_date', null)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    const all = [...(tasks || []), ...(tasks2 || [])].slice(0, 5);
+
+    if (!all.length) {
+      document.getElementById('dashTasksList').innerHTML = `<div class="empty-state"><div class="empty-icon">✓</div><p>Todo al día</p></div>`;
+      return;
+    }
+
+    document.getElementById('dashTasksList').innerHTML = all.map(t => `
+      <div class="task-item" onclick="toggleTaskDash('${t.id}')">
+        <div class="task-check"></div>
+        <span class="task-title">${t.title}</span>
+        <div class="task-priority priority-${t.priority}"></div>
+      </div>`).join('');
+  }
+
+  async function toggleTaskDash(id) {
+    await sb.from('tasks').update({ status: 'done', completed_at: new Date().toISOString() }).eq('id', id);
+    showToast('Tarea completada ✓');
+    loadDashTasks();
+  }
+
+  async function loadDashBook() {
+    const { data } = await sb.from('books').select('*')
+      .eq('user_id', currentUser.id).eq('status', 'reading').limit(1);
+
+    const el = document.getElementById('dashCurrentBook');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">▣</div><p>No hay libro activo</p></div>`;
+      return;
+    }
+    const b = data[0];
+    const pct = b.total_pages ? Math.round((b.current_page / b.total_pages) * 100) : 0;
+    el.innerHTML = `
+      <div class="book-widget">
+        <div class="book-cover">📖</div>
+        <div class="book-info">
+          <div class="book-title-text">${b.title}</div>
+          <div class="book-author">${b.author || ''}</div>
+          <div class="progress-bar"><div class="progress-fill green" style="width:${pct}%"></div></div>
+          <div class="book-pages">${b.current_page || 0} / ${b.total_pages || '?'} páginas · ${pct}%</div>
+        </div>
+      </div>`;
+  }
+
+  async function loadDashGoals() {
+    const { data } = await sb.from('goals').select('*')
+      .eq('user_id', currentUser.id).eq('status', 'active').limit(4);
+
+    const el = document.getElementById('dashGoalsList');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">◈</div><p>Sin objetivos activos</p></div>`;
+      return;
+    }
+    el.innerHTML = data.map(g => `
+      <div class="goal-item">
+        <div class="goal-header">
+          <span class="goal-name">${g.title}</span>
+          <span class="goal-pct">${g.progress}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${g.progress}%;background:${g.color}"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function loadDashFinances() {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1;
+    const start = `${y}-${String(m).padStart(2,'0')}-01`;
+    const end = `${y}-${String(m).padStart(2,'0')}-31`;
+
+    const { data } = await sb.from('transactions').select('type,amount')
+      .eq('user_id', currentUser.id).gte('date', start).lte('date', end);
+
+    let income = 0, expense = 0;
+    data?.forEach(t => t.type === 'income' ? income += +t.amount : expense += +t.amount);
+    const balance = income - expense;
+
+    document.getElementById('dashIncome').textContent = income.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+    document.getElementById('dashExpenses').textContent = expense.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+    const balEl = document.getElementById('dashBalance');
+    balEl.textContent = balance.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+    balEl.className = 'finance-stat-value ' + (balance >= 0 ? 'positive' : 'negative');
+  }
+
+  async function loadTodayMood() {
+    const { data } = await sb.from('journal_entries').select('mood')
+      .eq('user_id', currentUser.id).eq('date', todayStr()).single();
+    if (data?.mood) {
+      document.querySelectorAll('.mood-btn').forEach(b => {
+        if (parseInt(b.dataset.mood) === data.mood) b.classList.add('active');
+      });
+    }
+  }
+
+  async function setMood(val) {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.mood-btn[data-mood="${val}"]`).classList.add('active');
+    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).single();
+    if (existing.data) {
+      await sb.from('journal_entries').update({ mood: val }).eq('id', existing.data.id);
+    } else {
+      await sb.from('journal_entries').insert({ user_id: currentUser.id, date: todayStr(), mood: val });
+    }
+  }
+
+  // =============================================
+  // SAVE FUNCTIONS (modales)
+  // =============================================
+  async function saveHabit() {
+    const name = document.getElementById('habitName').value.trim();
+    if (!name) return showToast('Escribe un nombre');
+    const icon = document.getElementById('habitIcon').value || '⭐';
+    const color = document.getElementById('habitColor').value;
+    const { error } = await sb.from('habits').insert({ user_id: currentUser.id, name, icon, color });
+    if (error) return showToast('Error al guardar');
+    closeModal('habitModal');
+    document.getElementById('habitName').value = '';
+    showToast('Hábito creado ✓');
+    loadHabitsPage();
+  }
+
+  async function saveTask() {
+    const title = document.getElementById('taskTitle').value.trim();
+    if (!title) return showToast('Escribe un título');
+    const priority = document.getElementById('taskPriority').value;
+    const due_date = document.getElementById('taskDueDate').value || null;
+    const { error } = await sb.from('tasks').insert({ user_id: currentUser.id, title, priority, due_date });
+    if (error) return showToast('Error al guardar');
+    closeModal('taskModal');
+    document.getElementById('taskTitle').value = '';
+    showToast('Tarea guardada ✓');
+    loadTasksPage();
+    if (currentPage === 'dashboard') loadDashboard();
+  }
+
+  async function saveJournal() {
+    const mood = parseInt(document.getElementById('journalMood').value) || null;
+    const energy = parseInt(document.getElementById('journalEnergy').value) || null;
+    const content = document.getElementById('journalContent').value;
+    const wins = document.getElementById('journalWins').value;
+    const tomorrow = document.getElementById('journalTomorrow').value;
+
+    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).single();
+    const payload = { mood, energy, content, wins, tomorrow };
+
+    if (existing.data) {
+      await sb.from('journal_entries').update(payload).eq('id', existing.data.id);
+    } else {
+      await sb.from('journal_entries').insert({ user_id: currentUser.id, date: todayStr(), ...payload });
+    }
+    closeModal('journalModal');
+    showToast('Journal guardado ✓');
+    loadJournalPage();
+  }
+
+  async function saveGoal() {
+    const title = document.getElementById('goalTitle').value.trim();
+    if (!title) return showToast('Escribe un título');
+    const description = document.getElementById('goalDesc').value;
+    const target_date = document.getElementById('goalDate').value || null;
+    const color = document.getElementById('goalColor').value;
+    const { error } = await sb.from('goals').insert({ user_id: currentUser.id, title, description, target_date, color });
+    if (error) return showToast('Error al guardar');
+    closeModal('goalModal');
+    document.getElementById('goalTitle').value = '';
+    showToast('Objetivo creado ✓');
+    loadGoalsPage();
+  }
+
+  async function saveNote() {
+    const content = document.getElementById('noteContent').value.trim();
+    if (!content) return showToast('Escribe algo');
+    const title = document.getElementById('noteTitle').value.trim();
+    const { error } = await sb.from('notes').insert({ user_id: currentUser.id, title, content });
+    if (error) return showToast('Error al guardar');
+    closeModal('noteModal');
+    document.getElementById('noteContent').value = '';
+    showToast('Nota guardada ✓');
+    loadNotesPage();
+  }
+
+  async function saveBook() {
+    const title = document.getElementById('bookTitle').value.trim();
+    if (!title) return showToast('Escribe un título');
+    const author = document.getElementById('bookAuthor').value;
+    const status = document.getElementById('bookStatus').value;
+    const total_pages = parseInt(document.getElementById('bookPages').value) || null;
+    const started_at = status === 'reading' ? todayStr() : null;
+    const { error } = await sb.from('books').insert({ user_id: currentUser.id, title, author, status, total_pages, started_at });
+    if (error) return showToast('Error al guardar');
+    closeModal('bookModal');
+    document.getElementById('bookTitle').value = '';
+    showToast('Libro añadido ✓');
+    loadBooksPage();
+    if (currentPage === 'dashboard') loadDashBook();
+  }
+
+  async function saveTransaction() {
+    const type = document.getElementById('txType').value;
+    const amount = parseFloat(document.getElementById('txAmount').value);
+    const category = document.getElementById('txCategory').value || 'Sin categoría';
+    const description = document.getElementById('txDesc').value;
+    const date = document.getElementById('txDate').value || todayStr();
+    if (!amount) return showToast('Introduce un importe');
+    const { error } = await sb.from('transactions').insert({ user_id: currentUser.id, type, amount, category, description, date });
+    if (error) return showToast('Error al guardar');
+    closeModal('transactionModal');
+    document.getElementById('txAmount').value = '';
+    showToast('Transacción guardada ✓');
+    loadFinancesPage();
+    if (currentPage === 'dashboard') loadDashFinances();
+  }
+
+  // =============================================
+  // PAGE LOADERS
+  // =============================================
+  async function loadHabitsPage() {
+    const { data: habits } = await sb.from('habits').select('*').eq('user_id', currentUser.id).eq('active', true).order('created_at');
+    const { data: logs } = await sb.from('habit_logs').select('*').eq('user_id', currentUser.id).eq('date', todayStr());
+    const logMap = {};
+    logs?.forEach(l => logMap[l.habit_id] = l);
+
+    const el = document.getElementById('habitsPageContent');
+    if (!habits?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">✦</div><p>Aún no tienes hábitos</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('habitModal')">Crear primer hábito</button></div>`;
+      return;
+    }
+
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">` +
+      habits.map(h => {
+        const done = logMap[h.id]?.completed;
+        return `<div class="card" style="cursor:pointer;border-color:${done ? 'var(--green)' : 'var(--border)'}" onclick="toggleHabitPage('${h.id}', ${done})">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:10px;background:${h.color}20;display:flex;align-items:center;justify-content:center;font-size:20px">${h.icon || '⭐'}</div>
+            <div style="flex:1">
+              <div style="font-weight:550;font-size:14px;color:var(--text)">${h.name}</div>
+              <div style="font-size:12px;color:var(--text-3);margin-top:2px">${done ? '✓ Completado hoy' : 'Pendiente'}</div>
+            </div>
+            <div style="width:28px;height:28px;border-radius:50%;border:2px solid ${done ? 'var(--green)' : 'var(--border)'};background:${done ? 'var(--green)' : 'transparent'};display:flex;align-items:center;justify-content:center;color:white;font-size:13px">${done ? '✓' : ''}</div>
+          </div>
+        </div>`;
+      }).join('') + `</div>`;
+  }
+
+  async function toggleHabitPage(habitId, currentDone) {
+    const newDone = !currentDone;
+    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).single();
+    if (existing.data) {
+      await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.data.id);
+    } else {
+      await sb.from('habit_logs').insert({ user_id: currentUser.id, habit_id: habitId, date: todayStr(), completed: newDone });
+    }
+    showToast(newDone ? 'Hábito completado ✓' : 'Desmarcado');
+    loadHabitsPage();
+  }
+
+  async function loadTasksPage() {
+    const { data } = await sb.from('tasks').select('*').eq('user_id', currentUser.id).neq('status', 'done').order('created_at', { ascending: false });
+    const el = document.getElementById('tasksPageContent');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">✓</div><p>Sin tareas pendientes</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('taskModal')">Añadir tarea</button></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="card"><div style="display:flex;flex-direction:column;gap:4px">` +
+      data.map(t => `
+        <div class="task-item" style="border:none;border-bottom:1px solid var(--border-soft);border-radius:0;padding:10px 4px" onclick="completeTask('${t.id}')">
+          <div class="task-check"></div>
+          <span class="task-title">${t.title}</span>
+          ${t.due_date ? `<span style="font-size:11px;color:var(--text-3)">${t.due_date}</span>` : ''}
+          <div class="task-priority priority-${t.priority}"></div>
+        </div>`).join('') +
+      `</div></div>`;
+  }
+
+  async function completeTask(id) {
+    await sb.from('tasks').update({ status: 'done', completed_at: new Date().toISOString() }).eq('id', id);
+    showToast('Tarea completada ✓');
+    loadTasksPage();
+    if (currentPage === 'dashboard') loadDashTasks();
+  }
+
+  async function loadJournalPage() {
+    const { data } = await sb.from('journal_entries').select('*').eq('user_id', currentUser.id).order('date', { ascending: false }).limit(10);
+    const el = document.getElementById('journalPageContent');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◎</div><p>Aún no hay entradas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('journalModal')">Escribir entrada de hoy</button></div>`;
+      return;
+    }
+    const moodEmoji = ['', '😞', '😕', '😐', '🙂', '😄'];
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">` +
+      data.map(e => `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">${e.date}</span>
+            <div style="display:flex;gap:8px">
+              ${e.mood ? `<span class="badge badge-accent">${moodEmoji[e.mood]} ${e.mood}/5</span>` : ''}
+              ${e.energy ? `<span class="badge badge-green">⚡${e.energy}/5</span>` : ''}
+            </div>
+          </div>
+          ${e.content ? `<p style="font-size:13px;color:var(--text-2);margin-bottom:8px">${e.content}</p>` : ''}
+          ${e.wins ? `<div style="font-size:12px;color:var(--green);margin-bottom:4px">✓ ${e.wins}</div>` : ''}
+          ${e.tomorrow ? `<div style="font-size:12px;color:var(--text-3)">→ ${e.tomorrow}</div>` : ''}
+        </div>`).join('') +
+      `</div>`;
+  }
+
+  async function loadGoalsPage() {
+    const { data } = await sb.from('goals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const el = document.getElementById('goalsPageContent');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◈</div><p>Sin objetivos</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('goalModal')">Crear objetivo</button></div>`;
+      return;
+    }
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">` +
+      data.map(g => `
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0"></div>
+            <div style="font-weight:600;font-size:15px;flex:1">${g.title}</div>
+            <span class="badge ${g.status === 'active' ? 'badge-accent' : 'badge-green'}">${g.status === 'active' ? 'Activo' : 'Completado'}</span>
+          </div>
+          ${g.description ? `<p style="font-size:13px;color:var(--text-2);margin-bottom:12px">${g.description}</p>` : ''}
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:6px">
+            <span>Progreso</span><span>${g.progress}%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${g.progress}%;background:${g.color}"></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            ${g.target_date ? `<span style="font-size:11px;color:var(--text-3)">📅 ${g.target_date}</span>` : '<span></span>'}
+            <input type="range" min="0" max="100" value="${g.progress}" style="width:100px" onchange="updateGoalProgress('${g.id}', this.value)">
+          </div>
+        </div>`).join('') +
+      `</div>`;
+  }
+
+  async function updateGoalProgress(id, value) {
+    await sb.from('goals').update({ progress: parseInt(value) }).eq('id', id);
+    showToast('Progreso actualizado');
+    if (currentPage === 'dashboard') loadDashGoals();
+  }
+
+  async function loadNotesPage() {
+    const { data } = await sb.from('notes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const el = document.getElementById('notesPageContent');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◻</div><p>Sin notas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('noteModal')">Primera nota</button></div>`;
+      return;
+    }
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">` +
+      data.map(n => `
+        <div class="card" style="cursor:pointer" onclick="">
+          ${n.title ? `<div style="font-weight:600;font-size:14px;margin-bottom:8px">${n.title}</div>` : ''}
+          <div style="font-size:13px;color:var(--text-2);line-height:1.6">${n.content.slice(0, 200)}${n.content.length > 200 ? '...' : ''}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:10px">${new Date(n.created_at).toLocaleDateString('es-ES')}</div>
+        </div>`).join('') +
+      `</div>`;
+  }
+
+  async function loadBooksPage() {
+    const { data } = await sb.from('books').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    const el = document.getElementById('booksPageContent');
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">▣</div><p>Tu biblioteca está vacía</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('bookModal')">Añadir libro</button></div>`;
+      return;
+    }
+
+    const groups = { reading: [], to_read: [], done: [] };
+    data.forEach(b => groups[b.status]?.push(b));
+
+    const statusLabels = { reading: 'Leyendo', to_read: 'Por leer', done: 'Leídos' };
+
+    el.innerHTML = ['reading', 'to_read', 'done'].filter(s => groups[s].length).map(status => `
+      <div style="margin-bottom:24px">
+        <div style="font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">${statusLabels[status]} (${groups[status].length})</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+          ${groups[status].map(b => {
+            const pct = b.total_pages && b.current_page ? Math.round((b.current_page / b.total_pages) * 100) : 0;
+            return `<div class="card">
+              <div style="display:flex;gap:12px">
+                <div class="book-cover">📖</div>
+                <div style="flex:1">
+                  <div style="font-weight:600;font-size:14px;margin-bottom:2px">${b.title}</div>
+                  <div style="font-size:12px;color:var(--text-2);margin-bottom:8px">${b.author || 'Sin autor'}</div>
+                  ${status === 'reading' ? `
+                    <div class="progress-bar" style="margin-bottom:4px"><div class="progress-fill green" style="width:${pct}%"></div></div>
+                    <div style="font-size:11px;color:var(--text-3)">${b.current_page || 0}/${b.total_pages || '?'} pág.</div>
+                    <input type="number" placeholder="Página actual" value="${b.current_page || 0}" min="0" max="${b.total_pages || 9999}"
+                      style="width:100%;margin-top:8px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px"
+                      onchange="updateBookPage('${b.id}', this.value)">
+                  ` : ''}
+                  ${b.rating ? `<div style="font-size:12px;color:var(--amber);margin-top:4px">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}</div>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  async function updateBookPage(id, page) {
+    await sb.from('books').update({ current_page: parseInt(page) }).eq('id', id);
+    showToast('Progreso guardado ✓');
+    if (currentPage === 'dashboard') loadDashBook();
+  }
+
+  async function loadFinancesPage() {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1;
+    const start = `${y}-${String(m).padStart(2,'0')}-01`;
+    const end = `${y}-${String(m).padStart(2,'0')}-31`;
+
+    const { data } = await sb.from('transactions').select('*')
+      .eq('user_id', currentUser.id).gte('date', start).lte('date', end)
+      .order('date', { ascending: false });
+
+    const el = document.getElementById('financesPageContent');
+
+    let income = 0, expense = 0;
+    data?.forEach(t => t.type === 'income' ? income += +t.amount : expense += +t.amount);
+
+    if (!data?.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◆</div><p>Sin transacciones este mes</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('transactionModal')">Añadir</button></div>`;
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="finance-row" style="margin-bottom:16px">
+        <div class="finance-stat"><div class="finance-stat-label">Ingresos</div><div class="finance-stat-value positive">${income.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
+        <div class="finance-stat"><div class="finance-stat-label">Gastos</div><div class="finance-stat-value negative">${expense.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
+        <div class="finance-stat"><div class="finance-stat-label">Balance</div><div class="finance-stat-value ${income-expense>=0?'positive':'negative'}">${(income-expense).toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Transacciones del mes</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          ${data.map(t => `
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft)">
+              <div style="width:32px;height:32px;border-radius:8px;background:${t.type==='income'?'var(--green-soft)':'var(--red-soft)'};display:flex;align-items:center;justify-content:center;font-size:14px">${t.type==='income'?'↑':'↓'}</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:500">${t.description || t.category}</div>
+                <div style="font-size:11px;color:var(--text-3)">${t.category} · ${t.date}</div>
+              </div>
+              <div style="font-size:14px;font-weight:600;color:${t.type==='income'?'var(--green)':'var(--red)'}">${t.type==='income'?'+':'-'}${parseFloat(t.amount).toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // =============================================
+  // START
+  // =============================================
+  init();
+</script>
+</body>
+</html>
