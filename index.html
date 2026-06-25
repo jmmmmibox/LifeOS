@@ -1156,6 +1156,156 @@
       font-family: var(--font);
     }
     .day-btn.selected { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* =============================================
+       OBJETIVOS
+    ============================================= */
+    .goals-horizon-section {
+      margin-bottom: 28px;
+    }
+
+    .goals-horizon-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .goals-horizon-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .horizon-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .horizon-label {
+      font-size: 14px;
+      font-weight: 650;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .horizon-sublabel {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .horizon-count {
+      font-size: 12px;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    .goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .goal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      border-top: 3px solid var(--accent);
+      padding: 16px;
+      transition: box-shadow 0.15s;
+      position: relative;
+    }
+
+    .goal-card:hover { box-shadow: var(--shadow-md); }
+
+    .goal-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .goal-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      flex: 1;
+    }
+
+    .goal-card-actions {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .goal-card-desc {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .goal-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .goal-card-date {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .goal-card-pct {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    .goal-status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    .goal-empty {
+      grid-column: 1 / -1;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .goal-empty:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .goals-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      min-width: 120px;
+      flex: 1;
+    }
+
+    .goals-summary-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .goals-summary-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -1441,17 +1591,14 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
             <div>
               <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Objetivos</h2>
-              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tus grandes metas</p>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tu hoja de ruta hacia lo que importa</p>
             </div>
-            <button class="btn btn-primary" onclick="openModal('goalModal')">+ Nuevo objetivo</button>
+            <button class="btn btn-primary" onclick="openNewGoal()">+ Nuevo objetivo</button>
           </div>
-          <div id="goalsPageContent">
-            <div class="empty-state" style="padding:60px">
-              <div class="empty-icon">◈</div>
-              <p>Sin objetivos definidos</p>
-              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('goalModal')">Crear objetivo</button>
-            </div>
-          </div>
+          <!-- Resumen rápido -->
+          <div id="goalsSummary" style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap"></div>
+          <!-- Secciones por horizonte -->
+          <div id="goalsPageContent"></div>
         </div>
 
         <!-- NOTAS -->
@@ -1695,31 +1842,57 @@
 
 <!-- MODAL: Objetivo -->
 <div class="modal-overlay" id="goalModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
-      <span class="modal-title">Nuevo objetivo</span>
-      <button class="modal-close" onclick="closeModal('goalModal')">×</button>
+      <span class="modal-title" id="goalModalTitle">Nuevo objetivo</span>
+      <button class="modal-close" onclick="closeGoalModal()">×</button>
     </div>
+    <input type="hidden" id="goalEditId">
     <div class="form-group">
       <label class="form-label">Título</label>
       <input type="text" id="goalTitle" class="form-input" placeholder="¿Qué quieres lograr?">
     </div>
     <div class="form-group">
       <label class="form-label">Descripción</label>
-      <textarea id="goalDesc" class="form-textarea" style="min-height:60px" placeholder="Describe tu objetivo..."></textarea>
+      <textarea id="goalDesc" class="form-textarea" style="min-height:60px" placeholder="Por qué es importante para ti..."></textarea>
     </div>
     <div class="form-row">
       <div class="form-group">
+        <label class="form-label">Horizonte temporal</label>
+        <select id="goalHorizon" class="form-select">
+          <option value="short">Corto plazo (6m – 2 años)</option>
+          <option value="mid">Medio plazo (2 – 5 años)</option>
+          <option value="long">Largo plazo (5 – 10 años)</option>
+          <option value="personal">Meta personal</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Fecha límite</label>
         <input type="date" id="goalDate" class="form-input">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="goalStatus" class="form-select">
+          <option value="active">Activo</option>
+          <option value="paused">Pausado</option>
+          <option value="completed">Completado</option>
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Color</label>
         <input type="color" id="goalColor" class="form-input" value="#4f46e5" style="height:38px;padding:4px">
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Progreso actual: <span id="goalProgressLabel">0%</span></label>
+      <input type="range" id="goalProgress" min="0" max="100" value="0"
+        style="width:100%;accent-color:var(--accent)"
+        oninput="document.getElementById('goalProgressLabel').textContent=this.value+'%'">
+    </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('goalModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeGoalModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveGoal()">Guardar</button>
     </div>
   </div>
@@ -2781,17 +2954,173 @@
   }
 
   async function saveGoal() {
-    const title = document.getElementById('goalTitle').value.trim();
+    const title       = document.getElementById('goalTitle').value.trim();
     if (!title) return showToast('Escribe un título');
     const description = document.getElementById('goalDesc').value;
     const target_date = document.getElementById('goalDate').value || null;
-    const color = document.getElementById('goalColor').value;
-    const { error } = await sb.from('goals').insert({ user_id: currentUser.id, title, description, target_date, color });
-    if (error) return showToast('Error al guardar');
-    closeModal('goalModal');
-    document.getElementById('goalTitle').value = '';
-    showToast('Objetivo creado ✓');
+    const color       = document.getElementById('goalColor').value;
+    const status      = document.getElementById('goalStatus').value;
+    const horizon     = document.getElementById('goalHorizon').value;
+    const progress    = parseInt(document.getElementById('goalProgress').value);
+    const editId      = document.getElementById('goalEditId').value;
+
+    const payload = { title, description, target_date, color, status, progress,
+                      frequency: horizon }; // reusamos campo frequency para el horizonte
+
+    if (editId) {
+      const { error } = await sb.from('goals').update(payload).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Objetivo actualizado ✓');
+    } else {
+      const { error } = await sb.from('goals').insert({ user_id: currentUser.id, ...payload });
+      if (error) return showToast('Error al guardar');
+      showToast('Objetivo creado ✓');
+    }
+    closeGoalModal();
     loadGoalsPage();
+  }
+
+  function openNewGoal(horizon) {
+    document.getElementById('goalEditId').value = '';
+    document.getElementById('goalTitle').value = '';
+    document.getElementById('goalDesc').value = '';
+    document.getElementById('goalDate').value = '';
+    document.getElementById('goalColor').value = '#4f46e5';
+    document.getElementById('goalStatus').value = 'active';
+    document.getElementById('goalProgress').value = 0;
+    document.getElementById('goalProgressLabel').textContent = '0%';
+    document.getElementById('goalHorizon').value = horizon || 'short';
+    document.getElementById('goalModalTitle').textContent = 'Nuevo objetivo';
+    openModal('goalModal');
+  }
+
+  function openEditGoal(g) {
+    document.getElementById('goalEditId').value = g.id;
+    document.getElementById('goalTitle').value = g.title;
+    document.getElementById('goalDesc').value = g.description || '';
+    document.getElementById('goalDate').value = g.target_date || '';
+    document.getElementById('goalColor').value = g.color || '#4f46e5';
+    document.getElementById('goalStatus').value = g.status || 'active';
+    const prog = g.progress || 0;
+    document.getElementById('goalProgress').value = prog;
+    document.getElementById('goalProgressLabel').textContent = prog + '%';
+    document.getElementById('goalHorizon').value = g.frequency || 'short';
+    document.getElementById('goalModalTitle').textContent = 'Editar objetivo';
+    openModal('goalModal');
+  }
+
+  function closeGoalModal() {
+    closeModal('goalModal');
+    document.getElementById('goalEditId').value = '';
+  }
+
+  async function deleteGoal(id) {
+    if (!confirm('¿Eliminar este objetivo?')) return;
+    await sb.from('goal_milestones').delete().eq('goal_id', id);
+    await sb.from('goals').delete().eq('id', id);
+    showToast('Objetivo eliminado');
+    loadGoalsPage();
+  }
+
+  async function loadGoalsPage() {
+    const { data } = await sb.from('goals').select('*')
+      .eq('user_id', currentUser.id).order('created_at', { ascending: false });
+
+    const all = data || [];
+
+    // Resumen
+    const active    = all.filter(g => g.status === 'active').length;
+    const completed = all.filter(g => g.status === 'completed').length;
+    const avgProg   = all.length ? Math.round(all.reduce((s,g) => s + (g.progress||0), 0) / all.length) : 0;
+
+    document.getElementById('goalsSummary').innerHTML = `
+      <div class="goals-summary-card"><div class="goals-summary-label">Activos</div><div class="goals-summary-value">${active}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Completados</div><div class="goals-summary-value">${completed}</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Progreso medio</div><div class="goals-summary-value">${avgProg}%</div></div>
+      <div class="goals-summary-card"><div class="goals-summary-label">Total</div><div class="goals-summary-value">${all.length}</div></div>`;
+
+    const horizons = [
+      { key: 'short',    icon: '🚀', label: 'Corto plazo',    sub: '6 meses – 2 años',  color: '#10b981' },
+      { key: 'mid',      icon: '🎯', label: 'Medio plazo',    sub: '2 – 5 años',         color: '#4f46e5' },
+      { key: 'long',     icon: '🌟', label: 'Largo plazo',    sub: '5 – 10 años',        color: '#f59e0b' },
+      { key: 'personal', icon: '💎', label: 'Metas personales', sub: 'Valores y estilo de vida', color: '#ef4444' },
+    ];
+
+    const statusColors = { active: '#10b981', paused: '#f59e0b', completed: '#6b6b6b' };
+    const statusLabels = { active: 'Activo', paused: 'Pausado', completed: 'Completado' };
+
+    const el = document.getElementById('goalsPageContent');
+    el.innerHTML = horizons.map(h => {
+      const goals = all.filter(g => (g.frequency || 'short') === h.key);
+      const cards = goals.length
+        ? goals.map(g => {
+            const gJson = JSON.stringify(g).replace(/"/g, '&quot;');
+            const statusColor = statusColors[g.status] || '#6b6b6b';
+            const daysLeft = g.target_date
+              ? Math.ceil((new Date(g.target_date) - new Date()) / 86400000)
+              : null;
+            const daysLabel = daysLeft !== null
+              ? daysLeft > 0 ? `${daysLeft}d restantes` : daysLeft === 0 ? 'Hoy' : 'Vencido'
+              : '';
+            const daysColor = daysLeft !== null && daysLeft < 30 ? 'var(--red)' : 'var(--text-3)';
+            return `
+            <div class="goal-card" style="border-top-color:${g.color || h.color}">
+              <div class="goal-card-header">
+                <div>
+                  <span class="goal-status-dot" style="background:${statusColor}"></span>
+                  <span class="goal-card-title">${g.title}</span>
+                </div>
+                <div class="goal-card-actions">
+                  <button class="icon-btn" onclick="openEditGoal(JSON.parse(this.dataset.g))" data-g="${gJson}" title="Editar">✎</button>
+                  <button class="icon-btn danger" onclick="deleteGoal('${g.id}')" title="Eliminar">🗑</button>
+                </div>
+              </div>
+              ${g.description ? `<div class="goal-card-desc">${g.description}</div>` : ''}
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-bottom:5px">
+                <span>${statusLabels[g.status] || ''}</span>
+                <span class="goal-card-pct">${g.progress || 0}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:${g.progress||0}%;background:${g.color || h.color}"></div>
+              </div>
+              <div class="goal-card-footer">
+                <span style="font-size:11px;color:${daysColor}">${daysLabel}</span>
+                <input type="range" min="0" max="100" value="${g.progress||0}"
+                  style="width:80px;accent-color:${g.color || h.color}"
+                  onchange="updateGoalProgress('${g.id}', this.value, this)">
+              </div>
+            </div>`;
+          }).join('')
+        : `<div class="goal-empty" onclick="openNewGoal('${h.key}')">+ Añadir objetivo de ${h.label.toLowerCase()}</div>`;
+
+      return `
+      <div class="goals-horizon-section">
+        <div class="goals-horizon-header">
+          <div class="goals-horizon-title">
+            <div class="horizon-icon" style="background:${h.color}18">${h.icon}</div>
+            <div>
+              <div class="horizon-label">${h.label}</div>
+              <div class="horizon-sublabel">${h.sub}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="horizon-count">${goals.length} objetivo${goals.length !== 1 ? 's' : ''}</span>
+            <button class="btn btn-ghost btn-sm" onclick="openNewGoal('${h.key}')">+ Añadir</button>
+          </div>
+        </div>
+        <div class="goals-grid">${cards}</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function updateGoalProgress(id, value, el) {
+    await sb.from('goals').update({ progress: parseInt(value) }).eq('id', id);
+    // Actualizar solo el % visible sin recargar toda la página
+    const card = el.closest('.goal-card');
+    if (card) {
+      card.querySelector('.goal-card-pct').textContent = value + '%';
+      card.querySelector('.progress-fill').style.width = value + '%';
+    }
   }
 
   async function saveNote() {
@@ -2952,40 +3281,6 @@
     showToast('Tarea completada ✓');
     loadTasksPage();
     if (currentPage === 'dashboard') loadDashTasks();
-  }
-
-  async function loadGoalsPage() {
-    const { data } = await sb.from('goals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const el = document.getElementById('goalsPageContent');
-    if (!data?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◈</div><p>Sin objetivos</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('goalModal')">Crear objetivo</button></div>`;
-      return;
-    }
-    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">` +
-      data.map(g => `
-        <div class="card">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0"></div>
-            <div style="font-weight:600;font-size:15px;flex:1">${g.title}</div>
-            <span class="badge ${g.status === 'active' ? 'badge-accent' : 'badge-green'}">${g.status === 'active' ? 'Activo' : 'Completado'}</span>
-          </div>
-          ${g.description ? `<p style="font-size:13px;color:var(--text-2);margin-bottom:12px">${g.description}</p>` : ''}
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:6px">
-            <span>Progreso</span><span>${g.progress}%</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${g.progress}%;background:${g.color}"></div></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-            ${g.target_date ? `<span style="font-size:11px;color:var(--text-3)">📅 ${g.target_date}</span>` : '<span></span>'}
-            <input type="range" min="0" max="100" value="${g.progress}" style="width:100px" onchange="updateGoalProgress('${g.id}', this.value)">
-          </div>
-        </div>`).join('') +
-      `</div>`;
-  }
-
-  async function updateGoalProgress(id, value) {
-    await sb.from('goals').update({ progress: parseInt(value) }).eq('id', id);
-    showToast('Progreso actualizado');
-    if (currentPage === 'dashboard') loadDashGoals();
   }
 
   async function loadNotesPage() {
