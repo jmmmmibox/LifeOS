@@ -1335,18 +1335,6 @@
               </div>
             </div>
 
-            <!-- Mood del día -->
-            <div class="card">
-              <div class="card-title">¿Cómo estás hoy?</div>
-              <div class="mood-row">
-                <button class="mood-btn" onclick="setMood(1)" data-mood="1">😞<span class="mood-label">Mal</span></button>
-                <button class="mood-btn" onclick="setMood(2)" data-mood="2">😕<span class="mood-label">Regular</span></button>
-                <button class="mood-btn" onclick="setMood(3)" data-mood="3">😐<span class="mood-label">Neutro</span></button>
-                <button class="mood-btn" onclick="setMood(4)" data-mood="4">🙂<span class="mood-label">Bien</span></button>
-                <button class="mood-btn" onclick="setMood(5)" data-mood="5">😄<span class="mood-label">Genial</span></button>
-              </div>
-            </div>
-
             <!-- Libro actual -->
             <div class="card">
               <div class="card-title">
@@ -1357,42 +1345,6 @@
                 <div class="empty-state">
                   <div class="empty-icon">▣</div>
                   <p>No hay libro activo</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Objetivos activos -->
-            <div class="card col-2">
-              <div class="card-title">
-                Objetivos activos
-                <button class="btn btn-ghost btn-sm" onclick="navigate('goals')">Ver todos</button>
-              </div>
-              <div class="goal-list" id="dashGoalsList">
-                <div class="empty-state">
-                  <div class="empty-icon">◈</div>
-                  <p>Sin objetivos definidos</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Finanzas del mes -->
-            <div class="card col-3">
-              <div class="card-title">
-                Finanzas — <span id="dashFinanceMonth"></span>
-                <button class="btn btn-ghost btn-sm" onclick="navigate('finances')">Ver detalle</button>
-              </div>
-              <div class="finance-row">
-                <div class="finance-stat">
-                  <div class="finance-stat-label">Ingresos</div>
-                  <div class="finance-stat-value positive" id="dashIncome">0 €</div>
-                </div>
-                <div class="finance-stat">
-                  <div class="finance-stat-label">Gastos</div>
-                  <div class="finance-stat-value negative" id="dashExpenses">0 €</div>
-                </div>
-                <div class="finance-stat">
-                  <div class="finance-stat-label">Balance</div>
-                  <div class="finance-stat-value" id="dashBalance">0 €</div>
                 </div>
               </div>
             </div>
@@ -1464,12 +1416,17 @@
 
         <!-- JOURNAL -->
         <div class="page" id="page-journal">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <div>
               <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Journal</h2>
               <p style="font-size:13px;color:var(--text-2);margin-top:2px" id="journalDateLabel"></p>
             </div>
-            <button class="btn btn-primary" onclick="openModal('journalModal')">+ Entrada de hoy</button>
+            <button class="btn btn-primary" onclick="openNewJournalEntry()">+ Nueva entrada</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:20px">
+            <input type="text" id="journalSearch" class="form-input" placeholder="Buscar en el journal..." style="flex:1" oninput="filterJournal()">
+            <input type="date" id="journalDateFilter" class="form-input" style="width:160px" onchange="filterJournal()">
+            <button class="btn btn-ghost" onclick="clearJournalFilters()">Limpiar</button>
           </div>
           <div id="journalPageContent">
             <div class="empty-state" style="padding:60px">
@@ -1662,20 +1619,25 @@
 <div class="modal-overlay" id="taskModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Nueva tarea</span>
-      <button class="modal-close" onclick="closeModal('taskModal')">×</button>
+      <span class="modal-title" id="taskModalTitle">Nueva tarea</span>
+      <button class="modal-close" onclick="closeTaskModal()">×</button>
     </div>
+    <input type="hidden" id="taskEditId">
     <div class="form-group">
       <label class="form-label">Título</label>
       <input type="text" id="taskTitle" class="form-input" placeholder="¿Qué tienes que hacer?">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción (opcional)</label>
+      <textarea id="taskDesc" class="form-textarea" style="min-height:60px" placeholder="Detalles..."></textarea>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Prioridad</label>
         <select id="taskPriority" class="form-select">
-          <option value="low">Baja</option>
-          <option value="medium" selected>Media</option>
-          <option value="high">Alta</option>
+          <option value="low">🟢 Baja</option>
+          <option value="medium" selected>🟠 Media</option>
+          <option value="high">🔴 Alta</option>
         </select>
       </div>
       <div class="form-group">
@@ -1684,7 +1646,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeTaskModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveTask()">Guardar</button>
     </div>
   </div>
@@ -1694,8 +1656,13 @@
 <div class="modal-overlay" id="journalModal">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <span class="modal-title">Entrada de hoy</span>
-      <button class="modal-close" onclick="closeModal('journalModal')">×</button>
+      <span class="modal-title" id="journalModalTitle">Entrada de hoy</span>
+      <button class="modal-close" onclick="closeJournalModal()">×</button>
+    </div>
+    <input type="hidden" id="journalEditId">
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input type="date" id="journalDate" class="form-input">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -1720,7 +1687,7 @@
       <textarea id="journalTomorrow" class="form-textarea" style="min-height:60px" placeholder="Intenciones para mañana..."></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('journalModal')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="closeJournalModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveJournal()">Guardar</button>
     </div>
   </div>
@@ -2651,33 +2618,170 @@
     if (!title) return showToast('Escribe un título');
     const priority = document.getElementById('taskPriority').value;
     const due_date = document.getElementById('taskDueDate').value || null;
-    const { error } = await sb.from('tasks').insert({ user_id: currentUser.id, title, priority, due_date });
-    if (error) return showToast('Error al guardar');
-    closeModal('taskModal');
-    document.getElementById('taskTitle').value = '';
-    showToast('Tarea guardada ✓');
+    const description = document.getElementById('taskDesc').value;
+    const editId = document.getElementById('taskEditId').value;
+
+    if (editId) {
+      const { error } = await sb.from('tasks').update({ title, priority, due_date, description }).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Tarea actualizada ✓');
+    } else {
+      const { error } = await sb.from('tasks').insert({ user_id: currentUser.id, title, priority, due_date, description });
+      if (error) return showToast('Error al guardar');
+      showToast('Tarea guardada ✓');
+    }
+    closeTaskModal();
     loadTasksPage();
-    if (currentPage === 'dashboard') loadDashboard();
+    if (currentPage === 'dashboard') loadDashTasks();
+  }
+
+  function closeTaskModal() {
+    closeModal('taskModal');
+    document.getElementById('taskEditId').value = '';
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskDesc').value = '';
+    document.getElementById('taskDueDate').value = '';
+    document.getElementById('taskPriority').value = 'medium';
+    document.getElementById('taskModalTitle').textContent = 'Nueva tarea';
+  }
+
+  function openEditTask(t) {
+    document.getElementById('taskEditId').value = t.id;
+    document.getElementById('taskTitle').value = t.title;
+    document.getElementById('taskDesc').value = t.description || '';
+    document.getElementById('taskPriority').value = t.priority;
+    document.getElementById('taskDueDate').value = t.due_date || '';
+    document.getElementById('taskModalTitle').textContent = 'Editar tarea';
+    openModal('taskModal');
+  }
+
+  async function deleteTask(id) {
+    if (!confirm('¿Eliminar esta tarea?')) return;
+    await sb.from('tasks').delete().eq('id', id);
+    showToast('Tarea eliminada');
+    loadTasksPage();
+    if (currentPage === 'dashboard') loadDashTasks();
   }
 
   async function saveJournal() {
-    const mood = parseInt(document.getElementById('journalMood').value) || null;
-    const energy = parseInt(document.getElementById('journalEnergy').value) || null;
-    const content = document.getElementById('journalContent').value;
-    const wins = document.getElementById('journalWins').value;
+    const mood     = parseInt(document.getElementById('journalMood').value) || null;
+    const energy   = parseInt(document.getElementById('journalEnergy').value) || null;
+    const content  = document.getElementById('journalContent').value;
+    const wins     = document.getElementById('journalWins').value;
     const tomorrow = document.getElementById('journalTomorrow').value;
+    const date     = document.getElementById('journalDate').value || todayStr();
+    const editId   = document.getElementById('journalEditId').value;
+    const payload  = { mood, energy, content, wins, tomorrow, date };
 
-    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).maybeSingle();
-    const payload = { mood, energy, content, wins, tomorrow };
-
-    if (existing.data) {
-      await sb.from('journal_entries').update(payload).eq('id', existing.data.id);
+    if (editId) {
+      const { error } = await sb.from('journal_entries').update(payload).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Entrada actualizada ✓');
     } else {
-      await sb.from('journal_entries').insert({ user_id: currentUser.id, date: todayStr(), ...payload });
+      // Comprobar si ya existe entrada para esa fecha
+      const { data: existing } = await sb.from('journal_entries').select('id')
+        .eq('user_id', currentUser.id).eq('date', date).maybeSingle();
+      if (existing) {
+        await sb.from('journal_entries').update(payload).eq('id', existing.id);
+      } else {
+        await sb.from('journal_entries').insert({ user_id: currentUser.id, ...payload });
+      }
+      showToast('Entrada guardada ✓');
     }
-    closeModal('journalModal');
-    showToast('Journal guardado ✓');
+    closeJournalModal();
     loadJournalPage();
+  }
+
+  function openNewJournalEntry() {
+    document.getElementById('journalEditId').value = '';
+    document.getElementById('journalDate').value = todayStr();
+    document.getElementById('journalMood').value = '';
+    document.getElementById('journalEnergy').value = '';
+    document.getElementById('journalContent').value = '';
+    document.getElementById('journalWins').value = '';
+    document.getElementById('journalTomorrow').value = '';
+    document.getElementById('journalModalTitle').textContent = 'Nueva entrada';
+    openModal('journalModal');
+  }
+
+  function openEditJournal(e) {
+    document.getElementById('journalEditId').value = e.id;
+    document.getElementById('journalDate').value = e.date;
+    document.getElementById('journalMood').value = e.mood || '';
+    document.getElementById('journalEnergy').value = e.energy || '';
+    document.getElementById('journalContent').value = e.content || '';
+    document.getElementById('journalWins').value = e.wins || '';
+    document.getElementById('journalTomorrow').value = e.tomorrow || '';
+    document.getElementById('journalModalTitle').textContent = 'Editar entrada';
+    openModal('journalModal');
+  }
+
+  function closeJournalModal() {
+    closeModal('journalModal');
+    document.getElementById('journalEditId').value = '';
+  }
+
+  async function deleteJournal(id) {
+    if (!confirm('¿Eliminar esta entrada?')) return;
+    await sb.from('journal_entries').delete().eq('id', id);
+    showToast('Entrada eliminada');
+    loadJournalPage();
+  }
+
+  let allJournalEntries = [];
+
+  async function loadJournalPage() {
+    const { data } = await sb.from('journal_entries').select('*')
+      .eq('user_id', currentUser.id).order('date', { ascending: false });
+    allJournalEntries = data || [];
+    renderJournalEntries(allJournalEntries);
+  }
+
+  function filterJournal() {
+    const search = document.getElementById('journalSearch').value.toLowerCase();
+    const dateFilter = document.getElementById('journalDateFilter').value;
+    const filtered = allJournalEntries.filter(e => {
+      const matchDate = !dateFilter || e.date === dateFilter;
+      const matchText = !search || [e.content, e.wins, e.tomorrow].some(f => f?.toLowerCase().includes(search));
+      return matchDate && matchText;
+    });
+    renderJournalEntries(filtered);
+  }
+
+  function clearJournalFilters() {
+    document.getElementById('journalSearch').value = '';
+    document.getElementById('journalDateFilter').value = '';
+    renderJournalEntries(allJournalEntries);
+  }
+
+  function renderJournalEntries(entries) {
+    const el = document.getElementById('journalPageContent');
+    if (!entries.length) {
+      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◎</div><p>Sin entradas</p></div>`;
+      return;
+    }
+    const moodEmoji = ['', '😞', '😕', '😐', '🙂', '😄'];
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">` +
+      entries.map(e => {
+        const eJson = JSON.stringify(e).replace(/"/g, '&quot;');
+        return `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:14px;font-weight:650;color:var(--text)">${e.date}</span>
+              ${e.mood   ? `<span class="badge badge-accent">${moodEmoji[e.mood]} ${e.mood}/5</span>` : ''}
+              ${e.energy ? `<span class="badge badge-green">⚡${e.energy}/5</span>` : ''}
+            </div>
+            <div style="display:flex;gap:4px">
+              <button class="icon-btn" onclick="openEditJournal(JSON.parse(this.dataset.e))" data-e="${eJson}" title="Editar">✎</button>
+              <button class="icon-btn danger" onclick="deleteJournal('${e.id}')" title="Eliminar">🗑</button>
+            </div>
+          </div>
+          ${e.content  ? `<p style="font-size:13px;color:var(--text-2);margin-bottom:8px;line-height:1.6">${e.content}</p>` : ''}
+          ${e.wins     ? `<div style="font-size:12px;color:var(--green);margin-bottom:6px;display:flex;gap:6px"><span>✓</span><span>${e.wins}</span></div>` : ''}
+          ${e.tomorrow ? `<div style="font-size:12px;color:var(--accent);display:flex;gap:6px"><span>→</span><span>${e.tomorrow}</span></div>` : ''}
+        </div>`;
+      }).join('') + `</div>`;
   }
 
   async function saveGoal() {
@@ -2817,15 +2921,34 @@
       el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">✓</div><p>Sin tareas pendientes</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('taskModal')">Añadir tarea</button></div>`;
       return;
     }
-    el.innerHTML = `<div class="card"><div style="display:flex;flex-direction:column;gap:4px">` +
-      data.map(t => `
-        <div class="task-item" style="border:none;border-bottom:1px solid var(--border-soft);border-radius:0;padding:10px 4px" onclick="completeTask('${t.id}')">
-          <div class="task-check"></div>
-          <span class="task-title">${t.title}</span>
-          ${t.due_date ? `<span style="font-size:11px;color:var(--text-3)">${t.due_date}</span>` : ''}
-          <div class="task-priority priority-${t.priority}"></div>
-        </div>`).join('') +
-      `</div></div>`;
+
+    const priorityColors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
+    const priorityBg    = { high: '#fef2f2', medium: '#fffbeb', low: '#ecfdf5' };
+    const priorityLabel = { high: 'Alta', medium: 'Media', low: 'Baja' };
+
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">` +
+      data.map(t => {
+        const color  = priorityColors[t.priority] || '#6b6b6b';
+        const bg     = priorityBg[t.priority] || '#f8f8f6';
+        const label  = priorityLabel[t.priority] || t.priority;
+        const tJson  = JSON.stringify(t).replace(/"/g, '&quot;');
+        return `
+        <div style="background:${bg};border:1px solid ${color}30;border-left:4px solid ${color};border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px">
+          <button onclick="completeTask('${t.id}')" style="width:20px;height:20px;border-radius:4px;border:2px solid ${color};background:transparent;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;" title="Completar"></button>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:550;color:var(--text);margin-bottom:2px">${t.title}</div>
+            ${t.description ? `<div style="font-size:12px;color:var(--text-2);margin-bottom:4px">${t.description}</div>` : ''}
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:11px;font-weight:600;color:${color}">${label}</span>
+              ${t.due_date ? `<span style="font-size:11px;color:var(--text-3)">📅 ${t.due_date}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button class="icon-btn" onclick="openEditTask(JSON.parse(this.dataset.t))" data-t="${tJson}" title="Editar">✎</button>
+            <button class="icon-btn danger" onclick="deleteTask('${t.id}')" title="Eliminar">🗑</button>
+          </div>
+        </div>`;
+      }).join('') + `</div>`;
   }
 
   async function completeTask(id) {
@@ -2833,31 +2956,6 @@
     showToast('Tarea completada ✓');
     loadTasksPage();
     if (currentPage === 'dashboard') loadDashTasks();
-  }
-
-  async function loadJournalPage() {
-    const { data } = await sb.from('journal_entries').select('*').eq('user_id', currentUser.id).order('date', { ascending: false }).limit(10);
-    const el = document.getElementById('journalPageContent');
-    if (!data?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◎</div><p>Aún no hay entradas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('journalModal')">Escribir entrada de hoy</button></div>`;
-      return;
-    }
-    const moodEmoji = ['', '😞', '😕', '😐', '🙂', '😄'];
-    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">` +
-      data.map(e => `
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <span style="font-size:13px;font-weight:600;color:var(--text)">${e.date}</span>
-            <div style="display:flex;gap:8px">
-              ${e.mood ? `<span class="badge badge-accent">${moodEmoji[e.mood]} ${e.mood}/5</span>` : ''}
-              ${e.energy ? `<span class="badge badge-green">⚡${e.energy}/5</span>` : ''}
-            </div>
-          </div>
-          ${e.content ? `<p style="font-size:13px;color:var(--text-2);margin-bottom:8px">${e.content}</p>` : ''}
-          ${e.wins ? `<div style="font-size:12px;color:var(--green);margin-bottom:4px">✓ ${e.wins}</div>` : ''}
-          ${e.tomorrow ? `<div style="font-size:12px;color:var(--text-3)">→ ${e.tomorrow}</div>` : ''}
-        </div>`).join('') +
-      `</div>`;
   }
 
   async function loadGoalsPage() {
