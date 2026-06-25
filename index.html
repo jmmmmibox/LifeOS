@@ -2477,57 +2477,58 @@
       return;
     }
 
-    // Obtener logs del mes
     const startDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
     const endDate   = `${calYear}-${String(calMonth+1).padStart(2,'0')}-31`;
     const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
       .eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate);
 
-    // Mapa: habit_id -> Set de fechas completadas
     const logMap = {};
     habits.forEach(h => logMap[h.id] = new Set());
     logs?.forEach(l => { if (l.completed) logMap[l.habit_id]?.add(l.date); });
 
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const todayD = new Date();
-    const todayStr2 = todayStr();
     const isCurrentMonth = calYear === todayD.getFullYear() && calMonth === todayD.getMonth();
     const todayDay = todayD.getDate();
 
-    // Construir tabla
-    // Cabecera: días del mes
+    // Cabecera días
     let headNums = '<tr><th class="cal-th-habit"></th>';
     for (let d = 1; d <= daysInMonth; d++) {
       const isToday = isCurrentMonth && d === todayDay;
       headNums += `<th class="cal-th"><div class="cal-day-num ${isToday ? 'today-num' : ''}">${d}</div></th>`;
     }
-    headNums += '<th class="cal-th" style="min-width:50px;padding-left:10px">Racha</th></tr>';
+    headNums += '<th class="cal-th" style="min-width:54px;padding-left:10px">Racha</th></tr>';
 
     // Filas por hábito
     const rows = habits.map(h => {
       const streak = calcStreak(logMap[h.id]);
       let cells = '';
+
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const done = logMap[h.id].has(dateStr);
         const isFuture = isCurrentMonth && d > todayDay;
         const isToday = isCurrentMonth && d === todayDay;
 
-        let cls = 'cal-cell-inner';
-        let style = '';
-        let content = '';
-
         if (isFuture) {
-          cls += ' future';
-        } else if (done) {
-          cls += ' done' + (isToday ? ' today-col' : '');
-          style = `background:${h.color}`;
-          content = '&#10003;';
+          // Días futuros: no clicables, transparentes
+          cells += `<td class="cal-cell"><div class="cal-cell-inner future" style="opacity:0.2;background:var(--border-soft)"></div></td>`;
         } else {
-          cls += ' empty' + (isToday ? ' today-col' : '');
+          // Pasado o hoy: clicable
+          const bgStyle = done ? `background:${h.color}` : 'background:var(--border-soft)';
+          const todayStyle = isToday ? `outline:2px solid ${h.color};outline-offset:2px;` : '';
+          const cursor = 'cursor:pointer;';
+          const title = done ? 'Clic para desmarcar' : 'Clic para marcar como completado';
+          cells += `<td class="cal-cell">
+            <div class="cal-cell-inner" 
+              style="${bgStyle};${todayStyle}${cursor}border-radius:6px;transition:all 0.15s;"
+              title="${title}"
+              onclick="toggleHabitCalendar('${h.id}','${dateStr}',${done})"
+              onmouseover="this.style.opacity='0.75'"
+              onmouseout="this.style.opacity='1'"
+            ></div>
+          </td>`;
         }
-
-        cells += `<td class="cal-cell"><div class="${cls}" style="${style}">${content}</div></td>`;
       }
 
       const streakHtml = streak > 0
@@ -2782,6 +2783,25 @@
     showToast(newDone ? 'Completado' : 'Desmarcado');
     loadHabitsPage();
     if (currentPage === 'dashboard') loadDashHabits();
+    // Refrescar calendario si está visible
+    if (currentHabitsTab === 'calendario') renderHabitsCalendar();
+  }
+
+  async function toggleHabitCalendar(habitId, dateStr, currentDone) {
+    const newDone = !currentDone;
+    const { data: existing } = await sb.from('habit_logs').select('id')
+      .eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', dateStr).single();
+    if (existing) {
+      await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.id);
+    } else {
+      await sb.from('habit_logs').insert({ user_id: currentUser.id, habit_id: habitId, date: dateStr, completed: newDone });
+    }
+    // Refrescar solo el calendario sin parpadeo total
+    renderHabitsCalendar();
+    if (dateStr === todayStr()) {
+      loadHabitsPage();
+      if (currentPage === 'dashboard') loadDashHabits();
+    }
   }
 
   async function loadTasksPage() {
