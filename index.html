@@ -2052,6 +2052,12 @@
     return new Date().toISOString().split('T')[0];
   }
 
+  function lastDayOfMonth(year, month) {
+    // month es 1-based (1=enero)
+    const d = new Date(year, month, 0); // día 0 del mes siguiente = último día del mes actual
+    return `${year}-${String(month).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   // =============================================
   // QUICK CAPTURE
   // =============================================
@@ -2220,7 +2226,7 @@
 
   async function toggleHabitDash(habitId, currentDone) {
     const newDone = !currentDone;
-    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).single();
+    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).maybeSingle();
     if (existing.data) {
       await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.data.id);
     } else {
@@ -2314,7 +2320,7 @@
     const now = new Date();
     const y = now.getFullYear(), m = now.getMonth() + 1;
     const start = `${y}-${String(m).padStart(2,'0')}-01`;
-    const end = `${y}-${String(m).padStart(2,'0')}-31`;
+    const end = lastDayOfMonth(y, m);
 
     const { data } = await sb.from('transactions').select('type,amount')
       .eq('user_id', currentUser.id).gte('date', start).lte('date', end);
@@ -2332,7 +2338,7 @@
 
   async function loadTodayMood() {
     const { data } = await sb.from('journal_entries').select('mood')
-      .eq('user_id', currentUser.id).eq('date', todayStr()).single();
+      .eq('user_id', currentUser.id).eq('date', todayStr()).maybeSingle();
     if (data?.mood) {
       document.querySelectorAll('.mood-btn').forEach(b => {
         if (parseInt(b.dataset.mood) === data.mood) b.classList.add('active');
@@ -2343,7 +2349,7 @@
   async function setMood(val) {
     document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.mood-btn[data-mood="${val}"]`).classList.add('active');
-    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).single();
+    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).maybeSingle();
     if (existing.data) {
       await sb.from('journal_entries').update({ mood: val }).eq('id', existing.data.id);
     } else {
@@ -2478,7 +2484,7 @@
     }
 
     const startDate = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
-    const endDate   = `${calYear}-${String(calMonth+1).padStart(2,'0')}-31`;
+    const endDate = lastDayOfMonth(calYear, calMonth+1);
     const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
       .eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate);
 
@@ -2661,7 +2667,7 @@
     const wins = document.getElementById('journalWins').value;
     const tomorrow = document.getElementById('journalTomorrow').value;
 
-    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).single();
+    const existing = await sb.from('journal_entries').select('id').eq('user_id', currentUser.id).eq('date', todayStr()).maybeSingle();
     const payload = { mood, energy, content, wins, tomorrow };
 
     if (existing.data) {
@@ -2774,7 +2780,7 @@
 
   async function toggleHabitPage(habitId, currentDone) {
     const newDone = !currentDone;
-    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).single();
+    const existing = await sb.from('habit_logs').select('id').eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', todayStr()).maybeSingle();
     if (existing.data) {
       await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.data.id);
     } else {
@@ -2790,7 +2796,7 @@
   async function toggleHabitCalendar(habitId, dateStr, currentDone) {
     const newDone = !currentDone;
     const { data: existing } = await sb.from('habit_logs').select('id')
-      .eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', dateStr).single();
+      .eq('user_id', currentUser.id).eq('habit_id', habitId).eq('date', dateStr).maybeSingle();
     if (existing) {
       await sb.from('habit_logs').update({ completed: newDone }).eq('id', existing.id);
     } else {
@@ -2956,7 +2962,7 @@
     const now = new Date();
     const y = now.getFullYear(), m = now.getMonth() + 1;
     const start = `${y}-${String(m).padStart(2,'0')}-01`;
-    const end = `${y}-${String(m).padStart(2,'0')}-31`;
+    const end = lastDayOfMonth(y, m);
 
     const { data } = await sb.from('transactions').select('*')
       .eq('user_id', currentUser.id).gte('date', start).lte('date', end)
