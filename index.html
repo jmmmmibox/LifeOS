@@ -2685,7 +2685,15 @@
   const { createClient } = supabase;
   const sb = createClient(
     'https://sldhqxsxegtulsyrsjil.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGhxeHN4ZWd0dWxzeXJzamlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNzU4MDQsImV4cCI6MjA5Nzk1MTgwNH0.HIeuyXSYNI0zldxdVonGDBB8lRXlThFIRh0YnCu4a4k'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGhxeHN4ZWd0dWxzeXJzamlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNzU4MDQsImV4cCI6MjA5Nzk1MTgwNH0.HIeuyXSYNI0zldxdVonGDBB8lRXlThFIRh0YnCu4a4k',
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    }
   );
 
   let currentUser = null;
