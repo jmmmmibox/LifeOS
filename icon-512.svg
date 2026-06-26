@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1a1a2e"/>
+  <circle cx="410" cy="100" r="130" fill="#4f46e5" opacity="0.25"/>
+  <circle cx="100" cy="420" r="90" fill="#10b981" opacity="0.18"/>
+  <circle cx="420" cy="420" r="60" fill="#6366f1" opacity="0.12"/>
+  <text x="256" y="305" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="148" font-weight="800" fill="white" text-anchor="middle" letter-spacing="-4">Life</text>
+  <rect x="80" y="320" width="352" height="5" rx="2.5" fill="#4f46e5"/>
+  <text x="256" y="415" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="90" font-weight="300" fill="#a5b4fc" text-anchor="middle" letter-spacing="22">OS</text>
+</svg>
