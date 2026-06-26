@@ -61,8 +61,83 @@
       position: fixed;
       top: 0; left: 0; bottom: 0;
       z-index: 100;
-      transition: transform 0.25s ease;
+      transition: width 0.25s ease, transform 0.25s ease;
+      overflow: hidden;
     }
+
+    /* Sidebar contraída */
+    .sidebar.collapsed {
+      width: 56px;
+    }
+
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .logo-sub,
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .nav-item span:not(.nav-icon),
+    .sidebar.collapsed .sidebar-bottom-text {
+      display: none;
+    }
+
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .sidebar.collapsed .nav-icon {
+      width: auto;
+      font-size: 18px;
+      opacity: 1;
+    }
+
+    .sidebar.collapsed .sidebar-logo {
+      padding: 18px 12px;
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .logo-mark {
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .sidebar-bottom {
+      padding: 12px 4px;
+      align-items: center;
+    }
+
+    .sidebar.collapsed .sidebar-bottom .nav-item {
+      justify-content: center;
+    }
+
+    /* Botón toggle sidebar */
+    .sidebar-toggle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      color: var(--text-2);
+      position: absolute;
+      right: -13px;
+      top: 24px;
+      z-index: 101;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+
+    .sidebar-toggle:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Main ajusta margen */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.25s ease;
+    }
+
+    .main.collapsed { margin-left: 56px; }
 
     .sidebar-logo {
       padding: 20px 16px 16px;
@@ -168,15 +243,6 @@
     .sidebar-bottom {
       padding: 12px 8px;
       border-top: 1px solid var(--border-soft);
-    }
-
-    /* MAIN CONTENT */
-    .main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
     }
 
     /* TOP BAR */
@@ -1474,6 +1540,8 @@
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
+        <!-- Botón para contraer/expandir -->
+        <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Contraer sidebar">‹</button>
         <div class="logo-mark">
           <div class="logo-icon">L</div>
           <div>
@@ -1526,8 +1594,9 @@
       </nav>
 
       <div class="sidebar-bottom">
-        <button class="nav-item" onclick="handleLogout()">
-          <span class="nav-icon">→</span> Cerrar sesión
+        <button class="nav-item" onclick="handleLogout()" style="color:var(--red);width:100%">
+          <span class="nav-icon" style="opacity:1">⏻</span>
+          <span class="sidebar-bottom-text">Cerrar sesión</span>
         </button>
       </div>
     </aside>
@@ -2621,6 +2690,7 @@
     setTopbarDate();
     setGreeting();
     loadDashboard();
+    restoreSidebarState();
   }
 
   function showAuth() {
@@ -2738,6 +2808,27 @@
       'Enfócate en lo que importa.'
     ];
     return phrases[new Date().getDay() % phrases.length];
+  }
+
+  let sidebarCollapsed = false;
+
+  function toggleSidebarCollapse() {
+    sidebarCollapsed = !sidebarCollapsed;
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.main');
+    const btn = document.getElementById('sidebarToggleBtn');
+    sidebar.classList.toggle('collapsed', sidebarCollapsed);
+    main.classList.toggle('collapsed', sidebarCollapsed);
+    btn.textContent = sidebarCollapsed ? '›' : '‹';
+    btn.title = sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar';
+    localStorage.setItem('lifeos_sidebar_collapsed', sidebarCollapsed);
+  }
+
+  function restoreSidebarState() {
+    if (localStorage.getItem('lifeos_sidebar_collapsed') === 'true') {
+      sidebarCollapsed = false;
+      toggleSidebarCollapse();
+    }
   }
 
   function toggleSidebar() {
