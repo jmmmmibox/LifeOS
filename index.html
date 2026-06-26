@@ -107,25 +107,7 @@
       justify-content: center;
     }
 
-    /* Botón toggle sidebar */
-    .sidebar-toggle {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
-      color: var(--text-2);
-      position: absolute;
-      right: -13px;
-      top: 24px;
-      z-index: 101;
-      box-shadow: var(--shadow);
-      transition: all 0.2s;
-    }
-
-    .sidebar-toggle:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    /* Botón toggle — integrado en sidebar bottom, no flotante */
 
     /* Main ajusta margen */
     .main {
@@ -1540,8 +1522,6 @@
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <!-- Botón para contraer/expandir -->
-        <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" title="Contraer sidebar">‹</button>
         <div class="logo-mark">
           <div class="logo-icon">L</div>
           <div>
@@ -1594,6 +1574,10 @@
       </nav>
 
       <div class="sidebar-bottom">
+        <button class="nav-item" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" style="width:100%">
+          <span class="nav-icon" style="opacity:1" id="sidebarToggleIcon">‹‹</span>
+          <span class="sidebar-bottom-text">Contraer</span>
+        </button>
         <button class="nav-item" onclick="handleLogout()" style="color:var(--red);width:100%">
           <span class="nav-icon" style="opacity:1">⏻</span>
           <span class="sidebar-bottom-text">Cerrar sesión</span>
@@ -2081,32 +2065,6 @@
 
   </div><!-- #app -->
 </div><!-- #mainApp -->
-
-<!-- MOBILE BOTTOM NAV -->
-<div class="mobile-nav" id="mobileNav">
-  <div class="mobile-nav-items">
-    <button class="mobile-nav-item active" onclick="navigate('dashboard')">
-      <span class="m-icon">⊞</span>
-      <span class="m-label">Inicio</span>
-    </button>
-    <button class="mobile-nav-item" onclick="navigate('habits')">
-      <span class="m-icon">✦</span>
-      <span class="m-label">Hábitos</span>
-    </button>
-    <button class="mobile-nav-item" onclick="navigate('tasks')">
-      <span class="m-icon">✓</span>
-      <span class="m-label">Tareas</span>
-    </button>
-    <button class="mobile-nav-item" onclick="navigate('journal')">
-      <span class="m-icon">◎</span>
-      <span class="m-label">Journal</span>
-    </button>
-    <button class="mobile-nav-item" onclick="navigate('goals')">
-      <span class="m-icon">◈</span>
-      <span class="m-label">Metas</span>
-    </button>
-  </div>
-</div>
 
 <!-- ===== MODALES FINANZAS ===== -->
 <!-- Modal Ingreso/Gasto -->
@@ -2686,7 +2644,7 @@
   function showApp() {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('mobileNav').style.display = 'block';
+    
     setTopbarDate();
     setGreeting();
     loadDashboard();
@@ -2696,7 +2654,7 @@
   function showAuth() {
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('mobileNav').style.display = 'none';
+    
   }
 
   // =============================================
@@ -2816,11 +2774,14 @@
     sidebarCollapsed = !sidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
     const main = document.querySelector('.main');
-    const btn = document.getElementById('sidebarToggleBtn');
+    const icon = document.getElementById('sidebarToggleIcon');
+    const texts = sidebar.querySelectorAll('.sidebar-bottom-text');
     sidebar.classList.toggle('collapsed', sidebarCollapsed);
     main.classList.toggle('collapsed', sidebarCollapsed);
-    btn.textContent = sidebarCollapsed ? '›' : '‹';
-    btn.title = sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar';
+    if (icon) icon.textContent = sidebarCollapsed ? '›› ' : '‹‹';
+    texts.forEach((t, i) => {
+      if (i === 0) t.textContent = sidebarCollapsed ? 'Expandir' : 'Contraer';
+    });
     localStorage.setItem('lifeos_sidebar_collapsed', sidebarCollapsed);
   }
 
