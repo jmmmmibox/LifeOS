@@ -68,29 +68,39 @@
     /* Sidebar contraída */
     .sidebar.collapsed {
       width: 56px;
+      overflow: hidden;
     }
 
     .sidebar.collapsed .logo-text,
     .sidebar.collapsed .logo-sub,
     .sidebar.collapsed .nav-label,
-    .sidebar.collapsed .nav-item span:not(.nav-icon),
     .sidebar.collapsed .sidebar-bottom-text {
       display: none;
     }
 
+    /* Ocultar texto de nav items — solo mostrar icono */
     .sidebar.collapsed .nav-item {
       justify-content: center;
-      padding: 10px;
+      padding: 10px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* Ocultar cualquier texto dentro del nav-item que no sea el icono */
+    .sidebar.collapsed .nav-item > *:not(.nav-icon) {
+      display: none;
     }
 
     .sidebar.collapsed .nav-icon {
-      width: auto;
+      width: 56px;
+      text-align: center;
       font-size: 18px;
       opacity: 1;
+      flex-shrink: 0;
     }
 
     .sidebar.collapsed .sidebar-logo {
-      padding: 18px 12px;
+      padding: 18px 0;
       justify-content: center;
     }
 
@@ -99,15 +109,13 @@
     }
 
     .sidebar.collapsed .sidebar-bottom {
-      padding: 12px 4px;
+      padding: 12px 0;
       align-items: center;
     }
 
     .sidebar.collapsed .sidebar-bottom .nav-item {
       justify-content: center;
     }
-
-    /* Botón toggle — integrado en sidebar bottom, no flotante */
 
     /* Main ajusta margen */
     .main {
@@ -1571,6 +1579,13 @@
             <span class="nav-icon">◆</span> Finanzas
           </button>
         </div>
+
+        <div class="nav-section">
+          <div class="nav-label">Personal</div>
+          <button class="nav-item" onclick="navigate('quotes')">
+            <span class="nav-icon">❝</span> Frases
+          </button>
+        </div>
       </nav>
 
       <div class="sidebar-bottom">
@@ -1607,6 +1622,12 @@
             <p id="greetingSubtitle">Aquí tienes tu día</p>
           </div>
 
+          <!-- Frase del día -->
+          <div id="dashQuoteWidget" style="margin-bottom:20px;padding:16px 20px;background:var(--accent-soft);border-radius:var(--radius);border-left:3px solid var(--accent);display:none">
+            <div style="font-size:13px;color:var(--accent-text);font-style:italic;line-height:1.6" id="dashQuoteText"></div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:6px" id="dashQuoteAuthor"></div>
+          </div>
+
           <div class="dashboard-grid">
 
             <!-- Hábitos hoy -->
@@ -1629,7 +1650,7 @@
                 Tareas de hoy
                 <button class="btn btn-ghost btn-sm" onclick="navigate('tasks')">Ver todas</button>
               </div>
-              <div class="task-list" id="dashTasksList">
+              <div id="dashTasksList">
                 <div class="empty-state">
                   <div class="empty-icon">✓</div>
                   <p>Sin tareas pendientes</p>
@@ -1664,11 +1685,11 @@
             <button class="btn btn-primary" onclick="openModal('habitModal')">+ Nuevo habito</button>
           </div>
           <div class="habits-tabs">
-            <button class="habits-tab active" onclick="switchHabitsTab('hoy')">Hoy</button>
-            <button class="habits-tab" onclick="switchHabitsTab('calendario')">Calendario</button>
+            <button class="habits-tab" onclick="switchHabitsTab('hoy')">Hoy</button>
+            <button class="habits-tab active" onclick="switchHabitsTab('calendario')">Calendario</button>
             <button class="habits-tab" onclick="switchHabitsTab('estadisticas')">Estadisticas</button>
           </div>
-          <div id="habitsTabHoy">
+          <div id="habitsTabHoy" style="display:none">
             <div id="habitsPageContent">
               <div class="empty-state" style="padding:60px">
                 <div class="empty-icon">+</div>
@@ -1677,7 +1698,7 @@
               </div>
             </div>
           </div>
-          <div id="habitsTabCalendario" style="display:none">
+          <div id="habitsTabCalendario">
             <div class="card" style="overflow-x:auto">
               <div class="cal-header">
                 <span class="cal-month" id="calMonthLabel"></span>
@@ -1788,8 +1809,9 @@
           <!-- Filtros -->
           <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
             <input type="text" id="booksSearch" class="form-input" placeholder="Buscar título, autor, género..." style="flex:1;min-width:180px" oninput="filterBooks()">
-            <select id="booksStatusFilter" class="form-select" style="width:150px" onchange="filterBooks()">
+            <select id="booksStatusFilter" class="form-select" style="width:160px" onchange="filterBooks()">
               <option value="">Todos los estados</option>
+              <option value="next">Próximas lecturas</option>
               <option value="to_read">Por leer</option>
               <option value="reading">Leyendo</option>
               <option value="done">Leídos</option>
@@ -2059,6 +2081,27 @@
           </div>
 
         </div><!-- end page-finances -->
+
+        <!-- FRASES -->
+        <div class="page" id="page-quotes">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Frases</h2>
+              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Tu colección de inspiración</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('quoteModal')">+ Nueva frase</button>
+          </div>
+          <div style="margin-bottom:18px">
+            <input type="text" id="quotesSearch" class="form-input" placeholder="Buscar por texto o autor..." oninput="filterQuotes()">
+          </div>
+          <div id="quotesPageContent">
+            <div class="empty-state" style="padding:60px">
+              <div class="empty-icon">❝</div>
+              <p>Aún no tienes frases guardadas</p>
+              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('quoteModal')">Añadir primera frase</button>
+            </div>
+          </div>
+        </div>
 
       </div><!-- page-content -->
     </main>
@@ -2524,6 +2567,7 @@
       <div class="form-group">
         <label class="form-label">Estado</label>
         <select id="bookStatus" class="form-select">
+          <option value="next">Próxima lectura</option>
           <option value="to_read">Por leer</option>
           <option value="reading">Leyendo</option>
           <option value="done">Leído</option>
@@ -2598,6 +2642,33 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('transactionModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveTransaction()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Frase -->
+<div class="modal-overlay" id="quoteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="quoteModalTitle">Nueva frase</span>
+      <button class="modal-close" onclick="closeQuoteModal()">×</button>
+    </div>
+    <input type="hidden" id="quoteEditId">
+    <div class="form-group">
+      <label class="form-label">Frase</label>
+      <textarea id="quoteText" class="form-textarea" style="min-height:100px" placeholder="Escribe la frase..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Autor (opcional)</label>
+      <input type="text" id="quoteAuthor" class="form-input" placeholder="Nombre del autor">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría (opcional)</label>
+      <input type="text" id="quoteCategory" class="form-input" placeholder="Motivación, Filosofía, Negocios...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeQuoteModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveQuote()">Guardar</button>
     </div>
   </div>
 </div>
@@ -2707,7 +2778,8 @@
     goals: 'Objetivos',
     notes: 'Notas',
     books: 'Lectura',
-    finances: 'Finanzas'
+    finances: 'Finanzas',
+    quotes: 'Frases'
   };
 
   function navigate(page) {
@@ -2724,13 +2796,14 @@
     closeSidebar();
 
     if (page === 'dashboard') loadDashboard();
-    if (page === 'habits') loadHabitsPage();
+    if (page === 'habits') loadHabitsPage(); renderHabitsCalendar();
     if (page === 'tasks') loadTasksPage();
     if (page === 'journal') loadJournalPage();
     if (page === 'goals') loadGoalsPage();
     if (page === 'notes') loadNotesPage();
     if (page === 'books') loadBooksPage();
     if (page === 'finances') loadFinancesPage();
+    if (page === 'quotes') loadQuotesPage();
   }
 
   // =============================================
@@ -2964,8 +3037,115 @@
     await Promise.all([
       loadDashHabits(),
       loadDashTasks(),
-      loadDashBook()
+      loadDashBook(),
+      loadDashQuote()
     ]);
+  }
+
+  async function loadDashQuote() {
+    const { data } = await sb.from('quotes').select('*').eq('user_id', currentUser.id);
+    if (!data?.length) return;
+    // Frase del día basada en el día del año para que sea consistente
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const q = data[dayOfYear % data.length];
+    const widget = document.getElementById('dashQuoteWidget');
+    document.getElementById('dashQuoteText').textContent = `❝ ${q.text} ❞`;
+    document.getElementById('dashQuoteAuthor').textContent = q.author ? `— ${q.author}` : '';
+    widget.style.display = 'block';
+  }
+
+  // FRASES — lógica completa
+  let allQuotes = [];
+
+  async function loadQuotesPage() {
+    const { data } = await sb.from('quotes').select('*')
+      .eq('user_id', currentUser.id).order('created_at', { ascending: false });
+    allQuotes = data || [];
+    filterQuotes();
+  }
+
+  function filterQuotes() {
+    const search = document.getElementById('quotesSearch')?.value.toLowerCase().trim() || '';
+    const filtered = search
+      ? allQuotes.filter(q => (q.text||'').toLowerCase().includes(search) || (q.author||'').toLowerCase().includes(search) || (q.category||'').toLowerCase().includes(search))
+      : allQuotes;
+    renderQuotes(filtered, search);
+  }
+
+  function renderQuotes(quotes, search='') {
+    const el = document.getElementById('quotesPageContent');
+    if (!quotes.length) {
+      el.innerHTML = allQuotes.length
+        ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">❝</div><p>Sin resultados para "${search}"</p></div>`
+        : `<div class="empty-state" style="padding:60px"><div class="empty-icon">❝</div><p>Sin frases guardadas</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('quoteModal')">Añadir primera frase</button></div>`;
+      return;
+    }
+
+    el.innerHTML = `
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px">${quotes.length} frase${quotes.length !== 1 ? 's' : ''}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">` +
+      quotes.map(q => {
+        const qJson = JSON.stringify(q).replace(/"/g, '&quot;');
+        return `
+        <div class="card" style="border-left:3px solid var(--accent)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+            ${q.category ? `<span class="badge badge-accent" style="font-size:10px">${q.category}</span>` : '<span></span>'}
+            <div style="display:flex;gap:4px">
+              <button class="icon-btn" onclick="openEditQuote(JSON.parse(this.dataset.q))" data-q="${qJson}">✎</button>
+              <button class="icon-btn danger" onclick="deleteQuote('${q.id}')">🗑</button>
+            </div>
+          </div>
+          <div style="font-size:14px;color:var(--text);line-height:1.6;font-style:italic;margin-bottom:10px">❝ ${q.text} ❞</div>
+          ${q.author ? `<div style="font-size:12px;color:var(--text-3);font-weight:500">— ${q.author}</div>` : ''}
+        </div>`;
+      }).join('') + `</div>`;
+  }
+
+  async function saveQuote() {
+    const text = document.getElementById('quoteText').value.trim();
+    if (!text) return showToast('Escribe una frase');
+    const author   = document.getElementById('quoteAuthor').value.trim();
+    const category = document.getElementById('quoteCategory').value.trim();
+    const editId   = document.getElementById('quoteEditId').value;
+
+    if (editId) {
+      const { error } = await sb.from('quotes').update({ text, author, category }).eq('id', editId);
+      if (error) return showToast('Error al guardar');
+      showToast('Frase actualizada ✓');
+    } else {
+      const { error } = await sb.from('quotes').insert({ user_id: currentUser.id, text, author, category });
+      if (error) return showToast('Error al guardar');
+      showToast('Frase guardada ✓');
+    }
+    closeQuoteModal();
+    loadQuotesPage();
+    loadDashQuote();
+  }
+
+  function openEditQuote(q) {
+    document.getElementById('quoteEditId').value = q.id;
+    document.getElementById('quoteText').value = q.text || '';
+    document.getElementById('quoteAuthor').value = q.author || '';
+    document.getElementById('quoteCategory').value = q.category || '';
+    document.getElementById('quoteModalTitle').textContent = 'Editar frase';
+    openModal('quoteModal');
+  }
+
+  function closeQuoteModal() {
+    closeModal('quoteModal');
+    document.getElementById('quoteEditId').value = '';
+    document.getElementById('quoteText').value = '';
+    document.getElementById('quoteAuthor').value = '';
+    document.getElementById('quoteCategory').value = '';
+    document.getElementById('quoteModalTitle').textContent = 'Nueva frase';
+  }
+
+  async function deleteQuote(id) {
+    if (!confirm('¿Eliminar esta frase?')) return;
+    await sb.from('quotes').delete().eq('id', id);
+    showToast('Frase eliminada');
+    loadQuotesPage();
+    loadDashQuote();
   }
 
   async function loadDashHabits() {
@@ -3003,33 +3183,32 @@
 
   async function loadDashTasks() {
     const { data: tasks } = await sb.from('tasks').select('*')
-      .eq('user_id', currentUser.id)
-      .eq('status', 'pending')
-      .lte('due_date', todayStr())
-      .order('priority', { ascending: false })
-      .limit(5);
-
-    // También tareas sin fecha pero de hoy
+      .eq('user_id', currentUser.id).eq('status', 'pending')
+      .lte('due_date', todayStr()).order('priority', { ascending: false }).limit(5);
     const { data: tasks2 } = await sb.from('tasks').select('*')
-      .eq('user_id', currentUser.id)
-      .eq('status', 'pending')
-      .is('due_date', null)
-      .order('created_at', { ascending: false })
-      .limit(3);
+      .eq('user_id', currentUser.id).eq('status', 'pending')
+      .is('due_date', null).order('created_at', { ascending: false }).limit(3);
 
     const all = [...(tasks || []), ...(tasks2 || [])].slice(0, 5);
+    const el = document.getElementById('dashTasksList');
 
     if (!all.length) {
-      document.getElementById('dashTasksList').innerHTML = `<div class="empty-state"><div class="empty-icon">✓</div><p>Todo al día</p></div>`;
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">✓</div><p>Todo al día</p></div>`;
       return;
     }
 
-    document.getElementById('dashTasksList').innerHTML = all.map(t => `
-      <div class="task-item" onclick="toggleTaskDash('${t.id}')">
-        <div class="task-check"></div>
-        <span class="task-title">${t.title}</span>
-        <div class="task-priority priority-${t.priority}"></div>
-      </div>`).join('');
+    const pColors = { high:'#ef4444', medium:'#f59e0b', low:'#10b981' };
+    const pBg     = { high:'#fef2f2', medium:'#fffbeb', low:'#ecfdf5' };
+
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px">` +
+      all.map(t => {
+        const c = pColors[t.priority] || '#6b6b6b';
+        const bg = pBg[t.priority] || '#f8f8f6';
+        return `<div style="background:${bg};border:1px solid ${c}30;border-left:3px solid ${c};border-radius:var(--radius-sm);padding:8px 10px;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="toggleTaskDash('${t.id}')">
+          <div style="width:16px;height:16px;border-radius:3px;border:2px solid ${c};flex-shrink:0"></div>
+          <span style="font-size:13px;font-weight:500;color:var(--text);flex:1">${t.title}</span>
+        </div>`;
+      }).join('') + `</div>`;
   }
 
   async function toggleTaskDash(id) {
@@ -3050,13 +3229,14 @@
     const b = data[0];
     const pct = b.total_pages ? Math.round((b.current_page / b.total_pages) * 100) : 0;
     el.innerHTML = `
-      <div class="book-widget">
+      <div class="book-widget" style="cursor:pointer" onclick="${b.drive_url ? `window.open('${b.drive_url}','_blank')` : `navigate('books')`}">
         <div class="book-cover">📖</div>
         <div class="book-info">
           <div class="book-title-text">${b.title}</div>
           <div class="book-author">${b.author || ''}</div>
-          <div class="progress-bar"><div class="progress-fill green" style="width:${pct}%"></div></div>
-          <div class="book-pages">${b.current_page || 0} / ${b.total_pages || '?'} páginas · ${pct}%</div>
+          <div class="progress-bar" style="margin-top:8px"><div class="progress-fill green" style="width:${pct}%"></div></div>
+          <div class="book-pages">${b.current_page || 0} / ${b.total_pages || '?'} págs · ${pct}%</div>
+          ${b.drive_url ? `<div style="font-size:11px;color:var(--accent);margin-top:6px">📂 Pulsa para leer →</div>` : ''}
         </div>
       </div>`;
   }
@@ -3213,7 +3393,7 @@
   }
 
   // ---- TABS DE HABITOS ----
-  let currentHabitsTab = 'hoy';
+  let currentHabitsTab = 'calendario';
 
   function switchHabitsTab(tab) {
     currentHabitsTab = tab;
@@ -3997,12 +4177,12 @@
       return;
     }
 
-    const statusColors = { reading: '#4f46e5', to_read: '#f59e0b', done: '#10b981' };
-    const statusLabels = { reading: 'Leyendo', to_read: 'Por leer', done: 'Leído' };
-    const statusBg     = { reading: '#eef2ff', to_read: '#fffbeb', done: '#ecfdf5' };
+    const statusColors = { reading: '#4f46e5', next: '#8b5cf6', to_read: '#f59e0b', done: '#10b981' };
+    const statusLabels = { reading: 'Leyendo', next: 'Próximas lecturas', to_read: 'Por leer', done: 'Leído' };
+    const statusBg     = { reading: '#eef2ff', next: '#f5f3ff', to_read: '#fffbeb', done: '#ecfdf5' };
 
     // Agrupar por estado: leyendo primero
-    const order = ['reading', 'to_read', 'done'];
+    const order = ['reading', 'next', 'to_read', 'done'];
     const groups = {};
     order.forEach(s => groups[s] = []);
     books.forEach(b => groups[b.status]?.push(b));
