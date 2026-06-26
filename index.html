@@ -4549,7 +4549,7 @@
     if (!uid) return;
     try {
       const [ig, subs, pres, port, segs, sums, tels] = await Promise.all([
-        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${y}-${m}-31`),
+        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${lastDayOfMonth(parseInt(y), parseInt(m))}`),
         fnDbGet('suscripciones', `user_id=eq.${uid}&activa=eq.true`),
         fnDbGet('prestamos', `user_id=eq.${uid}`),
         fnDbGet('portfolio', `user_id=eq.${uid}`),
@@ -4602,7 +4602,7 @@
     const anio = document.getElementById('fn-ig-anio').value;
     const tipo = document.getElementById('fn-ig-tipo').value;
     let qs = `user_id=eq.${uid}`;
-    if (mes && anio) qs += `&fecha=gte.${anio}-${mes}-01&fecha=lte.${anio}-${mes}-31`;
+    if (mes && anio) qs += `&fecha=gte.${anio}-${mes}-01&fecha=lte.${lastDayOfMonth(parseInt(anio), parseInt(mes))}`;
     else if (anio) qs += `&fecha=gte.${anio}-01-01&fecha=lte.${anio}-12-31`;
     if (tipo) qs += `&tipo=eq.${tipo}`;
     try {
@@ -4975,7 +4975,7 @@
     const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
     try {
       const [rowsM, rowsY] = await Promise.all([
-        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${y}-${m}-31&tipo=eq.gasto`),
+        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${lastDayOfMonth(parseInt(y), parseInt(m))}&tipo=eq.gasto`),
         fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-01-01&fecha=lte.${y}-12-31&tipo=eq.gasto`)
       ]);
       // Mensual
