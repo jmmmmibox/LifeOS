@@ -74,33 +74,26 @@
     .sidebar.collapsed .logo-text,
     .sidebar.collapsed .logo-sub,
     .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .nav-text,
     .sidebar.collapsed .sidebar-bottom-text {
-      display: none;
+      display: none !important;
     }
 
-    /* Ocultar texto de nav items — solo mostrar icono */
     .sidebar.collapsed .nav-item {
       justify-content: center;
       padding: 10px 0;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    /* Ocultar cualquier texto dentro del nav-item que no sea el icono */
-    .sidebar.collapsed .nav-item > *:not(.nav-icon) {
-      display: none;
     }
 
     .sidebar.collapsed .nav-icon {
       width: 56px;
       text-align: center;
-      font-size: 18px;
-      opacity: 1;
+      font-size: 20px;
+      margin: 0;
       flex-shrink: 0;
     }
 
     .sidebar.collapsed .sidebar-logo {
-      padding: 18px 0;
+      padding: 16px 0;
       justify-content: center;
     }
 
@@ -109,13 +102,13 @@
     }
 
     .sidebar.collapsed .sidebar-bottom {
-      padding: 12px 0;
-      align-items: center;
+      padding: 8px 0;
     }
 
     .sidebar.collapsed .sidebar-bottom .nav-item {
       justify-content: center;
     }
+
 
     /* Main ajusta margen */
     .main {
@@ -1543,58 +1536,58 @@
         <div class="nav-section">
           <div class="nav-label">Principal</div>
           <button class="nav-item active" onclick="navigate('dashboard')">
-            <span class="nav-icon">⊞</span> Dashboard
+            <span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span>
           </button>
         </div>
 
         <div class="nav-section">
           <div class="nav-label">Diario</div>
           <button class="nav-item" onclick="navigate('habits')">
-            <span class="nav-icon">✦</span> Hábitos
+            <span class="nav-icon">🔥</span><span class="nav-text">Hábitos</span>
           </button>
           <button class="nav-item" onclick="navigate('tasks')">
-            <span class="nav-icon">✓</span> Tareas
+            <span class="nav-icon">✅</span><span class="nav-text">Tareas</span>
           </button>
           <button class="nav-item" onclick="navigate('journal')">
-            <span class="nav-icon">◎</span> Journal
+            <span class="nav-icon">📓</span><span class="nav-text">Journal</span>
           </button>
         </div>
 
         <div class="nav-section">
           <div class="nav-label">Crecimiento</div>
           <button class="nav-item" onclick="navigate('goals')">
-            <span class="nav-icon">◈</span> Objetivos
+            <span class="nav-icon">🎯</span><span class="nav-text">Objetivos</span>
           </button>
           <button class="nav-item" onclick="navigate('notes')">
-            <span class="nav-icon">◻</span> Notas
+            <span class="nav-icon">💡</span><span class="nav-text">Notas</span>
           </button>
           <button class="nav-item" onclick="navigate('books')">
-            <span class="nav-icon">▣</span> Lectura
+            <span class="nav-icon">📚</span><span class="nav-text">Lectura</span>
           </button>
         </div>
 
         <div class="nav-section">
           <div class="nav-label">Finanzas</div>
           <button class="nav-item" onclick="navigate('finances')">
-            <span class="nav-icon">◆</span> Finanzas
+            <span class="nav-icon">💰</span><span class="nav-text">Finanzas</span>
           </button>
         </div>
 
         <div class="nav-section">
           <div class="nav-label">Personal</div>
           <button class="nav-item" onclick="navigate('quotes')">
-            <span class="nav-icon">❝</span> Frases
+            <span class="nav-icon">✨</span><span class="nav-text">Frases</span>
           </button>
         </div>
       </nav>
 
       <div class="sidebar-bottom">
         <button class="nav-item" onclick="toggleSidebarCollapse()" id="sidebarToggleBtn" style="width:100%">
-          <span class="nav-icon" style="opacity:1" id="sidebarToggleIcon">‹‹</span>
+          <span class="nav-icon" id="sidebarToggleIcon">◀◀</span>
           <span class="sidebar-bottom-text">Contraer</span>
         </button>
         <button class="nav-item" onclick="handleLogout()" style="color:var(--red);width:100%">
-          <span class="nav-icon" style="opacity:1">⏻</span>
+          <span class="nav-icon">🚪</span>
           <span class="sidebar-bottom-text">Cerrar sesión</span>
         </button>
       </div>
