@@ -4169,7 +4169,6 @@
     // Solo arrancamos el dashboard de finanzas
     fnLoadDash();
   }
-  }
 
   // =============================================
   // FINANZAS — lógica completa integrada
@@ -4806,9 +4805,7 @@
   }
 
   // Cerrar modales finanzas al hacer click fuera
-  document.querySelectorAll('[id^="fn-modal-"]').forEach(m=>{
-    m.addEventListener('click', e => { if(e.target===m) fnCloseModal(m.id); });
-  });
+  // (se inicializa en init() cuando el DOM ya existe)
 
   // =============================================
   // START
