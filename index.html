@@ -856,8 +856,107 @@
     .sidebar-overlay.open { display: block; }
 
     /* =============================================
-       HÁBITOS — estilos mejorados
+       FINANZAS
     ============================================= */
+    .fn-tab {
+      padding: 7px 14px;
+      border-radius: 5px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-2);
+      font-family: var(--font);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .fn-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    .fn-tab:hover:not(.active) { color: var(--text); background: var(--border-soft); }
+
+    .fn-filter {
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-2);
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .fn-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .fn-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .fn-val.green { color: var(--green); }
+    .fn-val.red { color: var(--red); }
+    .fn-val.amber { color: var(--amber); }
+
+    .fn-th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .fn-td {
+      padding: 11px 14px;
+      font-size: 13px;
+      color: var(--text-2);
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .fn-empty-td {
+      padding: 32px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    .fn-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .fn-badge-green { background: var(--green-soft); color: var(--green); }
+    .fn-badge-red { background: var(--red-soft); color: var(--red); }
+    .fn-badge-amber { background: var(--amber-soft); color: var(--amber); }
+    .fn-badge-gray { background: var(--border-soft); color: var(--text-2); }
+
+    .fn-progress-wrap { background: var(--border); border-radius: 3px; height: 5px; overflow: hidden; }
+    .fn-progress-bar { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.3s; }
+
+    .fn-payment-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+    .fn-payment-icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+
+    .fn-bud-cat-row { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .fn-bud-cat-row:last-child { margin-bottom:0; }
+    .fn-bud-cat-info { flex:1; min-width:0; }
+    .fn-bud-cat-name { font-size:13px; font-weight:500; margin-bottom:4px; display:flex; justify-content:space-between; }
+    .fn-bud-cat-vals { font-size:11px; color:var(--text-2); margin-top:3px; }
     .habits-layout {
       display: grid;
       grid-template-columns: 320px 1fr;
@@ -1658,21 +1757,255 @@
 
         <!-- FINANZAS -->
         <div class="page" id="page-finances">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-            <div>
-              <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Finanzas</h2>
-              <p style="font-size:13px;color:var(--text-2);margin-top:2px">Control de ingresos y gastos</p>
-            </div>
-            <button class="btn btn-primary" onclick="openModal('transactionModal')">+ Nueva transacción</button>
+          <!-- Subnav finanzas -->
+          <div id="fn-alert" style="padding:10px 14px;border-radius:8px;font-size:13px;display:none;margin-bottom:16px"></div>
+          <div style="display:flex;gap:0;margin-bottom:24px;background:var(--bg);border-radius:var(--radius-sm);padding:4px;width:fit-content;flex-wrap:wrap">
+            <button class="fn-tab active" onclick="fnNav('dashboard',this)">🏠 Dashboard</button>
+            <button class="fn-tab" onclick="fnNav('ingresos',this)">💰 Ingresos/Gastos</button>
+            <button class="fn-tab" onclick="fnNav('suscripciones',this)">🔄 Suscripciones</button>
+            <button class="fn-tab" onclick="fnNav('prestamos',this)">🏦 Préstamos</button>
+            <button class="fn-tab" onclick="fnNav('ahorro',this)">🎯 Ahorro</button>
+            <button class="fn-tab" onclick="fnNav('presupuesto',this)">📊 Presupuesto</button>
+            <button class="fn-tab" onclick="fnNav('seguros',this)">🛡️ Seguros</button>
+            <button class="fn-tab" onclick="fnNav('suministros',this)">⚡ Suministros</button>
+            <button class="fn-tab" onclick="fnNav('telecom',this)">📱 Telecom</button>
+            <button class="fn-tab" onclick="fnNav('portfolio',this)">📈 Portfolio</button>
           </div>
-          <div id="financesPageContent">
-            <div class="empty-state" style="padding:60px">
-              <div class="empty-icon">◆</div>
-              <p>Sin transacciones este mes</p>
-              <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('transactionModal')">Añadir transacción</button>
+
+          <!-- DASHBOARD -->
+          <div id="fn-sec-dashboard">
+            <div style="margin-bottom:12px;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em">Resumen del mes actual</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos mes</div><div class="fn-val green" id="fn-dash-ingresos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Este mes</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos mes</div><div class="fn-val red" id="fn-dash-gastos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Este mes</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Balance mes</div><div class="fn-val" id="fn-dash-balance">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Ingresos − Gastos</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos fijos</div><div class="fn-val amber" id="fn-dash-fijos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Suscripciones + préstamos</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Portfolio</div><div class="fn-val" id="fn-dash-portfolio">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Valor actual</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-dash-rent">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Vs precio medio</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Seguros</div><div class="fn-val" id="fn-dash-seguros">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Pólizas activas</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Suscripciones/mes</div><div class="fn-val amber" id="fn-dash-subs">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Coste mensual total</div></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Próximos pagos (30 días)</div>
+            <div id="fn-dash-pagos" style="display:flex;flex-direction:column;gap:8px"><div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Cargando...</div></div>
+          </div>
+
+          <!-- INGRESOS/GASTOS -->
+          <div id="fn-sec-ingresos" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <select class="form-select" id="fn-ig-mes" onchange="fnLoadIG()" style="width:140px">
+                  <option value="">Todos los meses</option>
+                  <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+                  <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+                  <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+                <select class="form-select" id="fn-ig-anio" onchange="fnLoadIG()" style="width:110px"><option value="">Todos los años</option></select>
+                <select class="form-select" id="fn-ig-tipo" onchange="fnLoadIG()" style="width:150px">
+                  <option value="">Ingreso + Gasto</option>
+                  <option value="ingreso">Solo Ingresos</option>
+                  <option value="gasto">Solo Gastos</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-ig')">+ Añadir</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos</div><div class="fn-val green" id="fn-ig-ing">0,00 €</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos</div><div class="fn-val red" id="fn-ig-gas">0,00 €</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Balance</div><div class="fn-val" id="fn-ig-bal">0,00 €</div></div>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06px;white-space:nowrap">Fecha</th>
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Tipo</th>
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Categoría</th>
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Descripción</th>
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Importe</th>
+                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-ig-tbody"><tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-3)">Cargando...</td></tr></tbody>
+              </table>
             </div>
           </div>
-        </div>
+
+          <!-- SEGUROS -->
+          <div id="fn-sec-seguros" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="font-size:16px;font-weight:600">Seguros</h3>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-seguro')">+ Añadir Seguro</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Nombre</th><th class="fn-th">Compañía</th><th class="fn-th">Cobertura</th>
+                  <th class="fn-th">Prima anual</th><th class="fn-th">Prima mensual</th><th class="fn-th">Renovación</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-seg-tbody"><tr><td colspan="7" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUMINISTROS -->
+          <div id="fn-sec-suministros" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="fn-filter active" onclick="fnSetSumFiltro('',this)">Todos</button>
+                <button class="fn-filter" onclick="fnSetSumFiltro('luz',this)">⚡ Luz</button>
+                <button class="fn-filter" onclick="fnSetSumFiltro('agua',this)">💧 Agua</button>
+                <button class="fn-filter" onclick="fnSetSumFiltro('gas',this)">🔥 Gas</button>
+                <button class="fn-filter" onclick="fnSetSumFiltro('internet',this)">🌐 Internet</button>
+              </div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-suministro')">+ Añadir</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Tipo</th><th class="fn-th">Compañía</th><th class="fn-th">Importe</th>
+                  <th class="fn-th">Fecha factura</th><th class="fn-th">Vencimiento</th><th class="fn-th">Notas</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-sum-tbody"><tr><td colspan="7" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TELECOM -->
+          <div id="fn-sec-telecom" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="font-size:16px;font-weight:600">Telecom / Móvil</h3>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-telecom')">+ Añadir</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Operador</th><th class="fn-th">Tarifa</th><th class="fn-th">Coste/mes</th>
+                  <th class="fn-th">Renovación</th><th class="fn-th">Notas</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-tel-tbody"><tr><td colspan="6" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUSCRIPCIONES -->
+          <div id="fn-sec-suscripciones" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <div class="card" style="padding:12px 16px;display:inline-block">
+                <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Total mensual</div>
+                <div class="fn-val amber" id="fn-sub-total">0,00 €</div>
+              </div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-sub')">+ Añadir</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Servicio</th><th class="fn-th">Coste</th><th class="fn-th">Frecuencia</th>
+                  <th class="fn-th">Próximo cobro</th><th class="fn-th">Estado</th><th class="fn-th">Notas</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-sub-tbody"><tr><td colspan="7" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PRÉSTAMOS -->
+          <div id="fn-sec-prestamos" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+              <div id="fn-pre-cards" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-pre')">+ Añadir</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Nombre</th><th class="fn-th">Capital inicial</th><th class="fn-th">Pendiente</th>
+                  <th class="fn-th">Cuota/mes</th><th class="fn-th">Interés</th><th class="fn-th">Fin</th><th class="fn-th">Progreso</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-pre-tbody"><tr><td colspan="8" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- AHORRO -->
+          <div id="fn-sec-ahorro" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="font-size:16px;font-weight:600">Objetivos de Ahorro</h3>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-aho')">+ Añadir Objetivo</button>
+            </div>
+            <div id="fn-aho-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
+          </div>
+
+          <!-- PORTFOLIO -->
+          <div id="fn-sec-portfolio" style="display:none">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Valor actual</div><div class="fn-val green" id="fn-port-val">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Coste total</div><div class="fn-val" id="fn-port-cos">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ganancia/Pérdida</div><div class="fn-val" id="fn-port-gan">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-port-ren">—</div></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-port')">+ Añadir Activo</button>
+            </div>
+            <div class="card" style="overflow-x:auto;padding:0">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th class="fn-th">Ticker</th><th class="fn-th">Nombre</th><th class="fn-th">Tipo</th>
+                  <th class="fn-th">Participaciones</th><th class="fn-th">P.Medio</th><th class="fn-th">P.Actual</th>
+                  <th class="fn-th">Valor</th><th class="fn-th">+/− €</th><th class="fn-th">+/− %</th><th class="fn-th">Acciones</th>
+                </tr></thead>
+                <tbody id="fn-port-tbody"><tr><td colspan="10" class="fn-empty-td">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PRESUPUESTO -->
+          <div id="fn-sec-presupuesto" style="display:none">
+            <div style="display:flex;gap:8px;margin-bottom:20px">
+              <button class="btn btn-primary" id="fn-btn-bud-mes" onclick="fnSetBudTab('mes')">Mensual</button>
+              <button class="btn btn-ghost" id="fn-btn-bud-anio" onclick="fnSetBudTab('anio')">Anual</button>
+            </div>
+            <div id="fn-bud-panel-mes">
+              <div class="card" style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                  <div>
+                    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Límite mensual total</div>
+                    <div style="font-size:22px;font-weight:700;color:var(--text)" id="fn-bud-mes-limit">No definido</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="fnOpenBudModal('mes')">Editar límites</button>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+                  <span style="color:var(--text-2)">Gastado: <strong id="fn-bud-mes-gastado" style="color:var(--text)">—</strong></span>
+                  <span id="fn-bud-mes-pct" style="font-weight:600">—</span>
+                </div>
+                <div class="progress-bar" style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+                  <div id="fn-bud-mes-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width .3s"></div>
+                </div>
+                <div style="font-size:12px;color:var(--text-3);margin-top:6px" id="fn-bud-mes-resto">—</div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Por categoría</div>
+              <div class="card" id="fn-bud-mes-cats" style="padding:16px"><div style="color:var(--text-3);font-size:13px">Cargando...</div></div>
+            </div>
+            <div id="fn-bud-panel-anio" style="display:none">
+              <div class="card" style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                  <div>
+                    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Límite anual total</div>
+                    <div style="font-size:22px;font-weight:700;color:var(--text)" id="fn-bud-anio-limit">No definido</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="fnOpenBudModal('anio')">Editar límites</button>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+                  <span style="color:var(--text-2)">Gastado: <strong id="fn-bud-anio-gastado" style="color:var(--text)">—</strong></span>
+                  <span id="fn-bud-anio-pct" style="font-weight:600">—</span>
+                </div>
+                <div class="progress-bar" style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+                  <div id="fn-bud-anio-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width .3s"></div>
+                </div>
+                <div style="font-size:12px;color:var(--text-3);margin-top:6px" id="fn-bud-anio-resto">—</div>
+              </div>
+              <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Por categoría</div>
+              <div class="card" id="fn-bud-anio-cats" style="padding:16px"><div style="color:var(--text-3);font-size:13px">Cargando...</div></div>
+            </div>
+          </div>
+
+        </div><!-- end page-finances -->
 
       </div><!-- page-content -->
     </main>
@@ -1703,6 +2036,204 @@
       <span class="m-icon">◈</span>
       <span class="m-label">Metas</span>
     </button>
+  </div>
+</div>
+
+<!-- ===== MODALES FINANZAS ===== -->
+<!-- Modal Ingreso/Gasto -->
+<div class="modal-overlay" id="fn-modal-ig">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-ig-t">Añadir movimiento</span><button class="modal-close" onclick="fnCloseModal('fn-modal-ig')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tipo</label><select id="fn-f-ig-tipo" class="form-select"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select></div>
+      <div class="form-group"><label class="form-label">Fecha</label><input type="date" id="fn-f-ig-fecha" class="form-input"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Categoría</label>
+        <select id="fn-f-ig-cat" class="form-select">
+          <option>Salario</option><option>Negocio</option><option>Inversiones</option><option>Alimentación</option>
+          <option>Transporte</option><option>Ocio</option><option>Salud</option><option>Educación</option>
+          <option>Hogar</option><option>Ropa</option><option>Restaurantes</option><option>Otros</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Importe (€)</label><input type="number" id="fn-f-ig-imp" class="form-input" placeholder="0.00" step="0.01"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Descripción</label><input type="text" id="fn-f-ig-des" class="form-input" placeholder="Descripción del movimiento"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-ig')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveIG()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Seguro -->
+<div class="modal-overlay" id="fn-modal-seguro">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-seg-t">Añadir Seguro</span><button class="modal-close" onclick="fnCloseModal('fn-modal-seguro')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-seg-nom" class="form-input" placeholder="Seguro del coche"></div>
+      <div class="form-group"><label class="form-label">Compañía</label><input type="text" id="fn-f-seg-com" class="form-input" placeholder="Mapfre, AXA..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Prima anual (€)</label><input type="number" id="fn-f-seg-pa" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Prima mensual (€)</label><input type="number" id="fn-f-seg-pm" class="form-input" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha renovación</label><input type="date" id="fn-f-seg-ren" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Cobertura</label><input type="text" id="fn-f-seg-cob" class="form-input" placeholder="Todo riesgo..."></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-seg-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-seguro')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveSeguro()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Suministro -->
+<div class="modal-overlay" id="fn-modal-suministro">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-sum-t">Añadir Suministro</span><button class="modal-close" onclick="fnCloseModal('fn-modal-suministro')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tipo</label><select id="fn-f-sum-tip" class="form-select"><option value="luz">⚡ Luz</option><option value="agua">💧 Agua</option><option value="gas">🔥 Gas</option><option value="internet">🌐 Internet</option><option value="otro">Otro</option></select></div>
+      <div class="form-group"><label class="form-label">Compañía</label><input type="text" id="fn-f-sum-com" class="form-input" placeholder="Endesa, Iberdrola..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Importe (€)</label><input type="number" id="fn-f-sum-imp" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Fecha factura</label><input type="date" id="fn-f-sum-fec" class="form-input"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha vencimiento</label><input type="date" id="fn-f-sum-ven" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sum-not" class="form-input" placeholder="Notas..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-suministro')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveSuministro()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Telecom -->
+<div class="modal-overlay" id="fn-modal-telecom">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-tel-t">Añadir Telecom</span><button class="modal-close" onclick="fnCloseModal('fn-modal-telecom')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Operador</label><input type="text" id="fn-f-tel-op" class="form-input" placeholder="Movistar, Vodafone..."></div>
+      <div class="form-group"><label class="form-label">Tarifa</label><input type="text" id="fn-f-tel-tar" class="form-input" placeholder="Fibra 600 + móvil"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Coste mensual (€)</label><input type="number" id="fn-f-tel-cos" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Fecha renovación</label><input type="date" id="fn-f-tel-ren" class="form-input"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-tel-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-telecom')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveTelecom()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Suscripción -->
+<div class="modal-overlay" id="fn-modal-sub">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-sub-t">Añadir Suscripción</span><button class="modal-close" onclick="fnCloseModal('fn-modal-sub')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Servicio</label><input type="text" id="fn-f-sub-nom" class="form-input" placeholder="Netflix, Spotify..."></div>
+      <div class="form-group"><label class="form-label">Coste (€)</label><input type="number" id="fn-f-sub-cos" class="form-input" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Frecuencia</label><select id="fn-f-sub-fre" class="form-select"><option value="mensual">Mensual</option><option value="anual">Anual</option><option value="trimestral">Trimestral</option></select></div>
+      <div class="form-group"><label class="form-label">Próximo cobro</label><input type="date" id="fn-f-sub-fec" class="form-input"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Estado</label><select id="fn-f-sub-act" class="form-select"><option value="true">Activa</option><option value="false">Inactiva</option></select></div>
+      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sub-not" class="form-input" placeholder="Notas..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-sub')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveSub()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Préstamo -->
+<div class="modal-overlay" id="fn-modal-pre">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-pre-t">Añadir Préstamo</span><button class="modal-close" onclick="fnCloseModal('fn-modal-pre')">×</button></div>
+    <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-pre-nom" class="form-input" placeholder="Hipoteca, coche..."></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Capital inicial (€)</label><input type="number" id="fn-f-pre-ci" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Capital pendiente (€)</label><input type="number" id="fn-f-pre-cp" class="form-input" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Cuota mensual (€)</label><input type="number" id="fn-f-pre-cuo" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Tipo interés (%)</label><input type="number" id="fn-f-pre-int" class="form-input" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha inicio</label><input type="date" id="fn-f-pre-ini" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Fecha fin</label><input type="date" id="fn-f-pre-fin" class="form-input"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-pre-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-pre')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSavePre()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ahorro -->
+<div class="modal-overlay" id="fn-modal-aho">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-aho-t">Añadir Objetivo de Ahorro</span><button class="modal-close" onclick="fnCloseModal('fn-modal-aho')">×</button></div>
+    <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-aho-nom" class="form-input" placeholder="Vacaciones, coche nuevo..."></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Meta (€)</label><input type="number" id="fn-f-aho-met" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Ahorrado hasta ahora (€)</label><input type="number" id="fn-f-aho-act" class="form-input" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha objetivo</label><input type="date" id="fn-f-aho-fec" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-aho-not" class="form-input" placeholder="Notas..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-aho')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveAho()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Portfolio -->
+<div class="modal-overlay" id="fn-modal-port">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-port-t">Añadir Activo</span><button class="modal-close" onclick="fnCloseModal('fn-modal-port')">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Ticker</label><input type="text" id="fn-f-port-tic" class="form-input" placeholder="AAPL, AMUNDI..."></div>
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-port-nom" class="form-input" placeholder="Apple Inc."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tipo</label><select id="fn-f-port-tip" class="form-select"><option>ETF</option><option>Acción</option><option>Fondo</option><option>Crypto</option><option>Otro</option></select></div>
+      <div class="form-group"><label class="form-label">Participaciones</label><input type="number" id="fn-f-port-par" class="form-input" step="0.0001" placeholder="0.0000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Precio medio (€)</label><input type="number" id="fn-f-port-pm" class="form-input" step="0.0001" placeholder="0.0000"></div>
+      <div class="form-group"><label class="form-label">Precio actual (€)</label><input type="number" id="fn-f-port-pa" class="form-input" step="0.0001" placeholder="0.0000"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-port-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-port')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSavePort()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Presupuesto -->
+<div class="modal-overlay" id="fn-modal-bud">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-bud-title">Límites de presupuesto</span><button class="modal-close" onclick="fnCloseModal('fn-modal-bud')">×</button></div>
+    <div id="fn-modal-bud-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-bud')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveBudget()">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -3634,46 +4165,650 @@
   }
 
   async function loadFinancesPage() {
-    const now = new Date();
-    const y = now.getFullYear(), m = now.getMonth() + 1;
-    const start = `${y}-${String(m).padStart(2,'0')}-01`;
-    const end = lastDayOfMonth(y, m);
-
-    const { data } = await sb.from('transactions').select('*')
-      .eq('user_id', currentUser.id).gte('date', start).lte('date', end)
-      .order('date', { ascending: false });
-
-    const el = document.getElementById('financesPageContent');
-
-    let income = 0, expense = 0;
-    data?.forEach(t => t.type === 'income' ? income += +t.amount : expense += +t.amount);
-
-    if (!data?.length) {
-      el.innerHTML = `<div class="empty-state" style="padding:60px"><div class="empty-icon">◆</div><p>Sin transacciones este mes</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('transactionModal')">Añadir</button></div>`;
-      return;
-    }
-
-    el.innerHTML = `
-      <div class="finance-row" style="margin-bottom:16px">
-        <div class="finance-stat"><div class="finance-stat-label">Ingresos</div><div class="finance-stat-value positive">${income.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
-        <div class="finance-stat"><div class="finance-stat-label">Gastos</div><div class="finance-stat-value negative">${expense.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
-        <div class="finance-stat"><div class="finance-stat-label">Balance</div><div class="finance-stat-value ${income-expense>=0?'positive':'negative'}">${(income-expense).toLocaleString('es-ES',{minimumFractionDigits:2})} €</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Transacciones del mes</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          ${data.map(t => `
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft)">
-              <div style="width:32px;height:32px;border-radius:8px;background:${t.type==='income'?'var(--green-soft)':'var(--red-soft)'};display:flex;align-items:center;justify-content:center;font-size:14px">${t.type==='income'?'↑':'↓'}</div>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:500">${t.description || t.category}</div>
-                <div style="font-size:11px;color:var(--text-3)">${t.category} · ${t.date}</div>
-              </div>
-              <div style="font-size:14px;font-weight:600;color:${t.type==='income'?'var(--green)':'var(--red)'}">${t.type==='income'?'+':'-'}${parseFloat(t.amount).toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
-            </div>`).join('')}
-        </div>
-      </div>`;
+    // La app de finanzas usa su propio sistema fn*
+    // Solo arrancamos el dashboard de finanzas
+    fnLoadDash();
   }
+  }
+
+  // =============================================
+  // FINANZAS — lógica completa integrada
+  // =============================================
+  const FN_URL = 'https://sldhqxsxegtulsyrsjil.supabase.co';
+
+  function fnGetHeaders() {
+    const anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGhxeHN4ZWd0dWxzeXJzamlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNzU4MDQsImV4cCI6MjA5Nzk1MTgwNH0.HIeuyXSYNI0zldxdVonGDBB8lRXlThFIRh0YnCu4a4k';
+    // Intentar obtener el access token de la sesión activa de Supabase
+    let token = anon;
+    try {
+      const raw = Object.entries(localStorage).find(([k]) => k.includes('auth-token'));
+      if (raw) {
+        const parsed = JSON.parse(raw[1]);
+        token = parsed?.access_token || anon;
+      }
+    } catch(e) {}
+    return {
+      'Content-Type': 'application/json',
+      'apikey': anon,
+      'Authorization': 'Bearer ' + token,
+      'Prefer': 'return=representation'
+    };
+  }
+
+  let fnEditId = null;
+  let fnSumFiltro = '';
+  let fnBudTab = 'mes';
+  let fnBudModalType = 'mes';
+
+  const FN_CATS_GASTO = ['Alimentación','Transporte','Ocio','Salud','Educación','Hogar','Ropa','Restaurantes','Otros'];
+  const FN_CAT_ICONS = {Salario:'💼',Negocio:'🏪',Inversiones:'📈',Alimentación:'🛒',Transporte:'🚗',Ocio:'🎮',Salud:'💊',Educación:'📚',Hogar:'🏡',Ropa:'👕',Restaurantes:'🍽️',Otros:'📦'};
+
+  function fnFmt(n) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+  function fnFmtN(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+  function fnFmtD(d) { if(!d) return '—'; const [y,m,dd]=d.split('-'); return `${dd}/${m}/${y}`; }
+  function fnDaysTo(d) { if(!d) return null; return Math.ceil((new Date(d)-new Date())/86400000); }
+  function fnToday() { return new Date().toISOString().split('T')[0]; }
+
+  function fnAlert(msg, type='success') {
+    const el = document.getElementById('fn-alert');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = type === 'success' ? 'var(--green-soft)' : 'var(--red-soft)';
+    el.style.color = type === 'success' ? 'var(--green)' : 'var(--red)';
+    el.style.border = '1px solid ' + (type === 'success' ? 'var(--green)' : 'var(--red)');
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+
+  async function fnDbGet(table, qs='') {
+    const H = fnGetHeaders();
+    const r = await fetch(`${FN_URL}/rest/v1/${table}?${qs}&order=created_at.desc`, {headers:H});
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+
+  async function fnDbPost(table, data) {
+    const H = fnGetHeaders();
+    const r = await fetch(`${FN_URL}/rest/v1/${table}`, {method:'POST', headers:H, body:JSON.stringify(data)});
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+
+  async function fnDbPatch(table, id, data) {
+    const H = fnGetHeaders();
+    const r = await fetch(`${FN_URL}/rest/v1/${table}?id=eq.${id}`, {method:'PATCH', headers:H, body:JSON.stringify(data)});
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+
+  async function fnDbDel(table, id) {
+    const H = fnGetHeaders();
+    const r = await fetch(`${FN_URL}/rest/v1/${table}?id=eq.${id}`, {method:'DELETE', headers:H});
+    if (!r.ok) throw new Error(await r.text());
+  }
+
+  function fnNav(name, el) {
+    document.querySelectorAll('[id^="fn-sec-"]').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.fn-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('fn-sec-' + name).style.display = 'block';
+    el.classList.add('active');
+    ({dashboard:fnLoadDash, ingresos:fnLoadIG, seguros:fnLoadSeg, suministros:fnLoadSum,
+      telecom:fnLoadTel, suscripciones:fnLoadSub, prestamos:fnLoadPre, ahorro:fnLoadAho,
+      portfolio:fnLoadPort, presupuesto:fnLoadBudget})[name]?.();
+  }
+
+  function fnOpenModal(id, data=null) {
+    fnEditId = data?.id || null;
+    document.getElementById(id).classList.add('open');
+    if (!data) {
+      document.querySelectorAll(`#${id} input`).forEach(el => { if(el.type==='date') el.value=fnToday(); else el.value=''; });
+      document.querySelectorAll(`#${id} select`).forEach(el => el.selectedIndex = 0);
+      document.querySelectorAll(`#${id} textarea`).forEach(el => el.value = '');
+    } else {
+      fnFillModal(id, data);
+    }
+  }
+
+  function fnCloseModal(id) { document.getElementById(id).classList.remove('open'); fnEditId = null; }
+
+  const FN_FIELD_MAP = {
+    'fn-modal-ig': [['fn-f-ig-tipo','tipo'],['fn-f-ig-fecha','fecha'],['fn-f-ig-cat','categoria'],['fn-f-ig-imp','importe'],['fn-f-ig-des','descripcion']],
+    'fn-modal-seguro': [['fn-f-seg-nom','nombre'],['fn-f-seg-com','compania'],['fn-f-seg-pa','prima_anual'],['fn-f-seg-pm','prima_mensual'],['fn-f-seg-ren','fecha_renovacion'],['fn-f-seg-cob','cobertura'],['fn-f-seg-not','notas']],
+    'fn-modal-suministro': [['fn-f-sum-tip','tipo'],['fn-f-sum-com','compania'],['fn-f-sum-imp','importe'],['fn-f-sum-fec','fecha_factura'],['fn-f-sum-ven','fecha_vencimiento'],['fn-f-sum-not','notas']],
+    'fn-modal-telecom': [['fn-f-tel-op','operador'],['fn-f-tel-tar','tarifa'],['fn-f-tel-cos','coste_mensual'],['fn-f-tel-ren','fecha_renovacion'],['fn-f-tel-not','notas']],
+    'fn-modal-sub': [['fn-f-sub-nom','nombre'],['fn-f-sub-cos','coste'],['fn-f-sub-fre','frecuencia'],['fn-f-sub-fec','fecha_cobro'],['fn-f-sub-act','activa'],['fn-f-sub-not','notas']],
+    'fn-modal-pre': [['fn-f-pre-nom','nombre'],['fn-f-pre-ci','capital_inicial'],['fn-f-pre-cp','capital_pendiente'],['fn-f-pre-cuo','cuota_mensual'],['fn-f-pre-int','tipo_interes'],['fn-f-pre-ini','fecha_inicio'],['fn-f-pre-fin','fecha_fin'],['fn-f-pre-not','notas']],
+    'fn-modal-aho': [['fn-f-aho-nom','nombre'],['fn-f-aho-met','importe_meta'],['fn-f-aho-act','importe_actual'],['fn-f-aho-fec','fecha_objetivo'],['fn-f-aho-not','notas']],
+    'fn-modal-port': [['fn-f-port-tic','ticker'],['fn-f-port-nom','nombre'],['fn-f-port-tip','tipo'],['fn-f-port-par','participaciones'],['fn-f-port-pm','precio_medio'],['fn-f-port-pa','precio_actual'],['fn-f-port-not','notas']]
+  };
+
+  function fnFillModal(id, d) {
+    (FN_FIELD_MAP[id]||[]).forEach(([elId, key]) => {
+      const el = document.getElementById(elId);
+      if (el && d[key] != null) el.value = d[key];
+    });
+  }
+
+  async function fnSaveItem(table, data, modalId, reloadFn) {
+    try {
+      const uid = currentUser?.id;
+      if (!uid) return fnAlert('No hay sesión activa', 'error');
+      if (fnEditId) await fnDbPatch(table, fnEditId, data);
+      else await fnDbPost(table, {...data, user_id: uid});
+      fnAlert(fnEditId ? 'Actualizado ✓' : 'Añadido ✓');
+      fnCloseModal(modalId);
+      reloadFn();
+    } catch(e) { fnAlert('Error: ' + e.message, 'error'); }
+  }
+
+  async function fnDel(table, id, reloadFn) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    try { await fnDbDel(table, id); fnAlert('Eliminado ✓'); reloadFn(); }
+    catch(e) { fnAlert('Error al eliminar', 'error'); }
+  }
+
+  function fnEmpty(icon, msg) {
+    return `<tr><td colspan="20" class="fn-empty-td">${icon} ${msg}</td></tr>`;
+  }
+
+  // DASHBOARD
+  async function fnLoadDash() {
+    const now = new Date();
+    const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
+    const uid = currentUser?.id;
+    if (!uid) return;
+    try {
+      const [ig, subs, pres, port, segs, sums, tels] = await Promise.all([
+        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${y}-${m}-31`),
+        fnDbGet('suscripciones', `user_id=eq.${uid}&activa=eq.true`),
+        fnDbGet('prestamos', `user_id=eq.${uid}`),
+        fnDbGet('portfolio', `user_id=eq.${uid}`),
+        fnDbGet('seguros', `user_id=eq.${uid}`),
+        fnDbGet('suministros', `user_id=eq.${uid}`),
+        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`)
+      ]);
+      const ingresos = ig.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
+      const gastos = ig.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      const bal = ingresos - gastos;
+      const subsM = subs.reduce((s,r)=>{let c=Number(r.coste||0);if(r.frecuencia==='anual')c/=12;if(r.frecuencia==='trimestral')c/=3;return s+c;},0);
+      const presM = pres.reduce((s,r)=>s+Number(r.cuota_mensual||0),0);
+      const portV = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
+      const portC = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
+      const portR = portC > 0 ? (portV-portC)/portC*100 : 0;
+      document.getElementById('fn-dash-ingresos').textContent = fnFmt(ingresos);
+      document.getElementById('fn-dash-gastos').textContent = fnFmt(gastos);
+      const bEl = document.getElementById('fn-dash-balance');
+      bEl.textContent = fnFmt(bal); bEl.className = 'fn-val ' + (bal >= 0 ? 'green' : 'red');
+      document.getElementById('fn-dash-fijos').textContent = fnFmt(subsM + presM);
+      document.getElementById('fn-dash-portfolio').textContent = fnFmt(portV);
+      const rEl = document.getElementById('fn-dash-rent');
+      rEl.textContent = fnFmtN(portR) + '%'; rEl.className = 'fn-val ' + (portR >= 0 ? 'green' : 'red');
+      document.getElementById('fn-dash-seguros').textContent = segs.length;
+      document.getElementById('fn-dash-subs').textContent = fnFmt(subsM);
+      // Próximos pagos
+      const pagos = [];
+      subs.forEach(s=>{const d=fnDaysTo(s.fecha_cobro);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.nombre,f:s.fecha_cobro,i:s.coste,ico:'🔄',c:'#f59e0b'});});
+      segs.forEach(s=>{const d=fnDaysTo(s.fecha_renovacion);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.nombre,f:s.fecha_renovacion,i:s.prima_mensual,ico:'🛡️',c:'#10b981'});});
+      sums.forEach(s=>{const d=fnDaysTo(s.fecha_vencimiento);if(d!=null&&d>=0&&d<=30)pagos.push({n:(s.tipo||'')+' '+(s.compania||''),f:s.fecha_vencimiento,i:s.importe,ico:'⚡',c:'#4f46e5'});});
+      tels.forEach(s=>{const d=fnDaysTo(s.fecha_renovacion);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.operador,f:s.fecha_renovacion,i:s.coste_mensual,ico:'📱',c:'#ef4444'});});
+      pagos.sort((a,b)=>new Date(a.f)-new Date(b.f));
+      const pEl = document.getElementById('fn-dash-pagos');
+      pEl.innerHTML = pagos.length ? pagos.map(p=>`
+        <div class="fn-payment-item">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="fn-payment-icon" style="background:${p.c}22;color:${p.c}">${p.ico}</div>
+            <div><div style="font-size:13px;font-weight:500">${p.n}</div><div style="font-size:11px;color:var(--text-3)">${fnFmtD(p.f)} · en ${fnDaysTo(p.f)} días</div></div>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:${p.c}">${fnFmt(p.i)}</div>
+        </div>`).join('')
+        : '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">📅 No hay pagos en los próximos 30 días</div>';
+    } catch(e) { console.error(e); }
+  }
+
+  // INGRESOS/GASTOS
+  async function fnLoadIG() {
+    const uid = currentUser?.id; if(!uid) return;
+    const mes = document.getElementById('fn-ig-mes').value;
+    const anio = document.getElementById('fn-ig-anio').value;
+    const tipo = document.getElementById('fn-ig-tipo').value;
+    let qs = `user_id=eq.${uid}`;
+    if (mes && anio) qs += `&fecha=gte.${anio}-${mes}-01&fecha=lte.${anio}-${mes}-31`;
+    else if (anio) qs += `&fecha=gte.${anio}-01-01&fecha=lte.${anio}-12-31`;
+    if (tipo) qs += `&tipo=eq.${tipo}`;
+    try {
+      const rows = await fnDbGet('ingresos_gastos', qs);
+      const ySel = document.getElementById('fn-ig-anio');
+      if (ySel.options.length <= 1) {
+        [...new Set(rows.map(r=>r.fecha?.split('-')[0]).filter(Boolean))].sort().reverse()
+          .forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); });
+      }
+      const ing = rows.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
+      const gas = rows.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      document.getElementById('fn-ig-ing').textContent = fnFmt(ing);
+      document.getElementById('fn-ig-gas').textContent = fnFmt(gas);
+      const bEl = document.getElementById('fn-ig-bal');
+      bEl.textContent = fnFmt(ing-gas); bEl.className = 'fn-val ' + (ing-gas>=0?'green':'red');
+      document.getElementById('fn-ig-tbody').innerHTML = rows.length ? rows.map(r=>`
+        <tr>
+          <td class="fn-td">${fnFmtD(r.fecha)}</td>
+          <td class="fn-td"><span class="fn-badge ${r.tipo==='ingreso'?'fn-badge-green':'fn-badge-red'}">${r.tipo}</span></td>
+          <td class="fn-td">${r.categoria||'—'}</td>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.descripcion||'—'}</td>
+          <td class="fn-td" style="color:${r.tipo==='ingreso'?'var(--green)':'var(--red)'};font-weight:600">${fnFmt(r.importe)}</td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditIG(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('ingresos_gastos','${r.id}',fnLoadIG)">🗑</button>
+          </div></td>
+        </tr>`).join('')
+        : `<tr><td colspan="6" class="fn-empty-td">💰 Sin movimientos registrados</td></tr>`;
+    } catch(e) { fnAlert('Error cargando datos','error'); }
+  }
+  function fnEditIG(r) { document.getElementById('fn-modal-ig-t').textContent='Editar movimiento'; fnOpenModal('fn-modal-ig',r); }
+  async function fnSaveIG() {
+    await fnSaveItem('ingresos_gastos', {
+      tipo: document.getElementById('fn-f-ig-tipo').value,
+      fecha: document.getElementById('fn-f-ig-fecha').value,
+      categoria: document.getElementById('fn-f-ig-cat').value,
+      importe: parseFloat(document.getElementById('fn-f-ig-imp').value)||0,
+      descripcion: document.getElementById('fn-f-ig-des').value
+    }, 'fn-modal-ig', fnLoadIG);
+  }
+
+  // SEGUROS
+  async function fnLoadSeg() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('seguros', `user_id=eq.${uid}`);
+      document.getElementById('fn-seg-tbody').innerHTML = rows.length ? rows.map(r=>{
+        const d = fnDaysTo(r.fecha_renovacion);
+        return `<tr>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.nombre||'—'}</td>
+          <td class="fn-td">${r.compania||'—'}</td>
+          <td class="fn-td">${r.cobertura||'—'}</td>
+          <td class="fn-td">${fnFmt(r.prima_anual)}</td>
+          <td class="fn-td">${fnFmt(r.prima_mensual)}</td>
+          <td class="fn-td"><span class="fn-badge ${d!=null&&d<=30?'fn-badge-amber':'fn-badge-green'}">${fnFmtD(r.fecha_renovacion)}</span></td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditSeg(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('seguros','${r.id}',fnLoadSeg)">🗑</button>
+          </div></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="7" class="fn-empty-td">🛡️ Sin seguros registrados</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditSeg(r) { document.getElementById('fn-modal-seg-t').textContent='Editar Seguro'; fnOpenModal('fn-modal-seguro',r); }
+  async function fnSaveSeguro() {
+    await fnSaveItem('seguros', {
+      nombre: document.getElementById('fn-f-seg-nom').value,
+      compania: document.getElementById('fn-f-seg-com').value,
+      prima_anual: parseFloat(document.getElementById('fn-f-seg-pa').value)||0,
+      prima_mensual: parseFloat(document.getElementById('fn-f-seg-pm').value)||0,
+      fecha_renovacion: document.getElementById('fn-f-seg-ren').value||null,
+      cobertura: document.getElementById('fn-f-seg-cob').value,
+      notas: document.getElementById('fn-f-seg-not').value
+    }, 'fn-modal-seguro', fnLoadSeg);
+  }
+
+  // SUMINISTROS
+  function fnSetSumFiltro(f, el) {
+    fnSumFiltro = f;
+    document.querySelectorAll('#fn-sec-suministros .fn-filter').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    fnLoadSum();
+  }
+  async function fnLoadSum() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const qs = fnSumFiltro ? `user_id=eq.${uid}&tipo=eq.${fnSumFiltro}` : `user_id=eq.${uid}`;
+      const rows = await fnDbGet('suministros', qs);
+      const icons = {luz:'⚡',agua:'💧',gas:'🔥',internet:'🌐',otro:'📦'};
+      document.getElementById('fn-sum-tbody').innerHTML = rows.length ? rows.map(r=>`
+        <tr>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${icons[r.tipo]||'📦'} ${r.tipo||'—'}</td>
+          <td class="fn-td">${r.compania||'—'}</td>
+          <td class="fn-td">${fnFmt(r.importe)}</td>
+          <td class="fn-td">${fnFmtD(r.fecha_factura)}</td>
+          <td class="fn-td">${fnFmtD(r.fecha_vencimiento)}</td>
+          <td class="fn-td">${r.notas||'—'}</td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditSum(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('suministros','${r.id}',fnLoadSum)">🗑</button>
+          </div></td>
+        </tr>`).join('') : `<tr><td colspan="7" class="fn-empty-td">⚡ Sin suministros registrados</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditSum(r) { document.getElementById('fn-modal-sum-t').textContent='Editar Suministro'; fnOpenModal('fn-modal-suministro',r); }
+  async function fnSaveSuministro() {
+    await fnSaveItem('suministros', {
+      tipo: document.getElementById('fn-f-sum-tip').value,
+      compania: document.getElementById('fn-f-sum-com').value,
+      importe: parseFloat(document.getElementById('fn-f-sum-imp').value)||0,
+      fecha_factura: document.getElementById('fn-f-sum-fec').value||null,
+      fecha_vencimiento: document.getElementById('fn-f-sum-ven').value||null,
+      notas: document.getElementById('fn-f-sum-not').value
+    }, 'fn-modal-suministro', fnLoadSum);
+  }
+
+  // TELECOM
+  async function fnLoadTel() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('telecomunicaciones', `user_id=eq.${uid}`);
+      document.getElementById('fn-tel-tbody').innerHTML = rows.length ? rows.map(r=>`
+        <tr>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.operador||'—'}</td>
+          <td class="fn-td">${r.tarifa||'—'}</td>
+          <td class="fn-td">${fnFmt(r.coste_mensual)}</td>
+          <td class="fn-td">${fnFmtD(r.fecha_renovacion)}</td>
+          <td class="fn-td">${r.notas||'—'}</td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditTel(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('telecomunicaciones','${r.id}',fnLoadTel)">🗑</button>
+          </div></td>
+        </tr>`).join('') : `<tr><td colspan="6" class="fn-empty-td">📱 Sin contratos de telecom</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditTel(r) { document.getElementById('fn-modal-tel-t').textContent='Editar Telecom'; fnOpenModal('fn-modal-telecom',r); }
+  async function fnSaveTelecom() {
+    await fnSaveItem('telecomunicaciones', {
+      operador: document.getElementById('fn-f-tel-op').value,
+      tarifa: document.getElementById('fn-f-tel-tar').value,
+      coste_mensual: parseFloat(document.getElementById('fn-f-tel-cos').value)||0,
+      fecha_renovacion: document.getElementById('fn-f-tel-ren').value||null,
+      notas: document.getElementById('fn-f-tel-not').value
+    }, 'fn-modal-telecom', fnLoadTel);
+  }
+
+  // SUSCRIPCIONES
+  async function fnLoadSub() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('suscripciones', `user_id=eq.${uid}`);
+      const total = rows.filter(r=>r.activa).reduce((s,r)=>{let c=Number(r.coste||0);if(r.frecuencia==='anual')c/=12;if(r.frecuencia==='trimestral')c/=3;return s+c;},0);
+      document.getElementById('fn-sub-total').textContent = fnFmt(total);
+      document.getElementById('fn-sub-tbody').innerHTML = rows.length ? rows.map(r=>`
+        <tr>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.nombre||'—'}</td>
+          <td class="fn-td">${fnFmt(r.coste)}</td>
+          <td class="fn-td">${r.frecuencia||'—'}</td>
+          <td class="fn-td">${fnFmtD(r.fecha_cobro)}</td>
+          <td class="fn-td"><span class="fn-badge ${r.activa?'fn-badge-green':'fn-badge-gray'}">${r.activa?'Activa':'Inactiva'}</span></td>
+          <td class="fn-td">${r.notas||'—'}</td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditSub(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('suscripciones','${r.id}',fnLoadSub)">🗑</button>
+          </div></td>
+        </tr>`).join('') : `<tr><td colspan="7" class="fn-empty-td">🔄 Sin suscripciones registradas</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditSub(r) { document.getElementById('fn-modal-sub-t').textContent='Editar Suscripción'; fnOpenModal('fn-modal-sub',r); }
+  async function fnSaveSub() {
+    await fnSaveItem('suscripciones', {
+      nombre: document.getElementById('fn-f-sub-nom').value,
+      coste: parseFloat(document.getElementById('fn-f-sub-cos').value)||0,
+      frecuencia: document.getElementById('fn-f-sub-fre').value,
+      fecha_cobro: document.getElementById('fn-f-sub-fec').value||null,
+      activa: document.getElementById('fn-f-sub-act').value === 'true',
+      notas: document.getElementById('fn-f-sub-not').value
+    }, 'fn-modal-sub', fnLoadSub);
+  }
+
+  // PRÉSTAMOS
+  async function fnLoadPre() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('prestamos', `user_id=eq.${uid}`);
+      const totalP = rows.reduce((s,r)=>s+Number(r.capital_pendiente||0),0);
+      const totalC = rows.reduce((s,r)=>s+Number(r.cuota_mensual||0),0);
+      document.getElementById('fn-pre-cards').innerHTML = `
+        <div class="card" style="padding:12px 16px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Total pendiente</div><div class="fn-val red">${fnFmt(totalP)}</div></div>
+        <div class="card" style="padding:12px 16px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Cuota mensual total</div><div class="fn-val amber">${fnFmt(totalC)}</div></div>`;
+      document.getElementById('fn-pre-tbody').innerHTML = rows.length ? rows.map(r=>{
+        const pct = r.capital_inicial > 0 ? Math.min(100, Math.round((1-r.capital_pendiente/r.capital_inicial)*100)) : 0;
+        return `<tr>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.nombre||'—'}</td>
+          <td class="fn-td">${fnFmt(r.capital_inicial)}</td>
+          <td class="fn-td" style="color:var(--red)">${fnFmt(r.capital_pendiente)}</td>
+          <td class="fn-td">${fnFmt(r.cuota_mensual)}</td>
+          <td class="fn-td">${fnFmtN(r.tipo_interes)}%</td>
+          <td class="fn-td">${fnFmtD(r.fecha_fin)}</td>
+          <td class="fn-td" style="min-width:100px">
+            <div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%"></div></div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:3px">${pct}%</div>
+          </td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditPre(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('prestamos','${r.id}',fnLoadPre)">🗑</button>
+          </div></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="8" class="fn-empty-td">🏦 Sin préstamos registrados</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditPre(r) { document.getElementById('fn-modal-pre-t').textContent='Editar Préstamo'; fnOpenModal('fn-modal-pre',r); }
+  async function fnSavePre() {
+    await fnSaveItem('prestamos', {
+      nombre: document.getElementById('fn-f-pre-nom').value,
+      capital_inicial: parseFloat(document.getElementById('fn-f-pre-ci').value)||0,
+      capital_pendiente: parseFloat(document.getElementById('fn-f-pre-cp').value)||0,
+      cuota_mensual: parseFloat(document.getElementById('fn-f-pre-cuo').value)||0,
+      tipo_interes: parseFloat(document.getElementById('fn-f-pre-int').value)||0,
+      fecha_inicio: document.getElementById('fn-f-pre-ini').value||null,
+      fecha_fin: document.getElementById('fn-f-pre-fin').value||null,
+      notas: document.getElementById('fn-f-pre-not').value
+    }, 'fn-modal-pre', fnLoadPre);
+  }
+
+  // AHORRO
+  async function fnLoadAho() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('objetivos_ahorro', `user_id=eq.${uid}`);
+      const el = document.getElementById('fn-aho-grid');
+      el.innerHTML = rows.length ? rows.map(r=>{
+        const pct = r.importe_meta > 0 ? Math.min(100, Math.round(r.importe_actual/r.importe_meta*100)) : 0;
+        return `<div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${r.nombre||'—'}</div>
+            <div style="display:flex;gap:4px">
+              <button class="icon-btn" onclick='fnEditAho(${JSON.stringify(r)})'>✎</button>
+              <button class="icon-btn danger" onclick="fnDel('objetivos_ahorro','${r.id}',fnLoadAho)">🗑</button>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:6px">
+            <span>Ahorrado: <strong style="color:var(--text)">${fnFmt(r.importe_actual)}</strong></span>
+            <span>Meta: ${fnFmt(r.importe_meta)}</span>
+          </div>
+          <div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-3)">
+            <span>${pct}%</span>
+            ${r.fecha_objetivo ? `<span>📅 ${fnFmtD(r.fecha_objetivo)}</span>` : ''}
+          </div>
+          ${r.notas ? `<div style="font-size:12px;color:var(--text-2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border-soft)">${r.notas}</div>` : ''}
+        </div>`;
+      }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">🎯 Sin objetivos de ahorro</div>';
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditAho(r) { document.getElementById('fn-modal-aho-t').textContent='Editar Objetivo'; fnOpenModal('fn-modal-aho',r); }
+  async function fnSaveAho() {
+    await fnSaveItem('objetivos_ahorro', {
+      nombre: document.getElementById('fn-f-aho-nom').value,
+      importe_meta: parseFloat(document.getElementById('fn-f-aho-met').value)||0,
+      importe_actual: parseFloat(document.getElementById('fn-f-aho-act').value)||0,
+      fecha_objetivo: document.getElementById('fn-f-aho-fec').value||null,
+      notas: document.getElementById('fn-f-aho-not').value
+    }, 'fn-modal-aho', fnLoadAho);
+  }
+
+  // PORTFOLIO
+  async function fnLoadPort() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('portfolio', `user_id=eq.${uid}`);
+      const portV = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
+      const portC = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
+      const gan = portV - portC;
+      const ren = portC > 0 ? gan/portC*100 : 0;
+      document.getElementById('fn-port-val').textContent = fnFmt(portV);
+      document.getElementById('fn-port-cos').textContent = fnFmt(portC);
+      const gEl = document.getElementById('fn-port-gan');
+      gEl.textContent = fnFmt(gan); gEl.className = 'fn-val ' + (gan>=0?'green':'red');
+      const rEl = document.getElementById('fn-port-ren');
+      rEl.textContent = fnFmtN(ren)+'%'; rEl.className = 'fn-val ' + (ren>=0?'green':'red');
+      document.getElementById('fn-port-tbody').innerHTML = rows.length ? rows.map(r=>{
+        const val = Number(r.participaciones||0)*Number(r.precio_actual||0);
+        const cos = Number(r.participaciones||0)*Number(r.precio_medio||0);
+        const dif = val - cos;
+        const difPct = cos > 0 ? dif/cos*100 : 0;
+        return `<tr>
+          <td class="fn-td" style="color:var(--text);font-weight:600">${r.ticker||'—'}</td>
+          <td class="fn-td">${r.nombre||'—'}</td>
+          <td class="fn-td"><span class="fn-badge fn-badge-gray">${r.tipo||'—'}</span></td>
+          <td class="fn-td">${fnFmtN(r.participaciones,4)}</td>
+          <td class="fn-td">${fnFmt(r.precio_medio)}</td>
+          <td class="fn-td">${fnFmt(r.precio_actual)}</td>
+          <td class="fn-td" style="font-weight:600">${fnFmt(val)}</td>
+          <td class="fn-td" style="color:${dif>=0?'var(--green)':'var(--red)'};font-weight:500">${dif>=0?'+':''}${fnFmt(dif)}</td>
+          <td class="fn-td" style="color:${difPct>=0?'var(--green)':'var(--red)'}">${dif>=0?'+':''}${fnFmtN(difPct)}%</td>
+          <td class="fn-td"><div style="display:flex;gap:6px">
+            <button class="icon-btn" onclick='fnEditPort(${JSON.stringify(r)})'>✎</button>
+            <button class="icon-btn danger" onclick="fnDel('portfolio','${r.id}',fnLoadPort)">🗑</button>
+          </div></td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="10" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+  function fnEditPort(r) { document.getElementById('fn-modal-port-t').textContent='Editar Activo'; fnOpenModal('fn-modal-port',r); }
+  async function fnSavePort() {
+    await fnSaveItem('portfolio', {
+      ticker: document.getElementById('fn-f-port-tic').value,
+      nombre: document.getElementById('fn-f-port-nom').value,
+      tipo: document.getElementById('fn-f-port-tip').value,
+      participaciones: parseFloat(document.getElementById('fn-f-port-par').value)||0,
+      precio_medio: parseFloat(document.getElementById('fn-f-port-pm').value)||0,
+      precio_actual: parseFloat(document.getElementById('fn-f-port-pa').value)||0,
+      notas: document.getElementById('fn-f-port-not').value
+    }, 'fn-modal-port', fnLoadPort);
+  }
+
+  // PRESUPUESTO
+  function fnGetBudgets() { try { return JSON.parse(localStorage.getItem('lifeos_budgets')||'{}'); } catch { return {}; } }
+  function fnSaveBudgets(b) { localStorage.setItem('lifeos_budgets', JSON.stringify(b)); }
+
+  function fnSetBudTab(tab) {
+    fnBudTab = tab;
+    document.getElementById('fn-bud-panel-mes').style.display = tab==='mes'?'block':'none';
+    document.getElementById('fn-bud-panel-anio').style.display = tab==='anio'?'block':'none';
+    document.getElementById('fn-btn-bud-mes').className = 'btn ' + (tab==='mes'?'btn-primary':'btn-ghost');
+    document.getElementById('fn-btn-bud-anio').className = 'btn ' + (tab==='anio'?'btn-primary':'btn-ghost');
+    fnLoadBudget();
+  }
+
+  function fnOpenBudModal(type) {
+    fnBudModalType = type;
+    const b = fnGetBudgets();
+    const key = type === 'mes' ? 'monthly' : 'yearly';
+    document.getElementById('fn-modal-bud-title').textContent = type==='mes' ? 'Presupuesto mensual' : 'Presupuesto anual';
+    document.getElementById('fn-modal-bud-body').innerHTML = `
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Límite total (€)</label>
+        <input type="number" id="fn-bud-total-inp" class="form-input" value="${b[key+'_total']||''}" placeholder="0.00" step="0.01">
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px">Por categoría (opcional)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${FN_CATS_GASTO.map(c=>`
+          <div class="form-group">
+            <label class="form-label">${FN_CAT_ICONS[c]||'•'} ${c}</label>
+            <input type="number" id="fn-bud-cat-${c.replace(/[^a-z]/gi,'_')}" class="form-input" value="${b[key+'_cat_'+c]||''}" placeholder="0.00" step="0.01">
+          </div>`).join('')}
+      </div>`;
+    fnOpenModal('fn-modal-bud');
+  }
+
+  function fnSaveBudget() {
+    const b = fnGetBudgets();
+    const key = fnBudModalType === 'mes' ? 'monthly' : 'yearly';
+    b[key+'_total'] = parseFloat(document.getElementById('fn-bud-total-inp').value)||0;
+    FN_CATS_GASTO.forEach(c => {
+      const el = document.getElementById('fn-bud-cat-'+c.replace(/[^a-z]/gi,'_'));
+      b[key+'_cat_'+c] = el ? (parseFloat(el.value)||0) : 0;
+    });
+    fnSaveBudgets(b);
+    fnAlert('Presupuesto guardado ✓');
+    fnCloseModal('fn-modal-bud');
+    fnLoadBudget();
+  }
+
+  async function fnLoadBudget() {
+    const uid = currentUser?.id; if(!uid) return;
+    const b = fnGetBudgets();
+    const now = new Date();
+    const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
+    try {
+      const [rowsM, rowsY] = await Promise.all([
+        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${y}-${m}-31&tipo=eq.gasto`),
+        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-01-01&fecha=lte.${y}-12-31&tipo=eq.gasto`)
+      ]);
+      // Mensual
+      const gasM = rowsM.reduce((s,r)=>s+Number(r.importe||0),0);
+      const limM = b.monthly_total||0;
+      const pctM = limM > 0 ? Math.min(100,Math.round(gasM/limM*100)) : 0;
+      const colM = pctM>=90?'var(--red)':pctM>=70?'var(--amber)':'var(--green)';
+      document.getElementById('fn-bud-mes-limit').textContent = limM ? fnFmt(limM) : 'No definido';
+      document.getElementById('fn-bud-mes-gastado').textContent = fnFmt(gasM);
+      document.getElementById('fn-bud-mes-pct').textContent = limM ? pctM+'%' : '';
+      document.getElementById('fn-bud-mes-pct').style.color = colM;
+      document.getElementById('fn-bud-mes-bar').style.width = pctM+'%';
+      document.getElementById('fn-bud-mes-bar').style.background = colM;
+      document.getElementById('fn-bud-mes-resto').textContent = limM ? (gasM<=limM?`Quedan ${fnFmt(limM-gasM)}`:`⚠️ Superado en ${fnFmt(gasM-limM)}`) : 'Define un límite para ver el progreso';
+      // Categorías mes
+      const catM = {};
+      rowsM.forEach(r=>{catM[r.categoria]=(catM[r.categoria]||0)+Number(r.importe||0);});
+      document.getElementById('fn-bud-mes-cats').innerHTML = FN_CATS_GASTO.map(c=>{
+        const g=catM[c]||0; const l=b['monthly_cat_'+c]||0;
+        const pct=l>0?Math.min(100,Math.round(g/l*100)):0;
+        const col=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
+        return `<div class="fn-bud-cat-row">
+          <div style="font-size:18px;width:24px;text-align:center">${FN_CAT_ICONS[c]||'•'}</div>
+          <div class="fn-bud-cat-info">
+            <div class="fn-bud-cat-name"><span>${c}</span><span style="color:${g>0?'var(--text)':'var(--text-3)'}"><strong>${fnFmt(g)}</strong>${l?' <span style="color:var(--text-3)">/ '+fnFmt(l)+'</span>':''}</span></div>
+            ${l?`<div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:${col}"></div></div>
+            <div class="fn-bud-cat-vals">${pct}% · ${g<=l?'quedan '+fnFmt(l-g):'⚠️ superado '+fnFmt(g-l)}</div>`:'<div class="fn-bud-cat-vals" style="color:var(--text-3)">Sin límite definido</div>'}
+          </div>
+        </div>`;
+      }).join('');
+      // Anual
+      const gasY = rowsY.reduce((s,r)=>s+Number(r.importe||0),0);
+      const limY = b.yearly_total||0;
+      const pctY = limY>0?Math.min(100,Math.round(gasY/limY*100)):0;
+      const colY = pctY>=90?'var(--red)':pctY>=70?'var(--amber)':'var(--green)';
+      document.getElementById('fn-bud-anio-limit').textContent = limY ? fnFmt(limY) : 'No definido';
+      document.getElementById('fn-bud-anio-gastado').textContent = fnFmt(gasY);
+      document.getElementById('fn-bud-anio-pct').textContent = limY ? pctY+'%' : '';
+      document.getElementById('fn-bud-anio-pct').style.color = colY;
+      document.getElementById('fn-bud-anio-bar').style.width = pctY+'%';
+      document.getElementById('fn-bud-anio-bar').style.background = colY;
+      document.getElementById('fn-bud-anio-resto').textContent = limY ? (gasY<=limY?`Quedan ${fnFmt(limY-gasY)}`:`⚠️ Superado en ${fnFmt(gasY-limY)}`) : 'Define un límite para ver el progreso';
+      const catY = {};
+      rowsY.forEach(r=>{catY[r.categoria]=(catY[r.categoria]||0)+Number(r.importe||0);});
+      document.getElementById('fn-bud-anio-cats').innerHTML = FN_CATS_GASTO.map(c=>{
+        const g=catY[c]||0; const l=b['yearly_cat_'+c]||0;
+        const pct=l>0?Math.min(100,Math.round(g/l*100)):0;
+        const col=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
+        return `<div class="fn-bud-cat-row">
+          <div style="font-size:18px;width:24px;text-align:center">${FN_CAT_ICONS[c]||'•'}</div>
+          <div class="fn-bud-cat-info">
+            <div class="fn-bud-cat-name"><span>${c}</span><span style="color:${g>0?'var(--text)':'var(--text-3)'}"><strong>${fnFmt(g)}</strong>${l?' <span style="color:var(--text-3)">/ '+fnFmt(l)+'</span>':''}</span></div>
+            ${l?`<div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:${col}"></div></div>
+            <div class="fn-bud-cat-vals">${pct}% · ${g<=l?'quedan '+fnFmt(l-g):'⚠️ superado '+fnFmt(g-l)}</div>`:'<div class="fn-bud-cat-vals" style="color:var(--text-3)">Sin límite definido</div>'}
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  // Cerrar modales finanzas al hacer click fuera
+  document.querySelectorAll('[id^="fn-modal-"]').forEach(m=>{
+    m.addEventListener('click', e => { if(e.target===m) fnCloseModal(m.id); });
+  });
 
   // =============================================
   // START
