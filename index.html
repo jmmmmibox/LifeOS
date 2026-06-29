@@ -5586,30 +5586,39 @@
   const FN_FINNHUB_KEY = 'd91d0mpr01qqfqkb7860d91d0mpr01qqfqkb786g';
 
   async function fnGetFinnhubPrice(ticker) {
-    // Para ETFs europeos en XETRA: formato XETR:SXR8
-    // Para acciones US: formato directo AAPL
-    // Intentamos primero XETR, luego bare ticker
-    const variants = [];
+    // Construir todas las variantes posibles del ticker
+    const clean = ticker.replace(/\.(DE|F|XETRA|XETR)$/i, '').replace(/^(XETR:|XETRA:|BME:|NASDAQ:|NYSE:)/i, '');
+    
+    const variants = [
+      ticker,              // tal como está en la BD
+      `XETR:${clean}`,    // XETRA Frankfurt (ETFs europeos)
+      `${clean}.F`,        // Frankfurt suffix
+      `${clean}.XETRA`,   // XETRA suffix alternativo
+      clean,               // bare ticker (acciones US)
+      `NASDAQ:${clean}`,  // NASDAQ explícito
+      `NYSE:${clean}`,    // NYSE explícito
+      `BME:${clean}`,     // Bolsa Madrid
+    ];
 
-    if (!ticker.includes(':') && !ticker.includes('.')) {
-      // ETF europeo o acción sin prefijo — intentar XETR primero, luego bare
-      variants.push(`XETR:${ticker}`, ticker);
-    } else {
-      variants.push(ticker);
-    }
+    // Eliminar duplicados
+    const unique = [...new Set(variants)];
 
-    for (const symbol of variants) {
+    for (const symbol of unique) {
       try {
         const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${FN_FINNHUB_KEY}`;
         const res = await fetch(url);
         if (!res.ok) continue;
         const data = await res.json();
-        // Finnhub devuelve c=0 cuando no encuentra el ticker
         if (data.c && data.c > 0) {
+          console.log(`✓ ${ticker} → ${symbol}: ${data.c}`);
           return { price: parseFloat(data.c.toFixed(4)), symbol };
         }
       } catch(e) { continue; }
+      // Pequeña pausa entre variantes
+      await new Promise(r => setTimeout(r, 150));
     }
+    
+    console.warn(`✗ No price found for ${ticker} (tried: ${unique.join(', ')})`);
     return null;
   }
 
@@ -5639,6 +5648,7 @@
           activo.precio_actual = result.price;
           activo.precio_actualizado_at = now;
           updated++;
+          status.textContent = `✓ ${activo.ticker} → ${result.symbol}: ${result.price}`;
         } catch(e) { failed.push(activo); }
       } else {
         failed.push(activo);
