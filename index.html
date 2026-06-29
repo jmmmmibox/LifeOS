@@ -1587,6 +1587,9 @@
           <button class="nav-item" onclick="navigate('quotes')">
             <span class="nav-icon">✨</span><span class="nav-text">Frases</span>
           </button>
+          <button class="nav-item" onclick="navigate('settings')">
+            <span class="nav-icon">⚙️</span><span class="nav-text">Ajustes</span>
+          </button>
         </div>
       </nav>
 
@@ -2103,6 +2106,72 @@
               <button class="btn btn-primary" style="margin-top:12px" onclick="openModal('quoteModal')">Añadir primera frase</button>
             </div>
           </div>
+        </div>
+
+        <!-- AJUSTES -->
+        <div class="page" id="page-settings">
+          <div style="margin-bottom:28px">
+            <h2 style="font-size:20px;font-weight:650;letter-spacing:-0.4px">Ajustes</h2>
+            <p style="font-size:13px;color:var(--text-2);margin-top:2px">Gestión de datos y cuenta</p>
+          </div>
+
+          <!-- BACKUP -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:16px">📦 Copia de seguridad</div>
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">
+              Exporta todos tus datos en un archivo JSON. Incluye hábitos, tareas, journal, objetivos, notas, libros, frases y finanzas.
+            </p>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="exportBackup()">
+                ⬇️ Exportar copia de seguridad
+              </button>
+              <span id="exportStatus" style="font-size:12px;color:var(--text-3)"></span>
+            </div>
+          </div>
+
+          <!-- RESTORE -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:16px">📂 Restaurar copia</div>
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:8px;line-height:1.6">
+              Importa un archivo de copia de seguridad previamente exportado desde Life OS.
+            </p>
+            <div style="background:var(--amber-soft);border:1px solid var(--amber);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--amber)">
+              ⚠️ La restauración añade los datos encima de los existentes. No borra lo que ya tienes.
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <label class="btn btn-ghost" style="cursor:pointer">
+                ⬆️ Seleccionar archivo JSON
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(this)">
+              </label>
+              <span id="importStatus" style="font-size:12px;color:var(--text-3)"></span>
+            </div>
+            <div id="importPreview" style="margin-top:14px;display:none">
+              <div class="card" style="background:var(--bg)">
+                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px">Contenido del archivo:</div>
+                <div id="importPreviewContent"></div>
+                <div style="display:flex;gap:8px;margin-top:14px">
+                  <button class="btn btn-primary" onclick="confirmImport()">✓ Confirmar importación</button>
+                  <button class="btn btn-ghost" onclick="cancelImport()">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- INFO CUENTA -->
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">👤 Cuenta</div>
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+              <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700" id="settingsAvatar">J</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--text)" id="settingsEmail">—</div>
+                <div style="font-size:12px;color:var(--text-3)">Cuenta activa</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost" onclick="handleLogout()" style="color:var(--red);border-color:var(--red)">
+              🚪 Cerrar sesión
+            </button>
+          </div>
+
         </div>
 
       </div><!-- page-content -->
@@ -2789,7 +2858,8 @@
     notes: 'Notas',
     books: 'Lectura',
     finances: 'Finanzas',
-    quotes: 'Frases'
+    quotes: 'Frases',
+    settings: 'Ajustes'
   };
 
   function navigate(page) {
@@ -2814,6 +2884,7 @@
     if (page === 'books') loadBooksPage();
     if (page === 'finances') loadFinancesPage();
     if (page === 'quotes') loadQuotesPage();
+    if (page === 'settings') loadSettingsPage();
   }
 
   // =============================================
@@ -4410,6 +4481,149 @@
     // La app de finanzas usa su propio sistema fn*
     // Solo arrancamos el dashboard de finanzas
     fnLoadDash();
+  }
+
+  // =============================================
+  // AJUSTES — BACKUP & RESTORE
+  // =============================================
+  const BACKUP_TABLES = [
+    'habits', 'habit_logs', 'tasks', 'journal_entries',
+    'goals', 'goal_milestones', 'notes', 'books', 'book_highlights',
+    'quotes', 'ingresos_gastos', 'seguros', 'suministros',
+    'telecomunicaciones', 'suscripciones', 'prestamos',
+    'objetivos_ahorro', 'portfolio'
+  ];
+
+  function loadSettingsPage() {
+    const email = currentUser?.email || '—';
+    const initial = email[0]?.toUpperCase() || 'U';
+    const avatarEl = document.getElementById('settingsAvatar');
+    const emailEl = document.getElementById('settingsEmail');
+    if (avatarEl) avatarEl.textContent = initial;
+    if (emailEl) emailEl.textContent = email;
+  }
+
+  async function exportBackup() {
+    const statusEl = document.getElementById('exportStatus');
+    statusEl.textContent = 'Exportando...';
+    try {
+      const backup = {
+        version: '1.0',
+        exported_at: new Date().toISOString(),
+        user_email: currentUser?.email,
+        data: {}
+      };
+
+      for (const table of BACKUP_TABLES) {
+        const { data, error } = await sb.from(table).select('*').eq('user_id', currentUser.id);
+        if (!error) backup.data[table] = data || [];
+      }
+
+      // También exportar presupuestos de localStorage
+      const budgets = localStorage.getItem('lifeos_budgets');
+      if (budgets) backup.data['_budgets_local'] = JSON.parse(budgets);
+
+      const json = JSON.stringify(backup, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `lifeos-backup-${dateStr}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      const totalRows = Object.values(backup.data).reduce((s, t) => s + (Array.isArray(t) ? t.length : 0), 0);
+      statusEl.textContent = `✓ Exportado: ${totalRows} registros`;
+      statusEl.style.color = 'var(--green)';
+      showToast('Copia de seguridad exportada ✓');
+    } catch(e) {
+      statusEl.textContent = 'Error al exportar';
+      statusEl.style.color = 'var(--red)';
+      showToast('Error al exportar', 'error');
+    }
+  }
+
+  let pendingImportData = null;
+
+  function importBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('importStatus');
+    statusEl.textContent = 'Leyendo archivo...';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const backup = JSON.parse(e.target.result);
+        if (!backup.version || !backup.data) {
+          statusEl.textContent = '❌ Archivo no válido';
+          return;
+        }
+        pendingImportData = backup;
+
+        // Mostrar resumen
+        const preview = document.getElementById('importPreview');
+        const previewContent = document.getElementById('importPreviewContent');
+        const rows = Object.entries(backup.data)
+          .filter(([k]) => !k.startsWith('_'))
+          .map(([k, v]) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-soft);font-size:12px"><span style="color:var(--text-2)">${k}</span><span style="font-weight:600;color:var(--text)">${Array.isArray(v) ? v.length : 0} registros</span></div>`)
+          .join('');
+
+        previewContent.innerHTML = `
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:8px">Exportado el ${new Date(backup.exported_at).toLocaleDateString('es-ES')} · ${backup.user_email || 'usuario desconocido'}</div>
+          ${rows}`;
+        preview.style.display = 'block';
+        statusEl.textContent = `✓ Archivo válido`;
+        statusEl.style.color = 'var(--green)';
+      } catch(err) {
+        statusEl.textContent = '❌ Error al leer el archivo';
+        statusEl.style.color = 'var(--red)';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function confirmImport() {
+    if (!pendingImportData) return;
+    const statusEl = document.getElementById('importStatus');
+    statusEl.textContent = 'Importando...';
+
+    try {
+      const { data: backup } = pendingImportData;
+      let totalImported = 0;
+
+      for (const table of BACKUP_TABLES) {
+        const rows = backup[table];
+        if (!rows?.length) continue;
+        // Asegurar que todos los registros tienen el user_id actual
+        const normalized = rows.map(r => ({ ...r, user_id: currentUser.id }));
+        // Insertar ignorando duplicados
+        const { error } = await sb.from(table).upsert(normalized, { onConflict: 'id', ignoreDuplicates: true });
+        if (!error) totalImported += normalized.length;
+      }
+
+      // Restaurar presupuestos locales si existen
+      if (backup['_budgets_local']) {
+        localStorage.setItem('lifeos_budgets', JSON.stringify(backup['_budgets_local']));
+      }
+
+      statusEl.textContent = `✓ Importados ${totalImported} registros`;
+      statusEl.style.color = 'var(--green)';
+      showToast(`Importación completada: ${totalImported} registros ✓`);
+      cancelImport();
+    } catch(e) {
+      statusEl.textContent = '❌ Error durante la importación';
+      statusEl.style.color = 'var(--red)';
+      showToast('Error al importar');
+    }
+  }
+
+  function cancelImport() {
+    pendingImportData = null;
+    document.getElementById('importPreview').style.display = 'none';
+    document.getElementById('importFile').value = '';
+    document.getElementById('importStatus').textContent = '';
   }
 
   // =============================================
