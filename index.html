@@ -5582,37 +5582,35 @@
     }).join('') : `<tr><td colspan="11" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
   }
 
-  // Obtener precio desde Yahoo Finance (funciona desde el navegador)
-  async function fnGetYahooPrice(ticker) {
-    // Construir el símbolo para Yahoo: añadir .DE para XETRA si no tiene sufijo
-    let symbol = ticker;
-    if (!ticker.includes('.') && !ticker.includes(':')) {
-      symbol = ticker + '.DE';
+  // Obtener precio desde Finnhub (funciona desde el navegador)
+  const FN_FINNHUB_KEY = 'd91d0mpr01qqfqkb7860d91d0mpr01qqfqkb786g';
+
+  async function fnGetFinnhubPrice(ticker) {
+    // Para ETFs europeos en XETRA: formato XETR:SXR8
+    // Para acciones US: formato directo AAPL
+    // Intentamos primero XETR, luego bare ticker
+    const variants = [];
+
+    if (!ticker.includes(':') && !ticker.includes('.')) {
+      // ETF europeo o acción sin prefijo — intentar XETR primero, luego bare
+      variants.push(`XETR:${ticker}`, ticker);
+    } else {
+      variants.push(ticker);
     }
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const result = data?.chart?.result?.[0];
-      if (!result) throw new Error('No data');
-      const price = result.meta?.regularMarketPrice;
-      const currency = result.meta?.currency;
-      if (!price) throw new Error('No price');
-      return { price: parseFloat(price.toFixed(4)), currency, symbol };
-    } catch(e) {
-      // Intentar también sin sufijo
-      if (symbol !== ticker) {
-        try {
-          const url2 = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
-          const res2 = await fetch(url2);
-          const data2 = await res2.json();
-          const price2 = data2?.chart?.result?.[0]?.meta?.regularMarketPrice;
-          if (price2) return { price: parseFloat(price2.toFixed(4)), currency: 'EUR', symbol: ticker };
-        } catch(_) {}
-      }
-      return null;
+
+    for (const symbol of variants) {
+      try {
+        const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${FN_FINNHUB_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const data = await res.json();
+        // Finnhub devuelve c=0 cuando no encuentra el ticker
+        if (data.c && data.c > 0) {
+          return { price: parseFloat(data.c.toFixed(4)), symbol };
+        }
+      } catch(e) { continue; }
     }
+    return null;
   }
 
   async function fnRefreshPrices() {
@@ -5631,7 +5629,7 @@
       if (!activo.ticker) { failed.push(activo); continue; }
       status.textContent = `Buscando ${activo.ticker}...`;
 
-      const result = await fnGetYahooPrice(activo.ticker);
+      const result = await fnGetFinnhubPrice(activo.ticker);
       if (result?.price) {
         try {
           await fnDbPatch('portfolio', activo.id, {
