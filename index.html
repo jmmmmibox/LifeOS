@@ -2048,17 +2048,35 @@
               <div class="card"><div class="card-title" style="margin-bottom:6px">Ganancia/Pérdida</div><div class="fn-val" id="fn-port-gan">—</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-port-ren">—</div></div>
             </div>
-            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-ghost" id="fn-port-refresh-btn" onclick="fnRefreshPrices()" style="border-color:var(--accent);color:var(--accent)">
+                  🔄 Actualizar precios
+                </button>
+                <span id="fn-port-refresh-status" style="font-size:12px;color:var(--text-3)"></span>
+              </div>
               <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-port')">+ Añadir Activo</button>
+            </div>
+            <!-- Panel de actualización manual -->
+            <div id="fn-port-manual-panel" style="display:none;margin-bottom:16px">
+              <div class="card" style="border:1px solid var(--amber)">
+                <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:12px">⚠️ No se pudo obtener precio automático para estos activos. Introduce el precio actual manualmente:</div>
+                <div id="fn-port-manual-list" style="display:flex;flex-direction:column;gap:8px"></div>
+                <div style="margin-top:12px">
+                  <button class="btn btn-primary btn-sm" onclick="fnSaveManualPrices()">Guardar precios manuales</button>
+                  <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fn-port-manual-panel').style.display='none'">Cancelar</button>
+                </div>
+              </div>
             </div>
             <div class="card" style="overflow-x:auto;padding:0">
               <table style="width:100%;border-collapse:collapse">
                 <thead><tr style="border-bottom:1px solid var(--border)">
                   <th class="fn-th">Ticker</th><th class="fn-th">Nombre</th><th class="fn-th">Tipo</th>
-                  <th class="fn-th">Participaciones</th><th class="fn-th">P.Medio</th><th class="fn-th">P.Actual</th>
+                  <th class="fn-th">Participaciones</th><th class="fn-th">P.Medio</th>
+                  <th class="fn-th">P.Actual</th><th class="fn-th">Actualizado</th>
                   <th class="fn-th">Valor</th><th class="fn-th">+/− €</th><th class="fn-th">+/− %</th><th class="fn-th">Acciones</th>
                 </tr></thead>
-                <tbody id="fn-port-tbody"><tr><td colspan="10" class="fn-empty-td">Cargando...</td></tr></tbody>
+                <tbody id="fn-port-tbody"><tr><td colspan="11" class="fn-empty-td">Cargando...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -5513,42 +5531,180 @@
   }
 
   // PORTFOLIO
+  let fnPortData = []; // cache local de activos
+
   async function fnLoadPort() {
     const uid = currentUser?.id; if(!uid) return;
     try {
       const rows = await fnDbGet('portfolio', `user_id=eq.${uid}`);
-      const portV = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
-      const portC = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
-      const gan = portV - portC;
-      const ren = portC > 0 ? gan/portC*100 : 0;
-      document.getElementById('fn-port-val').textContent = fnFmt(portV);
-      document.getElementById('fn-port-cos').textContent = fnFmt(portC);
-      const gEl = document.getElementById('fn-port-gan');
-      gEl.textContent = fnFmt(gan); gEl.className = 'fn-val ' + (gan>=0?'green':'red');
-      const rEl = document.getElementById('fn-port-ren');
-      rEl.textContent = fnFmtN(ren)+'%'; rEl.className = 'fn-val ' + (ren>=0?'green':'red');
-      document.getElementById('fn-port-tbody').innerHTML = rows.length ? rows.map(r=>{
-        const val = Number(r.participaciones||0)*Number(r.precio_actual||0);
-        const cos = Number(r.participaciones||0)*Number(r.precio_medio||0);
-        const dif = val - cos;
-        const difPct = cos > 0 ? dif/cos*100 : 0;
-        return `<tr>
-          <td class="fn-td" style="color:var(--text);font-weight:600">${r.ticker||'—'}</td>
-          <td class="fn-td">${r.nombre||'—'}</td>
-          <td class="fn-td"><span class="fn-badge fn-badge-gray">${r.tipo||'—'}</span></td>
-          <td class="fn-td">${fnFmtN(r.participaciones,4)}</td>
-          <td class="fn-td">${fnFmt(r.precio_medio)}</td>
-          <td class="fn-td">${fnFmt(r.precio_actual)}</td>
-          <td class="fn-td" style="font-weight:600">${fnFmt(val)}</td>
-          <td class="fn-td" style="color:${dif>=0?'var(--green)':'var(--red)'};font-weight:500">${dif>=0?'+':''}${fnFmt(dif)}</td>
-          <td class="fn-td" style="color:${difPct>=0?'var(--green)':'var(--red)'}">${dif>=0?'+':''}${fnFmtN(difPct)}%</td>
-          <td class="fn-td"><div style="display:flex;gap:6px">
-            <button class="icon-btn" onclick='fnEditPort(${JSON.stringify(r)})'>✎</button>
-            <button class="icon-btn danger" onclick="fnDel('portfolio','${r.id}',fnLoadPort)">🗑</button>
-          </div></td>
-        </tr>`;
-      }).join('') : `<tr><td colspan="10" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
+      fnPortData = rows;
+      fnRenderPort(rows);
     } catch(e) { fnAlert('Error','error'); }
+  }
+
+  function fnRenderPort(rows) {
+    const portV = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
+    const portC = rows.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
+    const gan = portV - portC;
+    const ren = portC > 0 ? gan/portC*100 : 0;
+    document.getElementById('fn-port-val').textContent = fnFmt(portV);
+    document.getElementById('fn-port-cos').textContent = fnFmt(portC);
+    const gEl = document.getElementById('fn-port-gan');
+    gEl.textContent = fnFmt(gan); gEl.className = 'fn-val ' + (gan>=0?'green':'red');
+    const rEl = document.getElementById('fn-port-ren');
+    rEl.textContent = fnFmtN(ren)+'%'; rEl.className = 'fn-val ' + (ren>=0?'green':'red');
+
+    document.getElementById('fn-port-tbody').innerHTML = rows.length ? rows.map(r=>{
+      const val = Number(r.participaciones||0)*Number(r.precio_actual||0);
+      const cos = Number(r.participaciones||0)*Number(r.precio_medio||0);
+      const dif = val - cos;
+      const difPct = cos > 0 ? dif/cos*100 : 0;
+      // Mostrar cuándo se actualizó el precio
+      const updatedAt = r.precio_actualizado_at
+        ? new Date(r.precio_actualizado_at).toLocaleDateString('es-ES', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        : '—';
+      return `<tr>
+        <td class="fn-td" style="color:var(--text);font-weight:600">${r.ticker||'—'}</td>
+        <td class="fn-td">${r.nombre||'—'}</td>
+        <td class="fn-td"><span class="fn-badge fn-badge-gray">${r.tipo||'—'}</span></td>
+        <td class="fn-td">${fnFmtN(r.participaciones,4)}</td>
+        <td class="fn-td">${fnFmt(r.precio_medio)}</td>
+        <td class="fn-td" style="font-weight:600">${fnFmt(r.precio_actual)}</td>
+        <td class="fn-td" style="font-size:11px;color:var(--text-3)">${updatedAt}</td>
+        <td class="fn-td" style="font-weight:600">${fnFmt(val)}</td>
+        <td class="fn-td" style="color:${dif>=0?'var(--green)':'var(--red)'};font-weight:500">${dif>=0?'+':''}${fnFmt(dif)}</td>
+        <td class="fn-td" style="color:${difPct>=0?'var(--green)':'var(--red)'}">${dif>=0?'+':''}${fnFmtN(difPct)}%</td>
+        <td class="fn-td"><div style="display:flex;gap:6px">
+          <button class="icon-btn" onclick='fnEditPort(${JSON.stringify(r)})'>✎</button>
+          <button class="icon-btn danger" onclick="fnDel('portfolio','${r.id}',fnLoadPort)">🗑</button>
+        </div></td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="11" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
+  }
+
+  // Obtener precio desde Yahoo Finance (funciona desde el navegador)
+  async function fnGetYahooPrice(ticker) {
+    // Construir el símbolo para Yahoo: añadir .DE para XETRA si no tiene sufijo
+    let symbol = ticker;
+    if (!ticker.includes('.') && !ticker.includes(':')) {
+      symbol = ticker + '.DE';
+    }
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (!result) throw new Error('No data');
+      const price = result.meta?.regularMarketPrice;
+      const currency = result.meta?.currency;
+      if (!price) throw new Error('No price');
+      return { price: parseFloat(price.toFixed(4)), currency, symbol };
+    } catch(e) {
+      // Intentar también sin sufijo
+      if (symbol !== ticker) {
+        try {
+          const url2 = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
+          const res2 = await fetch(url2);
+          const data2 = await res2.json();
+          const price2 = data2?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if (price2) return { price: parseFloat(price2.toFixed(4)), currency: 'EUR', symbol: ticker };
+        } catch(_) {}
+      }
+      return null;
+    }
+  }
+
+  async function fnRefreshPrices() {
+    if (!fnPortData.length) return fnAlert('No hay activos en el portfolio', 'error');
+    const btn = document.getElementById('fn-port-refresh-btn');
+    const status = document.getElementById('fn-port-refresh-status');
+    btn.disabled = true;
+    btn.textContent = '⏳ Actualizando...';
+    status.textContent = '';
+
+    const failed = [];
+    let updated = 0;
+    const now = new Date().toISOString();
+
+    for (const activo of fnPortData) {
+      if (!activo.ticker) { failed.push(activo); continue; }
+      status.textContent = `Buscando ${activo.ticker}...`;
+
+      const result = await fnGetYahooPrice(activo.ticker);
+      if (result?.price) {
+        try {
+          await fnDbPatch('portfolio', activo.id, {
+            precio_actual: result.price,
+            precio_actualizado_at: now
+          });
+          activo.precio_actual = result.price;
+          activo.precio_actualizado_at = now;
+          updated++;
+        } catch(e) { failed.push(activo); }
+      } else {
+        failed.push(activo);
+      }
+      // Pequeña pausa para no saturar la API
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔄 Actualizar precios';
+
+    if (updated > 0) {
+      fnRenderPort(fnPortData);
+      status.textContent = `✓ ${updated} precio${updated>1?'s':''} actualizado${updated>1?'s':''}`;
+      status.style.color = 'var(--green)';
+    }
+
+    if (failed.length > 0) {
+      // Mostrar panel de actualización manual para los que fallaron
+      const manualList = document.getElementById('fn-port-manual-list');
+      manualList.innerHTML = failed.map(a => `
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-soft)">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${a.ticker||'Sin ticker'} <span style="font-weight:400;color:var(--text-2)">${a.nombre||''}</span></div>
+            <div style="font-size:11px;color:var(--text-3)">Precio actual: ${fnFmt(a.precio_actual)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="manual-price-${a.id}" class="form-input" style="width:110px;padding:5px 8px;font-size:13px"
+              value="${a.precio_actual||''}" step="0.0001" placeholder="0.0000">
+            <span style="font-size:12px;color:var(--text-3)">€</span>
+          </div>
+        </div>`).join('');
+      document.getElementById('fn-port-manual-panel').style.display = 'block';
+      document.getElementById('fn-port-manual-panel').dataset.failedIds = JSON.stringify(failed.map(a=>a.id));
+      if (updated === 0) {
+        status.textContent = 'No se pudieron obtener precios automáticos';
+        status.style.color = 'var(--amber)';
+      } else {
+        status.textContent += ` · ${failed.length} requieren actualización manual`;
+        status.style.color = 'var(--amber)';
+      }
+    }
+  }
+
+  async function fnSaveManualPrices() {
+    const failedIds = JSON.parse(document.getElementById('fn-port-manual-panel').dataset.failedIds || '[]');
+    const now = new Date().toISOString();
+    let saved = 0;
+    for (const id of failedIds) {
+      const input = document.getElementById(`manual-price-${id}`);
+      const price = parseFloat(input?.value);
+      if (!price || isNaN(price)) continue;
+      try {
+        await fnDbPatch('portfolio', id, { precio_actual: price, precio_actualizado_at: now });
+        const activo = fnPortData.find(a => a.id === id);
+        if (activo) { activo.precio_actual = price; activo.precio_actualizado_at = now; }
+        saved++;
+      } catch(e) {}
+    }
+    document.getElementById('fn-port-manual-panel').style.display = 'none';
+    if (saved > 0) {
+      fnRenderPort(fnPortData);
+      fnAlert(`${saved} precio${saved>1?'s':''} guardado${saved>1?'s':''} ✓`);
+    }
   }
   function fnEditPort(r) { document.getElementById('fn-modal-port-t').textContent='Editar Activo'; fnOpenModal('fn-modal-port',r); }
   async function fnSavePort() {
