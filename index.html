@@ -1841,7 +1841,8 @@
           <div id="fn-alert" style="padding:10px 14px;border-radius:8px;font-size:13px;display:none;margin-bottom:16px"></div>
           <div style="display:flex;gap:0;margin-bottom:24px;background:var(--bg);border-radius:var(--radius-sm);padding:4px;width:fit-content;flex-wrap:wrap">
             <button class="fn-tab active" onclick="fnNav('dashboard',this)">🏠 Dashboard</button>
-            <button class="fn-tab" onclick="fnNav('ingresos',this)">💰 Ingresos/Gastos</button>
+            <button class="fn-tab" onclick="fnNav('ingresos',this)">💰 Movimientos</button>
+            <button class="fn-tab" onclick="fnNav('recurrentes',this)">🔁 Recurrentes</button>
             <button class="fn-tab" onclick="fnNav('suscripciones',this)">🔄 Suscripciones</button>
             <button class="fn-tab" onclick="fnNav('prestamos',this)">🏦 Préstamos</button>
             <button class="fn-tab" onclick="fnNav('ahorro',this)">🎯 Ahorro</button>
@@ -1856,17 +1857,35 @@
           <div id="fn-sec-dashboard">
             <div style="margin-bottom:12px;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em">Resumen del mes actual</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos mes</div><div class="fn-val green" id="fn-dash-ingresos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Este mes</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos mes</div><div class="fn-val red" id="fn-dash-gastos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Este mes</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos mes</div><div class="fn-val green" id="fn-dash-ingresos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Confirmados</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos mes</div><div class="fn-val red" id="fn-dash-gastos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Confirmados</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Balance mes</div><div class="fn-val" id="fn-dash-balance">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Ingresos − Gastos</div></div>
+              <div class="card" style="border:1px solid var(--amber);cursor:pointer" onclick="fnNav('ingresos', document.querySelector('.fn-tab:nth-child(2)'));document.getElementById('fn-ig-estado').value='pendiente';fnLoadIG()">
+                <div class="card-title" style="margin-bottom:6px;color:var(--amber)">⏳ Pendientes</div>
+                <div class="fn-val amber" id="fn-dash-pendientes">—</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:4px">Pulsa para confirmar</div>
+              </div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos fijos</div><div class="fn-val amber" id="fn-dash-fijos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Suscripciones + préstamos</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Portfolio</div><div class="fn-val" id="fn-dash-portfolio">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Valor actual</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-dash-rent">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Vs precio medio</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Seguros</div><div class="fn-val" id="fn-dash-seguros">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Pólizas activas</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Suscripciones/mes</div><div class="fn-val amber" id="fn-dash-subs">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Coste mensual total</div></div>
             </div>
             <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Próximos pagos (30 días)</div>
             <div id="fn-dash-pagos" style="display:flex;flex-direction:column;gap:8px"><div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Cargando...</div></div>
+          </div>
+
+          <!-- INGRESOS RECURRENTES -->
+          <div id="fn-sec-recurrentes" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <div>
+                <h3 style="font-size:15px;font-weight:600">Ingresos y gastos recurrentes</h3>
+                <p style="font-size:12px;color:var(--text-3);margin-top:2px">Se generan automáticamente como pendientes en la fecha configurada</p>
+              </div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-rec')">+ Nuevo recurrente</button>
+            </div>
+            <div id="fn-rec-list">
+              <div class="fn-empty-td" style="padding:40px;text-align:center;color:var(--text-3)">Cargando...</div>
+            </div>
           </div>
 
           <!-- INGRESOS/GASTOS -->
@@ -1886,28 +1905,37 @@
                   <option value="ingreso">Solo Ingresos</option>
                   <option value="gasto">Solo Gastos</option>
                 </select>
+                <select class="form-select" id="fn-ig-estado" onchange="fnLoadIG()" style="width:160px">
+                  <option value="">Todos los estados</option>
+                  <option value="pendiente">Pendientes</option>
+                  <option value="confirmado">Confirmados</option>
+                  <option value="manual">Manuales</option>
+                </select>
               </div>
-              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-ig')">+ Añadir</button>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-ig')">+ Añadir manual</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos</div><div class="fn-val green" id="fn-ig-ing">0,00 €</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos</div><div class="fn-val red" id="fn-ig-gas">0,00 €</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Balance</div><div class="fn-val" id="fn-ig-bal">0,00 €</div></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos</div><div class="fn-val green" id="fn-ig-ing">0,00 &euro;</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos</div><div class="fn-val red" id="fn-ig-gas">0,00 &euro;</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Balance</div><div class="fn-val" id="fn-ig-bal">0,00 &euro;</div></div>
+              <div class="card" style="border:1px solid var(--amber)"><div class="card-title" style="margin-bottom:6px;color:var(--amber)">Pendientes</div><div class="fn-val amber" id="fn-ig-pen">0</div></div>
             </div>
             <div class="card" style="overflow-x:auto;padding:0">
               <table style="width:100%;border-collapse:collapse">
                 <thead><tr style="border-bottom:1px solid var(--border)">
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06px;white-space:nowrap">Fecha</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Tipo</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Categoría</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Descripción</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Importe</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase">Acciones</th>
+                  <th class="fn-th">Estado</th>
+                  <th class="fn-th">Fecha</th>
+                  <th class="fn-th">Tipo</th>
+                  <th class="fn-th">Categoria</th>
+                  <th class="fn-th">Descripcion</th>
+                  <th class="fn-th">Importe</th>
+                  <th class="fn-th">Acciones</th>
                 </tr></thead>
-                <tbody id="fn-ig-tbody"><tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-3)">Cargando...</td></tr></tbody>
+                <tbody id="fn-ig-tbody"><tr><td colspan="7" style="padding:32px;text-align:center;color:var(--text-3)">Cargando...</td></tr></tbody>
               </table>
             </div>
           </div>
+
 
           <!-- SEGUROS -->
           <div id="fn-sec-seguros" style="display:none">
@@ -2217,11 +2245,16 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Prima anual (€)</label><input type="number" id="fn-f-seg-pa" class="form-input" step="0.01" placeholder="0.00"></div>
-      <div class="form-group"><label class="form-label">Prima mensual (€)</label><input type="number" id="fn-f-seg-pm" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Cobertura</label><input type="text" id="fn-f-seg-cob" class="form-input" placeholder="Todo riesgo..."></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Fecha renovación</label><input type="date" id="fn-f-seg-ren" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Cobertura</label><input type="text" id="fn-f-seg-cob" class="form-input" placeholder="Todo riesgo..."></div>
+      <div class="form-group"><label class="form-label">Modo de pago</label>
+        <select id="fn-f-seg-modo" class="form-select">
+          <option value="unico">Pago único anual</option>
+          <option value="mensual">Provisión mensual (÷12)</option>
+        </select>
+      </div>
     </div>
     <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-seg-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
     <div class="modal-footer">
@@ -2240,13 +2273,29 @@
       <div class="form-group"><label class="form-label">Compañía</label><input type="text" id="fn-f-sum-com" class="form-input" placeholder="Endesa, Iberdrola..."></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Importe (€)</label><input type="number" id="fn-f-sum-imp" class="form-input" step="0.01" placeholder="0.00"></div>
-      <div class="form-group"><label class="form-label">Fecha factura</label><input type="date" id="fn-f-sum-fec" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Importe estimado (€)</label><input type="number" id="fn-f-sum-imp" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Frecuencia de facturación</label>
+        <select id="fn-f-sum-fre" class="form-select">
+          <option value="mensual">Mensual</option>
+          <option value="bimensual" selected>Bimensual (cada 2 meses)</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Fecha vencimiento</label><input type="date" id="fn-f-sum-ven" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sum-not" class="form-input" placeholder="Notas..."></div>
+      <div class="form-group"><label class="form-label">Día de cobro</label><input type="number" id="fn-f-sum-dia" class="form-input" min="1" max="31" placeholder="15"></div>
+      <div class="form-group"><label class="form-label">Mes de referencia</label>
+        <select id="fn-f-sum-mes" class="form-select">
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+          <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+          <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
     </div>
+    <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sum-not" class="form-input" placeholder="Notas..."></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-suministro')">Cancelar</button>
       <button class="btn btn-primary" onclick="fnSaveSuministro()">Guardar</button>
@@ -2264,7 +2313,7 @@
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Coste mensual (€)</label><input type="number" id="fn-f-tel-cos" class="form-input" step="0.01" placeholder="0.00"></div>
-      <div class="form-group"><label class="form-label">Fecha renovación</label><input type="date" id="fn-f-tel-ren" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Día de cobro</label><input type="number" id="fn-f-tel-dia" class="form-input" min="1" max="31" placeholder="1"></div>
     </div>
     <div class="form-group"><label class="form-label">Notas</label><textarea id="fn-f-tel-not" class="form-textarea" style="min-height:60px" placeholder="Notas..."></textarea></div>
     <div class="modal-footer">
@@ -2275,6 +2324,63 @@
 </div>
 
 <!-- Modal Suscripción -->
+<!-- Modal Recurrente (ingresos recurrentes) -->
+<div class="modal-overlay" id="fn-modal-rec">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-rec-t">Nuevo ingreso recurrente</span><button class="modal-close" onclick="fnCloseModal('fn-modal-rec')">×</button></div>
+    <input type="hidden" id="fn-f-rec-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-rec-nom" class="form-input" placeholder="Nómina, alquiler..."></div>
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select id="fn-f-rec-tipo" class="form-select">
+          <option value="ingreso">Ingreso</option>
+          <option value="gasto">Gasto</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Importe (€)</label><input type="number" id="fn-f-rec-imp" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Categoría</label>
+        <select id="fn-f-rec-cat" class="form-select">
+          <option>Salario</option><option>Negocio</option><option>Alquiler cobrado</option><option>Inversiones</option>
+          <option>Alimentación</option><option>Transporte</option><option>Ocio</option><option>Salud</option>
+          <option>Educación</option><option>Hogar</option><option>Otros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Frecuencia</label>
+        <select id="fn-f-rec-fre" class="form-select">
+          <option value="mensual">Mensual</option>
+          <option value="bimensual">Bimensual</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Día del mes</label><input type="number" id="fn-f-rec-dia" class="form-input" min="1" max="31" placeholder="28"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mes de referencia (para no mensuales)</label>
+        <select id="fn-f-rec-mes" class="form-select">
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+          <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+          <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+          <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Estado</label>
+        <select id="fn-f-rec-act" class="form-select"><option value="true">Activo</option><option value="false">Inactivo</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-rec-not" class="form-input" placeholder="Notas..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-rec')">Cancelar</button>
+      <button class="btn btn-primary" onclick="fnSaveRec()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="fn-modal-sub">
   <div class="modal" style="max-width:520px">
     <div class="modal-header"><span class="modal-title" id="fn-modal-sub-t">Añadir Suscripción</span><button class="modal-close" onclick="fnCloseModal('fn-modal-sub')">×</button></div>
@@ -2283,13 +2389,26 @@
       <div class="form-group"><label class="form-label">Coste (€)</label><input type="number" id="fn-f-sub-cos" class="form-input" step="0.01" placeholder="0.00"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Frecuencia</label><select id="fn-f-sub-fre" class="form-select"><option value="mensual">Mensual</option><option value="anual">Anual</option><option value="trimestral">Trimestral</option></select></div>
-      <div class="form-group"><label class="form-label">Próximo cobro</label><input type="date" id="fn-f-sub-fec" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Frecuencia</label>
+        <select id="fn-f-sub-fre" class="form-select">
+          <option value="mensual">Mensual</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Día de cobro</label><input type="number" id="fn-f-sub-dia" class="form-input" min="1" max="31" placeholder="15"></div>
     </div>
     <div class="form-row">
+      <div class="form-group"><label class="form-label">Modo si es anual</label>
+        <select id="fn-f-sub-modo" class="form-select">
+          <option value="unico">Pago único</option>
+          <option value="mensual">Provisión mensual (÷12)</option>
+        </select>
+      </div>
       <div class="form-group"><label class="form-label">Estado</label><select id="fn-f-sub-act" class="form-select"><option value="true">Activa</option><option value="false">Inactiva</option></select></div>
-      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sub-not" class="form-input" placeholder="Notas..."></div>
     </div>
+    <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-sub-not" class="form-input" placeholder="Notas..."></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-sub')">Cancelar</button>
       <button class="btn btn-primary" onclick="fnSaveSub()">Guardar</button>
@@ -2301,7 +2420,10 @@
 <div class="modal-overlay" id="fn-modal-pre">
   <div class="modal" style="max-width:520px">
     <div class="modal-header"><span class="modal-title" id="fn-modal-pre-t">Añadir Préstamo</span><button class="modal-close" onclick="fnCloseModal('fn-modal-pre')">×</button></div>
-    <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-pre-nom" class="form-input" placeholder="Hipoteca, coche..."></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-pre-nom" class="form-input" placeholder="Hipoteca, coche..."></div>
+      <div class="form-group"><label class="form-label">Día de cobro mensual</label><input type="number" id="fn-f-pre-dia" class="form-input" min="1" max="31" placeholder="1"></div>
+    </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Capital inicial (€)</label><input type="number" id="fn-f-pre-ci" class="form-input" step="0.01" placeholder="0.00"></div>
       <div class="form-group"><label class="form-label">Capital pendiente (€)</label><input type="number" id="fn-f-pre-cp" class="form-input" step="0.01" placeholder="0.00"></div>
@@ -4706,7 +4828,7 @@
     document.querySelectorAll('.fn-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('fn-sec-' + name).style.display = 'block';
     el.classList.add('active');
-    ({dashboard:fnLoadDash, ingresos:fnLoadIG, seguros:fnLoadSeg, suministros:fnLoadSum,
+    ({dashboard:fnLoadDash, ingresos:fnLoadIG, recurrentes:fnLoadRec, seguros:fnLoadSeg, suministros:fnLoadSum,
       telecom:fnLoadTel, suscripciones:fnLoadSub, prestamos:fnLoadPre, ahorro:fnLoadAho,
       portfolio:fnLoadPort, presupuesto:fnLoadBudget})[name]?.();
   }
@@ -4766,56 +4888,244 @@
   }
 
   // DASHBOARD
+  // =============================================
+  // MOTOR DE RECURRENTES
+  // =============================================
+
+  // Calcula si un recurrente debe generar movimiento en un período dado
+  function fnDebeGenerar(rec, year, month) {
+    const fre = rec.frecuencia || 'mensual';
+    const mesRef = parseInt(rec.mes_cobro || rec.mes_inicio || 1);
+    if (fre === 'mensual') return true;
+    if (fre === 'bimensual') return (month - mesRef) % 2 === 0 || (month + 12 - mesRef) % 2 === 0;
+    if (fre === 'trimestral') return (month - mesRef) % 3 === 0 || (month + 12 - mesRef) % 3 === 0;
+    if (fre === 'semestral') return (month - mesRef) % 6 === 0 || (month + 12 - mesRef) % 6 === 0;
+    if (fre === 'anual') return month === mesRef;
+    return false;
+  }
+
+  async function fnCheckRecurrentes() {
+    const uid = currentUser?.id; if (!uid) return;
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth() + 1;
+    const periodo = `${y}-${String(m).padStart(2,'0')}`;
+
+    try {
+      // Cargar todos los recurrentes y el log del período actual
+      const [recs, subs, pres, segs, sums, tels, logs] = await Promise.all([
+        fnDbGet('ingresos_recurrentes', `user_id=eq.${uid}&activo=eq.true`),
+        fnDbGet('suscripciones', `user_id=eq.${uid}&activa=eq.true`),
+        fnDbGet('prestamos', `user_id=eq.${uid}`),
+        fnDbGet('seguros', `user_id=eq.${uid}`),
+        fnDbGet('suministros', `user_id=eq.${uid}`),
+        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`),
+        fnDbGet('recurrentes_log', `user_id=eq.${uid}&periodo=eq.${periodo}`)
+      ]);
+
+      const logSet = new Set(logs.map(l => `${l.recurrente_tipo}:${l.recurrente_id}`));
+      const toGenerate = [];
+
+      // Función helper para construir fecha de cobro en el mes actual
+      const buildFecha = (dia) => {
+        const d = Math.min(dia || 1, new Date(y, m, 0).getDate());
+        if (new Date(y, m-1, d) > now) return null; // No generar si es fecha futura
+        return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      };
+
+      // 1. Ingresos recurrentes propios
+      for (const r of recs) {
+        const key = `ingreso_recurrente:${r.id}`;
+        if (logSet.has(key)) continue;
+        if (!fnDebeGenerar(r, y, m)) continue;
+        const fecha = buildFecha(r.dia_cobro);
+        if (!fecha) continue;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'ingreso_recurrente',
+          tipo: r.tipo || 'ingreso', fecha, importe: r.importe,
+          categoria: r.categoria || 'Otros', descripcion: r.nombre,
+          importe_esperado: r.importe, estado: 'pendiente', periodo
+        });
+      }
+
+      // 2. Suscripciones
+      for (const r of subs) {
+        const key = `suscripcion:${r.id}`;
+        if (logSet.has(key)) continue;
+        const fre = r.frecuencia || 'mensual';
+        const mesRef = parseInt(r.mes_cobro || 1);
+        let debe = false;
+        if (fre === 'mensual') debe = true;
+        else if (fre === 'trimestral') debe = (m - mesRef) % 3 === 0 || (m + 12 - mesRef) % 3 === 0;
+        else if (fre === 'semestral') debe = (m - mesRef) % 6 === 0 || (m + 12 - mesRef) % 6 === 0;
+        else if (fre === 'anual') debe = m === mesRef;
+        if (!debe) continue;
+        const fecha = buildFecha(r.dia_cobro || 1);
+        if (!fecha) continue;
+        // Modo mensual para anuales (provisión)
+        const importe = (fre === 'anual' && r.modo_anual === 'mensual') ? r.coste / 12 : r.coste;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'suscripcion',
+          tipo: 'gasto', fecha, importe,
+          categoria: 'Suscripciones', descripcion: r.nombre,
+          importe_esperado: importe, estado: 'pendiente', periodo
+        });
+      }
+
+      // 3. Préstamos (mensual)
+      for (const r of pres) {
+        if (!r.cuota_mensual) continue;
+        const key = `prestamo:${r.id}`;
+        if (logSet.has(key)) continue;
+        const fecha = buildFecha(r.dia_cobro || 1);
+        if (!fecha) continue;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'prestamo',
+          tipo: 'gasto', fecha, importe: r.cuota_mensual,
+          categoria: 'Préstamos', descripcion: r.nombre,
+          importe_esperado: r.cuota_mensual, estado: 'pendiente', periodo
+        });
+      }
+
+      // 4. Seguros
+      for (const r of segs) {
+        if (!r.prima_anual) continue;
+        const key = `seguro:${r.id}`;
+        if (logSet.has(key)) continue;
+        const modoMensual = r.modo_anual === 'mensual';
+        let debe = false;
+        if (modoMensual) {
+          debe = true; // todos los meses
+        } else {
+          // Solo en el mes de renovación
+          const mesRen = r.fecha_renovacion ? parseInt(r.fecha_renovacion.split('-')[1]) : null;
+          if (mesRen) debe = m === mesRen;
+        }
+        if (!debe) continue;
+        const dia = r.fecha_renovacion ? parseInt(r.fecha_renovacion.split('-')[2]) : 1;
+        const fecha = buildFecha(modoMensual ? 1 : dia);
+        if (!fecha) continue;
+        const importe = modoMensual ? r.prima_anual / 12 : r.prima_anual;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'seguro',
+          tipo: 'gasto', fecha, importe,
+          categoria: 'Seguros', descripcion: r.nombre,
+          importe_esperado: importe, estado: 'pendiente', periodo
+        });
+      }
+
+      // 5. Suministros
+      for (const r of sums) {
+        if (!r.importe) continue;
+        const key = `suministro:${r.id}`;
+        if (logSet.has(key)) continue;
+        if (!fnDebeGenerar(r, y, m)) continue;
+        const fecha = buildFecha(r.dia_cobro || 15);
+        if (!fecha) continue;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'suministro',
+          tipo: 'gasto', fecha, importe: r.importe,
+          categoria: 'Suministros', descripcion: `${r.tipo||''} ${r.compania||''}`.trim(),
+          importe_esperado: r.importe, estado: 'pendiente', periodo
+        });
+      }
+
+      // 6. Telecom
+      for (const r of tels) {
+        if (!r.coste_mensual) continue;
+        const key = `telecom:${r.id}`;
+        if (logSet.has(key)) continue;
+        const fecha = buildFecha(r.dia_cobro || 1);
+        if (!fecha) continue;
+        toGenerate.push({
+          recurrente_id: r.id, recurrente_tipo: 'telecom',
+          tipo: 'gasto', fecha, importe: r.coste_mensual,
+          categoria: 'Telecom', descripcion: r.operador || 'Telecom',
+          importe_esperado: r.coste_mensual, estado: 'pendiente', periodo
+        });
+      }
+
+      // Insertar movimientos pendientes
+      if (toGenerate.length > 0) {
+        for (const item of toGenerate) {
+          const { data: igData } = await fnDbPost('ingresos_gastos', {
+            user_id: uid, tipo: item.tipo, fecha: item.fecha,
+            categoria: item.categoria, descripcion: item.descripcion,
+            importe: item.importe, importe_esperado: item.importe_esperado,
+            estado: 'pendiente', recurrente_id: item.recurrente_id,
+            recurrente_tipo: item.recurrente_tipo
+          });
+          // Registrar en log
+          const igId = Array.isArray(igData) ? igData[0]?.id : igData?.id;
+          await fnDbPost('recurrentes_log', {
+            user_id: uid, recurrente_id: item.recurrente_id,
+            recurrente_tipo: item.recurrente_tipo, periodo: item.periodo,
+            ingreso_gasto_id: igId
+          });
+        }
+        showToast(`${toGenerate.length} movimientos pendientes generados`);
+      }
+    } catch(e) { console.error('Error generando recurrentes:', e); }
+  }
+
   async function fnLoadDash() {
+    // Primero generar pendientes del mes
+    await fnCheckRecurrentes();
+
     const now = new Date();
     const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
     const uid = currentUser?.id;
     if (!uid) return;
     try {
-      const [ig, subs, pres, port, segs, sums, tels] = await Promise.all([
+      const [ig, subs, pres, port] = await Promise.all([
         fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${lastDayOfMonth(parseInt(y), parseInt(m))}`),
         fnDbGet('suscripciones', `user_id=eq.${uid}&activa=eq.true`),
         fnDbGet('prestamos', `user_id=eq.${uid}`),
-        fnDbGet('portfolio', `user_id=eq.${uid}`),
-        fnDbGet('seguros', `user_id=eq.${uid}`),
-        fnDbGet('suministros', `user_id=eq.${uid}`),
-        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`)
+        fnDbGet('portfolio', `user_id=eq.${uid}`)
       ]);
-      const ingresos = ig.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
-      const gastos = ig.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      const confirmados = ig.filter(r => r.estado !== 'pendiente');
+      const pendientes = ig.filter(r => r.estado === 'pendiente');
+      const ingresos = confirmados.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
+      const gastos = confirmados.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
       const bal = ingresos - gastos;
       const subsM = subs.reduce((s,r)=>{let c=Number(r.coste||0);if(r.frecuencia==='anual')c/=12;if(r.frecuencia==='trimestral')c/=3;return s+c;},0);
       const presM = pres.reduce((s,r)=>s+Number(r.cuota_mensual||0),0);
       const portV = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
       const portC = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
       const portR = portC > 0 ? (portV-portC)/portC*100 : 0;
+
       document.getElementById('fn-dash-ingresos').textContent = fnFmt(ingresos);
       document.getElementById('fn-dash-gastos').textContent = fnFmt(gastos);
       const bEl = document.getElementById('fn-dash-balance');
       bEl.textContent = fnFmt(bal); bEl.className = 'fn-val ' + (bal >= 0 ? 'green' : 'red');
+      const pEl = document.getElementById('fn-dash-pendientes');
+      pEl.textContent = pendientes.length;
       document.getElementById('fn-dash-fijos').textContent = fnFmt(subsM + presM);
       document.getElementById('fn-dash-portfolio').textContent = fnFmt(portV);
       const rEl = document.getElementById('fn-dash-rent');
       rEl.textContent = fnFmtN(portR) + '%'; rEl.className = 'fn-val ' + (portR >= 0 ? 'green' : 'red');
-      document.getElementById('fn-dash-seguros').textContent = segs.length;
       document.getElementById('fn-dash-subs').textContent = fnFmt(subsM);
-      // Próximos pagos
-      const pagos = [];
-      subs.forEach(s=>{const d=fnDaysTo(s.fecha_cobro);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.nombre,f:s.fecha_cobro,i:s.coste,ico:'🔄',c:'#f59e0b'});});
-      segs.forEach(s=>{const d=fnDaysTo(s.fecha_renovacion);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.nombre,f:s.fecha_renovacion,i:s.prima_mensual,ico:'🛡️',c:'#10b981'});});
-      sums.forEach(s=>{const d=fnDaysTo(s.fecha_vencimiento);if(d!=null&&d>=0&&d<=30)pagos.push({n:(s.tipo||'')+' '+(s.compania||''),f:s.fecha_vencimiento,i:s.importe,ico:'⚡',c:'#4f46e5'});});
-      tels.forEach(s=>{const d=fnDaysTo(s.fecha_renovacion);if(d!=null&&d>=0&&d<=30)pagos.push({n:s.operador,f:s.fecha_renovacion,i:s.coste_mensual,ico:'📱',c:'#ef4444'});});
-      pagos.sort((a,b)=>new Date(a.f)-new Date(b.f));
-      const pEl = document.getElementById('fn-dash-pagos');
-      pEl.innerHTML = pagos.length ? pagos.map(p=>`
-        <div class="fn-payment-item">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="fn-payment-icon" style="background:${p.c}22;color:${p.c}">${p.ico}</div>
-            <div><div style="font-size:13px;font-weight:500">${p.n}</div><div style="font-size:11px;color:var(--text-3)">${fnFmtD(p.f)} · en ${fnDaysTo(p.f)} días</div></div>
-          </div>
-          <div style="font-size:15px;font-weight:600;color:${p.c}">${fnFmt(p.i)}</div>
-        </div>`).join('')
-        : '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">📅 No hay pagos en los próximos 30 días</div>';
+
+      // Próximos pagos = movimientos pendientes del mes
+      const pEl2 = document.getElementById('fn-dash-pagos');
+      const tipoIcons = {suscripcion:'🔄',prestamo:'🏦',seguro:'🛡️',suministro:'⚡',telecom:'📱',ingreso_recurrente:'💰'};
+      pEl2.innerHTML = pendientes.length
+        ? pendientes.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(p=>`
+          <div class="fn-payment-item" style="cursor:pointer" onclick="fnNav('ingresos', document.querySelector('.fn-tab:nth-child(2)'));document.getElementById('fn-ig-estado').value='pendiente';fnLoadIG()">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="fn-payment-icon" style="background:${p.tipo==='ingreso'?'#ecfdf5':'#fef2f2'};color:${p.tipo==='ingreso'?'var(--green)':'var(--red)'}">
+                ${tipoIcons[p.recurrente_tipo]||'💳'}
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:500">${p.descripcion||p.categoria}</div>
+                <div style="font-size:11px;color:var(--text-3)">${fnFmtD(p.fecha)} · Pendiente de confirmar</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="font-size:15px;font-weight:600;color:${p.tipo==='ingreso'?'var(--green)':'var(--red)'}">${p.tipo==='ingreso'?'+':'-'}${fnFmt(p.importe)}</div>
+              <span style="font-size:10px;background:var(--amber-soft);color:var(--amber);padding:2px 6px;border-radius:10px;font-weight:600">PDTE</span>
+            </div>
+          </div>`).join('')
+        : '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">✅ No hay movimientos pendientes</div>';
     } catch(e) { console.error(e); }
   }
 
@@ -4825,10 +5135,12 @@
     const mes = document.getElementById('fn-ig-mes').value;
     const anio = document.getElementById('fn-ig-anio').value;
     const tipo = document.getElementById('fn-ig-tipo').value;
+    const estado = document.getElementById('fn-ig-estado')?.value || '';
     let qs = `user_id=eq.${uid}`;
     if (mes && anio) qs += `&fecha=gte.${anio}-${mes}-01&fecha=lte.${lastDayOfMonth(parseInt(anio), parseInt(mes))}`;
     else if (anio) qs += `&fecha=gte.${anio}-01-01&fecha=lte.${anio}-12-31`;
     if (tipo) qs += `&tipo=eq.${tipo}`;
+    if (estado) qs += `&estado=eq.${estado}`;
     try {
       const rows = await fnDbGet('ingresos_gastos', qs);
       const ySel = document.getElementById('fn-ig-anio');
@@ -4836,27 +5148,129 @@
         [...new Set(rows.map(r=>r.fecha?.split('-')[0]).filter(Boolean))].sort().reverse()
           .forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); });
       }
-      const ing = rows.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
-      const gas = rows.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      const confirmados = rows.filter(r=>r.estado!=='pendiente');
+      const ing = confirmados.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
+      const gas = confirmados.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      const pen = rows.filter(r=>r.estado==='pendiente').length;
       document.getElementById('fn-ig-ing').textContent = fnFmt(ing);
       document.getElementById('fn-ig-gas').textContent = fnFmt(gas);
       const bEl = document.getElementById('fn-ig-bal');
       bEl.textContent = fnFmt(ing-gas); bEl.className = 'fn-val ' + (ing-gas>=0?'green':'red');
+      document.getElementById('fn-ig-pen').textContent = pen;
+
+      const estadoBadge = (e) => {
+        if (e==='pendiente') return '<span style="background:var(--amber-soft);color:var(--amber);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">⏳ PDTE</span>';
+        if (e==='manual') return '<span style="background:var(--accent-soft);color:var(--accent-text);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">MANUAL</span>';
+        return '<span style="background:var(--green-soft);color:var(--green);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">✓ OK</span>';
+      };
+
       document.getElementById('fn-ig-tbody').innerHTML = rows.length ? rows.map(r=>`
-        <tr>
+        <tr style="${r.estado==='pendiente'?'background:var(--amber-soft)':''}">
+          <td class="fn-td">${estadoBadge(r.estado)}</td>
           <td class="fn-td">${fnFmtD(r.fecha)}</td>
           <td class="fn-td"><span class="fn-badge ${r.tipo==='ingreso'?'fn-badge-green':'fn-badge-red'}">${r.tipo}</span></td>
           <td class="fn-td">${r.categoria||'—'}</td>
           <td class="fn-td" style="color:var(--text);font-weight:500">${r.descripcion||'—'}</td>
-          <td class="fn-td" style="color:${r.tipo==='ingreso'?'var(--green)':'var(--red)'};font-weight:600">${fnFmt(r.importe)}</td>
-          <td class="fn-td"><div style="display:flex;gap:6px">
-            <button class="icon-btn" onclick='fnEditIG(${JSON.stringify(r)})'>✎</button>
-            <button class="icon-btn danger" onclick="fnDel('ingresos_gastos','${r.id}',fnLoadIG)">🗑</button>
-          </div></td>
+          <td class="fn-td" style="color:${r.tipo==='ingreso'?'var(--green)':'var(--red)'};font-weight:600">${r.tipo==='ingreso'?'+':'-'}${fnFmt(r.importe)}</td>
+          <td class="fn-td">
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              ${r.estado==='pendiente' ? `<button class="btn btn-primary btn-sm" onclick="fnConfirmar('${r.id}')">✓ Confirmar</button>` : ''}
+              <button class="icon-btn" onclick='fnEditIG(${JSON.stringify(r)})'>✎</button>
+              <button class="icon-btn danger" onclick="fnDel('ingresos_gastos','${r.id}',fnLoadIG)">🗑</button>
+            </div>
+          </td>
         </tr>`).join('')
-        : `<tr><td colspan="6" class="fn-empty-td">💰 Sin movimientos registrados</td></tr>`;
+        : `<tr><td colspan="7" class="fn-empty-td">💰 Sin movimientos registrados</td></tr>`;
     } catch(e) { fnAlert('Error cargando datos','error'); }
   }
+
+  async function fnConfirmar(id) {
+    try {
+      await fnDbPatch('ingresos_gastos', id, { estado: 'confirmado' });
+      fnAlert('Confirmado ✓');
+      fnLoadIG();
+      fnLoadDash();
+    } catch(e) { fnAlert('Error','error'); }
+  }
+
+  // INGRESOS RECURRENTES
+  async function fnLoadRec() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const [recs, subs, pres, segs, sums, tels] = await Promise.all([
+        fnDbGet('ingresos_recurrentes', `user_id=eq.${uid}`),
+        fnDbGet('suscripciones', `user_id=eq.${uid}`),
+        fnDbGet('prestamos', `user_id=eq.${uid}`),
+        fnDbGet('seguros', `user_id=eq.${uid}`),
+        fnDbGet('suministros', `user_id=eq.${uid}`),
+        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`)
+      ]);
+
+      const freqLabel = f => ({mensual:'Mensual',bimensual:'Bimensual',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'}[f]||f);
+
+      const seccion = (titulo, icono, color, items, tipo) => {
+        if (!items.length) return '';
+        return `<div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+            <span>${icono}</span> ${titulo} (${items.length})
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${items.map(r => {
+              const nombre = r.nombre || r.operador || r.tipo || '—';
+              const importe = r.importe || r.cuota_mensual || r.coste || r.prima_anual || r.coste_mensual || 0;
+              const freq = freqLabel(r.frecuencia || 'mensual');
+              const dia = r.dia_cobro || r.dia || '—';
+              const activo = r.activo !== false && r.activa !== false;
+              return `<div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:var(--radius);padding:12px 14px;${!activo?'opacity:0.5':''}">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600">${nombre}</div>
+                  <div style="font-size:11px;color:var(--text-3);margin-top:2px">${freq} · Día ${dia}</div>
+                </div>
+                <div style="font-size:14px;font-weight:700;color:${tipo==='ingreso'?'var(--green)':'var(--red)'}">
+                  ${tipo==='ingreso'?'+':'-'}${fnFmt(importe)}
+                </div>
+                <span style="font-size:10px;background:${activo?'var(--green-soft)':'var(--border-soft)'};color:${activo?'var(--green)':'var(--text-3)'};padding:2px 8px;border-radius:10px;font-weight:600">
+                  ${activo?'Activo':'Inactivo'}
+                </span>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      };
+
+      document.getElementById('fn-rec-list').innerHTML =
+        seccion('Ingresos recurrentes propios', '💚', 'var(--green)', recs, 'ingreso') +
+        seccion('Suscripciones', '🔄', '#f59e0b', subs, 'gasto') +
+        seccion('Préstamos', '🏦', '#ef4444', pres, 'gasto') +
+        seccion('Seguros', '🛡️', '#10b981', segs, 'gasto') +
+        seccion('Suministros', '⚡', '#4f46e5', sums, 'gasto') +
+        seccion('Telecom', '📱', '#8b5cf6', tels, 'gasto') ||
+        '<div class="fn-empty-td" style="text-align:center;padding:40px;color:var(--text-3)">Sin recurrentes configurados. Añádelos en sus secciones.</div>';
+    } catch(e) { fnAlert('Error','error'); }
+  }
+
+  async function fnSaveRec() {
+    const nombre = document.getElementById('fn-f-rec-nom').value.trim();
+    if (!nombre) return fnAlert('Escribe un nombre', 'error');
+    const editId = document.getElementById('fn-f-rec-id').value;
+    const data = {
+      nombre,
+      tipo: document.getElementById('fn-f-rec-tipo').value,
+      importe: parseFloat(document.getElementById('fn-f-rec-imp').value)||0,
+      categoria: document.getElementById('fn-f-rec-cat').value,
+      frecuencia: document.getElementById('fn-f-rec-fre').value,
+      dia_cobro: parseInt(document.getElementById('fn-f-rec-dia').value)||1,
+      mes_cobro: parseInt(document.getElementById('fn-f-rec-mes').value)||1,
+      activo: document.getElementById('fn-f-rec-act').value === 'true',
+      notas: document.getElementById('fn-f-rec-not').value
+    };
+    if (editId) await fnDbPatch('ingresos_recurrentes', editId, data);
+    else await fnDbPost('ingresos_recurrentes', {...data, user_id: currentUser.id});
+    fnCloseModal('fn-modal-rec');
+    fnAlert('Guardado ✓');
+    fnLoadRec();
+  }
+
   function fnEditIG(r) { document.getElementById('fn-modal-ig-t').textContent='Editar movimiento'; fnOpenModal('fn-modal-ig',r); }
   async function fnSaveIG() {
     await fnSaveItem('ingresos_gastos', {
@@ -4864,7 +5278,8 @@
       fecha: document.getElementById('fn-f-ig-fecha').value,
       categoria: document.getElementById('fn-f-ig-cat').value,
       importe: parseFloat(document.getElementById('fn-f-ig-imp').value)||0,
-      descripcion: document.getElementById('fn-f-ig-des').value
+      descripcion: document.getElementById('fn-f-ig-des').value,
+      estado: 'manual'
     }, 'fn-modal-ig', fnLoadIG);
   }
 
@@ -4896,9 +5311,10 @@
       nombre: document.getElementById('fn-f-seg-nom').value,
       compania: document.getElementById('fn-f-seg-com').value,
       prima_anual: parseFloat(document.getElementById('fn-f-seg-pa').value)||0,
-      prima_mensual: parseFloat(document.getElementById('fn-f-seg-pm').value)||0,
+      prima_mensual: parseFloat(document.getElementById('fn-f-seg-pa').value)/12||0,
       fecha_renovacion: document.getElementById('fn-f-seg-ren').value||null,
       cobertura: document.getElementById('fn-f-seg-cob').value,
+      modo_anual: document.getElementById('fn-f-seg-modo').value,
       notas: document.getElementById('fn-f-seg-not').value
     }, 'fn-modal-seguro', fnLoadSeg);
   }
@@ -4937,8 +5353,9 @@
       tipo: document.getElementById('fn-f-sum-tip').value,
       compania: document.getElementById('fn-f-sum-com').value,
       importe: parseFloat(document.getElementById('fn-f-sum-imp').value)||0,
-      fecha_factura: document.getElementById('fn-f-sum-fec').value||null,
-      fecha_vencimiento: document.getElementById('fn-f-sum-ven').value||null,
+      frecuencia: document.getElementById('fn-f-sum-fre').value,
+      dia_cobro: parseInt(document.getElementById('fn-f-sum-dia').value)||15,
+      mes_inicio: parseInt(document.getElementById('fn-f-sum-mes').value)||1,
       notas: document.getElementById('fn-f-sum-not').value
     }, 'fn-modal-suministro', fnLoadSum);
   }
@@ -4968,7 +5385,7 @@
       operador: document.getElementById('fn-f-tel-op').value,
       tarifa: document.getElementById('fn-f-tel-tar').value,
       coste_mensual: parseFloat(document.getElementById('fn-f-tel-cos').value)||0,
-      fecha_renovacion: document.getElementById('fn-f-tel-ren').value||null,
+      dia_cobro: parseInt(document.getElementById('fn-f-tel-dia').value)||1,
       notas: document.getElementById('fn-f-tel-not').value
     }, 'fn-modal-telecom', fnLoadTel);
   }
@@ -5001,7 +5418,8 @@
       nombre: document.getElementById('fn-f-sub-nom').value,
       coste: parseFloat(document.getElementById('fn-f-sub-cos').value)||0,
       frecuencia: document.getElementById('fn-f-sub-fre').value,
-      fecha_cobro: document.getElementById('fn-f-sub-fec').value||null,
+      dia_cobro: parseInt(document.getElementById('fn-f-sub-dia').value)||1,
+      modo_anual: document.getElementById('fn-f-sub-modo').value,
       activa: document.getElementById('fn-f-sub-act').value === 'true',
       notas: document.getElementById('fn-f-sub-not').value
     }, 'fn-modal-sub', fnLoadSub);
@@ -5042,6 +5460,7 @@
   async function fnSavePre() {
     await fnSaveItem('prestamos', {
       nombre: document.getElementById('fn-f-pre-nom').value,
+      dia_cobro: parseInt(document.getElementById('fn-f-pre-dia').value)||1,
       capital_inicial: parseFloat(document.getElementById('fn-f-pre-ci').value)||0,
       capital_pendiente: parseFloat(document.getElementById('fn-f-pre-cp').value)||0,
       cuota_mensual: parseFloat(document.getElementById('fn-f-pre-cuo').value)||0,
