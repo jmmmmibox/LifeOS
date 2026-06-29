@@ -2042,43 +2042,67 @@
 
           <!-- PORTFOLIO -->
           <div id="fn-sec-portfolio" style="display:none">
+            <!-- Resumen -->
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">
               <div class="card"><div class="card-title" style="margin-bottom:6px">Valor actual</div><div class="fn-val green" id="fn-port-val">—</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Coste total</div><div class="fn-val" id="fn-port-cos">—</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Ganancia/Pérdida</div><div class="fn-val" id="fn-port-gan">—</div></div>
               <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-port-ren">—</div></div>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-ghost" id="fn-port-refresh-btn" onclick="fnRefreshPrices()" style="border-color:var(--accent);color:var(--accent)">
-                  🔄 Actualizar precios
-                </button>
-                <span id="fn-port-refresh-status" style="font-size:12px;color:var(--text-3)"></span>
-              </div>
-              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-port')">+ Añadir Activo</button>
-            </div>
-            <!-- Panel de actualización manual -->
-            <div id="fn-port-manual-panel" style="display:none;margin-bottom:16px">
-              <div class="card" style="border:1px solid var(--amber)">
-                <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:12px">⚠️ No se pudo obtener precio automático para estos activos. Introduce el precio actual manualmente:</div>
-                <div id="fn-port-manual-list" style="display:flex;flex-direction:column;gap:8px"></div>
-                <div style="margin-top:12px">
-                  <button class="btn btn-primary btn-sm" onclick="fnSaveManualPrices()">Guardar precios manuales</button>
-                  <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fn-port-manual-panel').style.display='none'">Cancelar</button>
+
+            <!-- Layout: TradingView izquierda, tabla derecha -->
+            <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start">
+
+              <!-- Panel TradingView -->
+              <div>
+                <div class="card" style="padding:14px">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+                    <span>📊 Precios en tiempo real</span>
+                    <span style="font-size:10px;color:var(--text-3)">TradingView</span>
+                  </div>
+                  <!-- Selector de ticker -->
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="fn-tv-tickers"></div>
+                  <!-- Widget TradingView -->
+                  <div id="fn-tv-widget" style="border-radius:6px;overflow:hidden;min-height:300px"></div>
+                  <!-- Botón copiar precio -->
+                  <div id="fn-tv-copy-panel" style="margin-top:10px;display:none">
+                    <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">
+                      Viendo: <strong id="fn-tv-current-ticker">—</strong>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input type="number" id="fn-tv-price-input" class="form-input" style="flex:1;font-size:13px" step="0.0001" placeholder="Introduce el precio">
+                      <button class="btn btn-primary btn-sm" onclick="fnCopyTVPrice()">💾 Guardar</button>
+                    </div>
+                    <div style="font-size:11px;color:var(--text-3);margin-top:4px">Introduce el precio que ves en TradingView y pulsa Guardar</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="card" style="overflow-x:auto;padding:0">
-              <table style="width:100%;border-collapse:collapse">
-                <thead><tr style="border-bottom:1px solid var(--border)">
-                  <th class="fn-th">Ticker</th><th class="fn-th">Nombre</th><th class="fn-th">Tipo</th>
-                  <th class="fn-th">Participaciones</th><th class="fn-th">P.Medio</th>
-                  <th class="fn-th">P.Actual</th><th class="fn-th">Actualizado</th>
-                  <th class="fn-th">Valor</th><th class="fn-th">+/− €</th><th class="fn-th">+/− %</th><th class="fn-th">Acciones</th>
-                </tr></thead>
-                <tbody id="fn-port-tbody"><tr><td colspan="11" class="fn-empty-td">Cargando...</td></tr></tbody>
-              </table>
-            </div>
+
+              <!-- Tabla portfolio -->
+              <div>
+                <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+                  <button class="btn btn-primary btn-sm" onclick="fnOpenModal('fn-modal-port')">+ Añadir Activo</button>
+                </div>
+                <div class="card" style="overflow-x:auto;padding:0">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead><tr style="border-bottom:1px solid var(--border)">
+                      <th class="fn-th">Ticker</th>
+                      <th class="fn-th">Nombre</th>
+                      <th class="fn-th">Participaciones</th>
+                      <th class="fn-th">P.Medio</th>
+                      <th class="fn-th">P.Actual</th>
+                      <th class="fn-th">Actualizado</th>
+                      <th class="fn-th">Valor</th>
+                      <th class="fn-th">+/− €</th>
+                      <th class="fn-th">+/− %</th>
+                      <th class="fn-th">Acciones</th>
+                    </tr></thead>
+                    <tbody id="fn-port-tbody"><tr><td colspan="10" class="fn-empty-td">Cargando...</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div><!-- end grid -->
           </div>
 
           <!-- PRESUPUESTO -->
@@ -5531,7 +5555,59 @@
   }
 
   // PORTFOLIO
-  let fnPortData = []; // cache local de activos
+  let fnPortData = [];
+  let fnTVCurrentId = null; // id del activo seleccionado en TV
+
+  // Mapeo de tickers al formato que entiende TradingView
+  function fnToTVSymbol(ticker) {
+    const t = ticker.toUpperCase().trim();
+    // ETFs XETRA conocidos
+    const xetraMap = {
+      'SXR8':'XETR:SXR8', 'EUNL':'XETR:EUNL', 'IS3N':'XETR:IS3N',
+      'PPFB':'XETR:PPFB', 'XAIX':'XETR:XAIX', 'V9N':'XETR:V9N',
+      'VWCE':'XETR:VWCE', 'CSPX':'LSE:CSPX', 'IWDA':'XETR:IWDA',
+    };
+    if (xetraMap[t]) return xetraMap[t];
+    if (t.includes(':')) return t; // ya tiene prefijo
+    if (t.includes('.DE') || t.includes('.F')) return 'XETR:' + t.split('.')[0];
+    // Por defecto: asumir mercado US o XETRA
+    return t;
+  }
+
+  function fnLoadTVWidget(ticker, name) {
+    const symbol = fnToTVSymbol(ticker);
+    const container = document.getElementById('fn-tv-widget');
+    container.innerHTML = '';
+
+    // Cargar script TradingView si no está
+    if (!window.TradingView) {
+      const s = document.createElement('script');
+      s.src = 'https://s3.tradingview.com/tv.js';
+      s.onload = () => fnCreateTVWidget(symbol, container);
+      document.head.appendChild(s);
+    } else {
+      fnCreateTVWidget(symbol, container);
+    }
+  }
+
+  function fnCreateTVWidget(symbol, container) {
+    new window.TradingView.widget({
+      container_id: 'fn-tv-widget',
+      symbol: symbol,
+      interval: 'D',
+      timezone: 'Europe/Madrid',
+      theme: 'light',
+      style: '1',
+      locale: 'es',
+      toolbar_bg: '#f8f8f6',
+      enable_publishing: false,
+      hide_top_toolbar: false,
+      hide_legend: false,
+      save_image: false,
+      height: 320,
+      width: '100%',
+    });
+  }
 
   async function fnLoadPort() {
     const uid = currentUser?.id; if(!uid) return;
@@ -5539,7 +5615,72 @@
       const rows = await fnDbGet('portfolio', `user_id=eq.${uid}`);
       fnPortData = rows;
       fnRenderPort(rows);
+      fnRenderTVTickers(rows);
+      // Cargar el primero por defecto
+      if (rows.length > 0) fnSelectTVTicker(rows[0]);
     } catch(e) { fnAlert('Error','error'); }
+  }
+
+  function fnRenderTVTickers(rows) {
+    const el = document.getElementById('fn-tv-tickers');
+    if (!rows.length) { el.innerHTML = ''; return; }
+    el.innerHTML = rows.map(r => `
+      <button onclick="fnSelectTVTicker(${JSON.stringify(r).replace(/"/g,'&quot;')})"
+        id="fn-tv-btn-${r.id}"
+        style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg);
+               cursor:pointer;font-size:11px;font-weight:600;color:var(--text-2);font-family:var(--font);
+               transition:all 0.15s">
+        ${r.ticker}
+      </button>`).join('');
+  }
+
+  function fnSelectTVTicker(activo) {
+    fnTVCurrentId = activo.id;
+    // Resaltar botón activo
+    document.querySelectorAll('[id^="fn-tv-btn-"]').forEach(b => {
+      b.style.background = 'var(--bg)';
+      b.style.color = 'var(--text-2)';
+      b.style.borderColor = 'var(--border)';
+    });
+    const btn = document.getElementById(`fn-tv-btn-${activo.id}`);
+    if (btn) {
+      btn.style.background = 'var(--accent)';
+      btn.style.color = 'white';
+      btn.style.borderColor = 'var(--accent)';
+    }
+    // Cargar widget
+    fnLoadTVWidget(activo.ticker, activo.nombre);
+    // Mostrar panel copiar precio
+    document.getElementById('fn-tv-copy-panel').style.display = 'block';
+    document.getElementById('fn-tv-current-ticker').textContent = `${activo.ticker} — ${activo.nombre || ''}`;
+    document.getElementById('fn-tv-price-input').value = activo.precio_actual || '';
+    document.getElementById('fn-tv-price-input').focus();
+  }
+
+  async function fnCopyTVPrice() {
+    if (!fnTVCurrentId) return;
+    const price = parseFloat(document.getElementById('fn-tv-price-input').value);
+    if (!price || isNaN(price)) return fnAlert('Introduce un precio válido', 'error');
+    try {
+      const now = new Date().toISOString();
+      await fnDbPatch('portfolio', fnTVCurrentId, {
+        precio_actual: price,
+        precio_actualizado_at: now
+      });
+      // Actualizar cache local
+      const activo = fnPortData.find(a => a.id === fnTVCurrentId);
+      if (activo) {
+        activo.precio_actual = price;
+        activo.precio_actualizado_at = now;
+      }
+      fnRenderPort(fnPortData);
+      fnAlert(`Precio guardado: ${fnFmt(price)} ✓`);
+      // Pasar al siguiente activo automáticamente
+      const idx = fnPortData.findIndex(a => a.id === fnTVCurrentId);
+      if (idx < fnPortData.length - 1) {
+        setTimeout(() => fnSelectTVTicker(fnPortData[idx + 1]), 500);
+      }
+    } catch(e) { fnAlert('Error al guardar', 'error'); }
   }
 
   function fnRenderPort(rows) {
@@ -5559,14 +5700,15 @@
       const cos = Number(r.participaciones||0)*Number(r.precio_medio||0);
       const dif = val - cos;
       const difPct = cos > 0 ? dif/cos*100 : 0;
-      // Mostrar cuándo se actualizó el precio
       const updatedAt = r.precio_actualizado_at
-        ? new Date(r.precio_actualizado_at).toLocaleDateString('es-ES', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        ? new Date(r.precio_actualizado_at).toLocaleDateString('es-ES',{day:'numeric',month:'short'})
         : '—';
-      return `<tr>
-        <td class="fn-td" style="color:var(--text);font-weight:600">${r.ticker||'—'}</td>
+      const isSelected = r.id === fnTVCurrentId;
+      return `<tr style="${isSelected?'background:var(--accent-soft)':''}">
+        <td class="fn-td" style="font-weight:600;cursor:pointer;color:var(--accent)"
+            onclick="fnSelectTVTicker(${JSON.stringify(r).replace(/"/g,'&quot;')})"
+            title="Ver en TradingView">${r.ticker||'—'}</td>
         <td class="fn-td">${r.nombre||'—'}</td>
-        <td class="fn-td"><span class="fn-badge fn-badge-gray">${r.tipo||'—'}</span></td>
         <td class="fn-td">${fnFmtN(r.participaciones,4)}</td>
         <td class="fn-td">${fnFmt(r.precio_medio)}</td>
         <td class="fn-td" style="font-weight:600">${fnFmt(r.precio_actual)}</td>
@@ -5579,141 +5721,9 @@
           <button class="icon-btn danger" onclick="fnDel('portfolio','${r.id}',fnLoadPort)">🗑</button>
         </div></td>
       </tr>`;
-    }).join('') : `<tr><td colspan="11" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
+    }).join('') : `<tr><td colspan="10" class="fn-empty-td">📈 Sin activos en el portfolio</td></tr>`;
   }
 
-  // Obtener precio desde Finnhub (funciona desde el navegador)
-  const FN_FINNHUB_KEY = 'd91d0mpr01qqfqkb7860d91d0mpr01qqfqkb786g';
-
-  async function fnGetFinnhubPrice(ticker) {
-    // Construir todas las variantes posibles del ticker
-    const clean = ticker.replace(/\.(DE|F|XETRA|XETR)$/i, '').replace(/^(XETR:|XETRA:|BME:|NASDAQ:|NYSE:)/i, '');
-    
-    const variants = [
-      ticker,              // tal como está en la BD
-      `XETR:${clean}`,    // XETRA Frankfurt (ETFs europeos)
-      `${clean}.F`,        // Frankfurt suffix
-      `${clean}.XETRA`,   // XETRA suffix alternativo
-      clean,               // bare ticker (acciones US)
-      `NASDAQ:${clean}`,  // NASDAQ explícito
-      `NYSE:${clean}`,    // NYSE explícito
-      `BME:${clean}`,     // Bolsa Madrid
-    ];
-
-    // Eliminar duplicados
-    const unique = [...new Set(variants)];
-
-    for (const symbol of unique) {
-      try {
-        const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${FN_FINNHUB_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) continue;
-        const data = await res.json();
-        if (data.c && data.c > 0) {
-          console.log(`✓ ${ticker} → ${symbol}: ${data.c}`);
-          return { price: parseFloat(data.c.toFixed(4)), symbol };
-        }
-      } catch(e) { continue; }
-      // Pequeña pausa entre variantes
-      await new Promise(r => setTimeout(r, 150));
-    }
-    
-    console.warn(`✗ No price found for ${ticker} (tried: ${unique.join(', ')})`);
-    return null;
-  }
-
-  async function fnRefreshPrices() {
-    if (!fnPortData.length) return fnAlert('No hay activos en el portfolio', 'error');
-    const btn = document.getElementById('fn-port-refresh-btn');
-    const status = document.getElementById('fn-port-refresh-status');
-    btn.disabled = true;
-    btn.textContent = '⏳ Actualizando...';
-    status.textContent = '';
-
-    const failed = [];
-    let updated = 0;
-    const now = new Date().toISOString();
-
-    for (const activo of fnPortData) {
-      if (!activo.ticker) { failed.push(activo); continue; }
-      status.textContent = `Buscando ${activo.ticker}...`;
-
-      const result = await fnGetFinnhubPrice(activo.ticker);
-      if (result?.price) {
-        try {
-          await fnDbPatch('portfolio', activo.id, {
-            precio_actual: result.price,
-            precio_actualizado_at: now
-          });
-          activo.precio_actual = result.price;
-          activo.precio_actualizado_at = now;
-          updated++;
-          status.textContent = `✓ ${activo.ticker} → ${result.symbol}: ${result.price}`;
-        } catch(e) { failed.push(activo); }
-      } else {
-        failed.push(activo);
-      }
-      // Pequeña pausa para no saturar la API
-      await new Promise(r => setTimeout(r, 300));
-    }
-
-    btn.disabled = false;
-    btn.textContent = '🔄 Actualizar precios';
-
-    if (updated > 0) {
-      fnRenderPort(fnPortData);
-      status.textContent = `✓ ${updated} precio${updated>1?'s':''} actualizado${updated>1?'s':''}`;
-      status.style.color = 'var(--green)';
-    }
-
-    if (failed.length > 0) {
-      // Mostrar panel de actualización manual para los que fallaron
-      const manualList = document.getElementById('fn-port-manual-list');
-      manualList.innerHTML = failed.map(a => `
-        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border-soft)">
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">${a.ticker||'Sin ticker'} <span style="font-weight:400;color:var(--text-2)">${a.nombre||''}</span></div>
-            <div style="font-size:11px;color:var(--text-3)">Precio actual: ${fnFmt(a.precio_actual)}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <input type="number" id="manual-price-${a.id}" class="form-input" style="width:110px;padding:5px 8px;font-size:13px"
-              value="${a.precio_actual||''}" step="0.0001" placeholder="0.0000">
-            <span style="font-size:12px;color:var(--text-3)">€</span>
-          </div>
-        </div>`).join('');
-      document.getElementById('fn-port-manual-panel').style.display = 'block';
-      document.getElementById('fn-port-manual-panel').dataset.failedIds = JSON.stringify(failed.map(a=>a.id));
-      if (updated === 0) {
-        status.textContent = 'No se pudieron obtener precios automáticos';
-        status.style.color = 'var(--amber)';
-      } else {
-        status.textContent += ` · ${failed.length} requieren actualización manual`;
-        status.style.color = 'var(--amber)';
-      }
-    }
-  }
-
-  async function fnSaveManualPrices() {
-    const failedIds = JSON.parse(document.getElementById('fn-port-manual-panel').dataset.failedIds || '[]');
-    const now = new Date().toISOString();
-    let saved = 0;
-    for (const id of failedIds) {
-      const input = document.getElementById(`manual-price-${id}`);
-      const price = parseFloat(input?.value);
-      if (!price || isNaN(price)) continue;
-      try {
-        await fnDbPatch('portfolio', id, { precio_actual: price, precio_actualizado_at: now });
-        const activo = fnPortData.find(a => a.id === id);
-        if (activo) { activo.precio_actual = price; activo.precio_actualizado_at = now; }
-        saved++;
-      } catch(e) {}
-    }
-    document.getElementById('fn-port-manual-panel').style.display = 'none';
-    if (saved > 0) {
-      fnRenderPort(fnPortData);
-      fnAlert(`${saved} precio${saved>1?'s':''} guardado${saved>1?'s':''} ✓`);
-    }
-  }
   function fnEditPort(r) { document.getElementById('fn-modal-port-t').textContent='Editar Activo'; fnOpenModal('fn-modal-port',r); }
   async function fnSavePort() {
     await fnSaveItem('portfolio', {
