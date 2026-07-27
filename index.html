@@ -5704,7 +5704,7 @@
     else await fnDbPost('ingresos_recurrentes', {...data, user_id: currentUser.id});
     fnCloseModal('fn-modal-rec');
     fnAlert('Guardado ✓');
-    fnLoadRec();
+    fnLoadIngresos();
   }
 
   function fnEditIG(r) { document.getElementById('fn-modal-ig-t').textContent='Editar movimiento'; fnOpenModal('fn-modal-ig',r); }
