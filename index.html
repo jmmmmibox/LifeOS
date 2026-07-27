@@ -5502,6 +5502,67 @@
     fnOpenModal('fn-modal-aho');
   }
 
+  async function fnSaveAho() {
+    const editId = document.getElementById('fn-f-aho-id').value;
+    const data = {
+      tipo: document.getElementById('fn-f-aho-tipo').value,
+      nombre: document.getElementById('fn-f-aho-nom').value,
+      importe_mensual: parseFloat(document.getElementById('fn-f-aho-imp').value)||0,
+      dia_cobro: parseInt(document.getElementById('fn-f-aho-dia').value)||1,
+      notas: document.getElementById('fn-f-aho-not').value
+    };
+    if (editId) await fnDbPatch('objetivos_ahorro', editId, data);
+    else await fnDbPost('objetivos_ahorro', {...data, user_id: currentUser.id});
+    fnCloseModal('fn-modal-aho');
+    fnAlert('Guardado ✓');
+    fnLoadAho();
+  }
+
+  async function fnLoadAho() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('objetivos_ahorro', `user_id=eq.${uid}`);
+      const ahos = rows.filter(r=>r.tipo==='ahorro');
+      const invs = rows.filter(r=>r.tipo==='inversion');
+      const ahoM = ahos.reduce((s,r)=>s+Number(r.importe_mensual||0),0);
+      const invM = invs.reduce((s,r)=>s+Number(r.importe_mensual||0),0);
+      const totalM = ahoM + invM;
+
+      document.getElementById('fn-aho-mes').textContent = fnFmt(ahoM);
+      document.getElementById('fn-inv-mes').textContent = fnFmt(invM);
+      document.getElementById('fn-ahoinv-mes').textContent = fnFmt(totalM);
+      document.getElementById('fn-ahoinv-anio').textContent = fnFmt(totalM*12);
+
+      const renderList = (items, containerId, color, emptyMsg) => {
+        document.getElementById(containerId).innerHTML = items.length ? items.map(r => {
+          const rJson = JSON.stringify(r).replace(/"/g,'&quot;');
+          return `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:var(--radius);padding:12px 14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:13px;font-weight:600">${r.nombre||'—'}</div>
+                ${r.notas?`<div style="font-size:11px;color:var(--text-3);margin-top:2px">${r.notas}</div>`:''}
+                <div style="font-size:11px;color:var(--text-3);margin-top:2px">Día ${r.dia_cobro||'—'} de cada mes</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="text-align:right">
+                  <div style="font-size:16px;font-weight:700;color:${color}">${fnFmt(r.importe_mensual||0)}<span style="font-size:10px;font-weight:400;color:var(--text-3)">/mes</span></div>
+                  <div style="font-size:11px;color:var(--text-3)">${fnFmt((r.importe_mensual||0)*12)}/año</div>
+                </div>
+                <div style="display:flex;gap:4px">
+                  <button class="icon-btn" onclick='fnEditAho(JSON.parse(this.dataset.r))' data-r="${rJson}">✎</button>
+                  <button class="icon-btn danger" onclick="fnDel('objetivos_ahorro','${r.id}',fnLoadAho)">🗑</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join('') : `<div style="color:var(--text-3);font-size:13px;padding:16px 0">${emptyMsg}</div>`;
+      };
+
+      renderList(ahos, 'fn-aho-list', 'var(--green)', 'Sin entradas de ahorro');
+      renderList(invs, 'fn-inv-list', 'var(--accent)', 'Sin entradas de inversión');
+    } catch(e) { fnAlert('Error','error'); }
+  }
+
   // MOVIMIENTOS (oculto)
   async function fnLoadIG() {
     const uid = currentUser?.id; if(!uid) return;
