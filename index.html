@@ -1872,55 +1872,75 @@
           <div id="fn-alert" style="padding:10px 14px;border-radius:8px;font-size:13px;display:none;margin-bottom:16px"></div>
           <div style="display:flex;gap:0;margin-bottom:24px;background:var(--bg);border-radius:var(--radius-sm);padding:4px;width:fit-content;flex-wrap:wrap">
             <button class="fn-tab active" onclick="fnNav('dashboard',this)">🏠 Dashboard</button>
-            <button class="fn-tab" onclick="fnNav('ingresos',this)">💰 Movimientos</button>
-            <button class="fn-tab" onclick="fnNav('recurrentes',this)">🔁 Recurrentes</button>
+            <button class="fn-tab" onclick="fnNav('ingresos',this)">💚 Ingresos</button>
             <button class="fn-tab" onclick="fnNav('suscripciones',this)">🔄 Suscripciones</button>
             <button class="fn-tab" onclick="fnNav('prestamos',this)">🏦 Préstamos</button>
-            <button class="fn-tab" onclick="fnNav('ahorro',this)">🎯 Ahorro</button>
-            <button class="fn-tab" onclick="fnNav('presupuesto',this)">📊 Presupuesto</button>
             <button class="fn-tab" onclick="fnNav('seguros',this)">🛡️ Seguros</button>
             <button class="fn-tab" onclick="fnNav('suministros',this)">⚡ Suministros</button>
             <button class="fn-tab" onclick="fnNav('telecom',this)">📱 Telecom</button>
+            <button class="fn-tab" onclick="fnNav('ahorro',this)">🏦 Ahorro e Inversión</button>
             <button class="fn-tab" onclick="fnNav('portfolio',this)">📈 Portfolio</button>
           </div>
 
           <!-- DASHBOARD -->
           <div id="fn-sec-dashboard">
-            <div style="margin-bottom:12px;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em">Resumen del mes actual</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Ingresos mes</div><div class="fn-val green" id="fn-dash-ingresos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Confirmados</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos mes</div><div class="fn-val red" id="fn-dash-gastos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Confirmados</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Balance mes</div><div class="fn-val" id="fn-dash-balance">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Ingresos − Gastos</div></div>
-              <div class="card" style="border:1px solid var(--amber);cursor:pointer" onclick="fnNav('ingresos', document.querySelector('.fn-tab:nth-child(2)'));document.getElementById('fn-ig-estado').value='pendiente';fnLoadIG()">
-                <div class="card-title" style="margin-bottom:6px;color:var(--amber)">⏳ Pendientes</div>
-                <div class="fn-val amber" id="fn-dash-pendientes">—</div>
-                <div style="font-size:11px;color:var(--text-3);margin-top:4px">Pulsa para confirmar</div>
-              </div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Gastos fijos</div><div class="fn-val amber" id="fn-dash-fijos">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Suscripciones + préstamos</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Portfolio</div><div class="fn-val" id="fn-dash-portfolio">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Valor actual</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Rentabilidad</div><div class="fn-val" id="fn-dash-rent">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Vs precio medio</div></div>
-              <div class="card"><div class="card-title" style="margin-bottom:6px">Suscripciones/mes</div><div class="fn-val amber" id="fn-dash-subs">—</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">Coste mensual total</div></div>
+            <div style="display:flex;gap:8px;margin-bottom:20px">
+              <button class="btn btn-primary" id="fn-dash-tab-mes" onclick="fnDashTab('mes')">Mensual</button>
+              <button class="btn btn-ghost" id="fn-dash-tab-anio" onclick="fnDashTab('anio')">Anual</button>
             </div>
-            <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Próximos pagos (30 días)</div>
-            <div id="fn-dash-pagos" style="display:flex;flex-direction:column;gap:8px"><div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">Cargando...</div></div>
+
+            <!-- Tabla resumen -->
+            <div class="card" style="margin-bottom:16px;padding:0;overflow:hidden">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:var(--bg);border-bottom:2px solid var(--border)">
+                    <th style="padding:12px 16px;text-align:left;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em">Concepto</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em" id="fn-dash-col-label">Mensual</th>
+                    <th style="padding:12px 16px;text-align:right;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em" id="fn-dash-col-label2">Anual</th>
+                  </tr>
+                </thead>
+                <tbody id="fn-dash-tabla">
+                  <tr><td colspan="3" style="padding:32px;text-align:center;color:var(--text-3)">Cargando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Desglose gastos -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="card">
+                <div class="card-title" style="margin-bottom:14px">📊 Desglose gastos fijos</div>
+                <div id="fn-dash-desglose"></div>
+              </div>
+              <div class="card">
+                <div class="card-title" style="margin-bottom:14px">💡 Resumen</div>
+                <div id="fn-dash-resumen"></div>
+              </div>
+            </div>
           </div>
 
           <!-- INGRESOS RECURRENTES -->
-          <div id="fn-sec-recurrentes" style="display:none">
+          <!-- INGRESOS (nueva sección) -->
+          <div id="fn-sec-ingresos" style="display:none">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
               <div>
-                <h3 style="font-size:15px;font-weight:600">Ingresos y gastos recurrentes</h3>
-                <p style="font-size:12px;color:var(--text-3);margin-top:2px">Se generan automáticamente como pendientes en la fecha configurada</p>
+                <h3 style="font-size:15px;font-weight:600">Ingresos recurrentes</h3>
+                <p style="font-size:12px;color:var(--text-3);margin-top:2px">Nóminas, alquileres y otros ingresos habituales</p>
               </div>
-              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-rec')">+ Nuevo recurrente</button>
+              <button class="btn btn-primary" onclick="fnOpenModalRec('ingreso')">+ Añadir ingreso</button>
             </div>
-            <div id="fn-rec-list">
-              <div class="fn-empty-td" style="padding:40px;text-align:center;color:var(--text-3)">Cargando...</div>
+            <!-- Resumen -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Total mensual</div><div class="fn-val green" id="fn-ing-total-mes">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Total anual</div><div class="fn-val green" id="fn-ing-total-anio">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Fuentes activas</div><div class="fn-val" id="fn-ing-count">—</div></div>
+            </div>
+            <div id="fn-ing-list" style="display:flex;flex-direction:column;gap:8px">
+              <div class="fn-empty-td" style="text-align:center;padding:40px;color:var(--text-3)">Cargando...</div>
             </div>
           </div>
 
-          <!-- INGRESOS/GASTOS -->
-          <div id="fn-sec-ingresos" style="display:none">
+          <!-- MOVIMIENTOS (oculto, solo accesible via URL o dev) -->
+          <div id="fn-sec-movimientos" style="display:none">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <select class="form-select" id="fn-ig-mes" onchange="fnLoadIG()" style="width:140px">
@@ -1954,18 +1974,48 @@
             <div class="card" style="overflow-x:auto;padding:0">
               <table style="width:100%;border-collapse:collapse">
                 <thead><tr style="border-bottom:1px solid var(--border)">
-                  <th class="fn-th">Estado</th>
-                  <th class="fn-th">Fecha</th>
-                  <th class="fn-th">Tipo</th>
-                  <th class="fn-th">Categoria</th>
-                  <th class="fn-th">Descripcion</th>
-                  <th class="fn-th">Importe</th>
-                  <th class="fn-th">Acciones</th>
+                  <th class="fn-th">Estado</th><th class="fn-th">Fecha</th><th class="fn-th">Tipo</th>
+                  <th class="fn-th">Categoria</th><th class="fn-th">Descripcion</th><th class="fn-th">Importe</th><th class="fn-th">Acciones</th>
                 </tr></thead>
                 <tbody id="fn-ig-tbody"><tr><td colspan="7" style="padding:32px;text-align:center;color:var(--text-3)">Cargando...</td></tr></tbody>
               </table>
             </div>
           </div>
+
+          <!-- AHORRO E INVERSIÓN -->
+          <div id="fn-sec-ahorro" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <div>
+                <h3 style="font-size:15px;font-weight:600">Ahorro e Inversión</h3>
+                <p style="font-size:12px;color:var(--text-3);margin-top:2px">Lo que destinas a ahorro e inversión cada mes</p>
+              </div>
+              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-aho')">+ Añadir</button>
+            </div>
+            <!-- Resumen -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Ahorro mensual</div><div class="fn-val green" id="fn-aho-mes">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Inversión mensual</div><div class="fn-val" style="color:var(--accent)" id="fn-inv-mes">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Total mensual</div><div class="fn-val amber" id="fn-ahoinv-mes">—</div></div>
+              <div class="card"><div class="card-title" style="margin-bottom:6px">Total anual</div><div class="fn-val amber" id="fn-ahoinv-anio">—</div></div>
+            </div>
+            <!-- Dos columnas: Ahorro | Inversión -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🏦 Ahorro</div>
+                <div id="fn-aho-list" style="display:flex;flex-direction:column;gap:8px">
+                  <div style="color:var(--text-3);font-size:13px;padding:16px 0">Cargando...</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📈 Inversión</div>
+                <div id="fn-inv-list" style="display:flex;flex-direction:column;gap:8px">
+                  <div style="color:var(--text-3);font-size:13px;padding:16px 0">Cargando...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
 
 
           <!-- SEGUROS -->
@@ -2063,14 +2113,6 @@
           </div>
 
           <!-- AHORRO -->
-          <div id="fn-sec-ahorro" style="display:none">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-              <h3 style="font-size:16px;font-weight:600">Objetivos de Ahorro</h3>
-              <button class="btn btn-primary" onclick="fnOpenModal('fn-modal-aho')">+ Añadir Objetivo</button>
-            </div>
-            <div id="fn-aho-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"></div>
-          </div>
-
           <!-- PORTFOLIO -->
           <div id="fn-sec-portfolio" style="display:none">
             <!-- Resumen -->
@@ -2137,55 +2179,6 @@
           </div>
 
           <!-- PRESUPUESTO -->
-          <div id="fn-sec-presupuesto" style="display:none">
-            <div style="display:flex;gap:8px;margin-bottom:20px">
-              <button class="btn btn-primary" id="fn-btn-bud-mes" onclick="fnSetBudTab('mes')">Mensual</button>
-              <button class="btn btn-ghost" id="fn-btn-bud-anio" onclick="fnSetBudTab('anio')">Anual</button>
-            </div>
-            <div id="fn-bud-panel-mes">
-              <div class="card" style="margin-bottom:16px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-                  <div>
-                    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Límite mensual total</div>
-                    <div style="font-size:22px;font-weight:700;color:var(--text)" id="fn-bud-mes-limit">No definido</div>
-                  </div>
-                  <button class="btn btn-ghost btn-sm" onclick="fnOpenBudModal('mes')">Editar límites</button>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
-                  <span style="color:var(--text-2)">Gastado: <strong id="fn-bud-mes-gastado" style="color:var(--text)">—</strong></span>
-                  <span id="fn-bud-mes-pct" style="font-weight:600">—</span>
-                </div>
-                <div class="progress-bar" style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
-                  <div id="fn-bud-mes-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width .3s"></div>
-                </div>
-                <div style="font-size:12px;color:var(--text-3);margin-top:6px" id="fn-bud-mes-resto">—</div>
-              </div>
-              <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Por categoría</div>
-              <div class="card" id="fn-bud-mes-cats" style="padding:16px"><div style="color:var(--text-3);font-size:13px">Cargando...</div></div>
-            </div>
-            <div id="fn-bud-panel-anio" style="display:none">
-              <div class="card" style="margin-bottom:16px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-                  <div>
-                    <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Límite anual total</div>
-                    <div style="font-size:22px;font-weight:700;color:var(--text)" id="fn-bud-anio-limit">No definido</div>
-                  </div>
-                  <button class="btn btn-ghost btn-sm" onclick="fnOpenBudModal('anio')">Editar límites</button>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
-                  <span style="color:var(--text-2)">Gastado: <strong id="fn-bud-anio-gastado" style="color:var(--text)">—</strong></span>
-                  <span id="fn-bud-anio-pct" style="font-weight:600">—</span>
-                </div>
-                <div class="progress-bar" style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
-                  <div id="fn-bud-anio-bar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width .3s"></div>
-                </div>
-                <div style="font-size:12px;color:var(--text-3);margin-top:6px" id="fn-bud-anio-resto">—</div>
-              </div>
-              <div style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Por categoría</div>
-              <div class="card" id="fn-bud-anio-cats" style="padding:16px"><div style="color:var(--text-3);font-size:13px">Cargando...</div></div>
-            </div>
-          </div>
-
         </div><!-- end page-finances -->
 
         <!-- FRASES -->
@@ -2517,18 +2510,32 @@
   </div>
 </div>
 
-<!-- Modal Ahorro -->
+<!-- Modal Ahorro/Inversión -->
 <div class="modal-overlay" id="fn-modal-aho">
-  <div class="modal" style="max-width:520px">
-    <div class="modal-header"><span class="modal-title" id="fn-modal-aho-t">Añadir Objetivo de Ahorro</span><button class="modal-close" onclick="fnCloseModal('fn-modal-aho')">×</button></div>
-    <div class="form-group"><label class="form-label">Nombre</label><input type="text" id="fn-f-aho-nom" class="form-input" placeholder="Vacaciones, coche nuevo..."></div>
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title" id="fn-modal-aho-t">Añadir ahorro/inversión</span><button class="modal-close" onclick="fnCloseModal('fn-modal-aho')">×</button></div>
+    <input type="hidden" id="fn-f-aho-id">
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Meta (€)</label><input type="number" id="fn-f-aho-met" class="form-input" step="0.01" placeholder="0.00"></div>
-      <div class="form-group"><label class="form-label">Ahorrado hasta ahora (€)</label><input type="number" id="fn-f-aho-act" class="form-input" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select id="fn-f-aho-tipo" class="form-select">
+          <option value="ahorro">🏦 Ahorro</option>
+          <option value="inversion">📈 Inversión</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Nombre</label>
+        <input type="text" id="fn-f-aho-nom" class="form-input" placeholder="Cuenta ahorro, Trade Republic...">
+      </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Fecha objetivo</label><input type="date" id="fn-f-aho-fec" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Notas</label><input type="text" id="fn-f-aho-not" class="form-input" placeholder="Notas..."></div>
+      <div class="form-group"><label class="form-label">Importe mensual (€)</label>
+        <input type="number" id="fn-f-aho-imp" class="form-input" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group"><label class="form-label">Día de transferencia</label>
+        <input type="number" id="fn-f-aho-dia" class="form-input" min="1" max="31" placeholder="1">
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label>
+      <input type="text" id="fn-f-aho-not" class="form-input" placeholder="Banco, destino...">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="fnCloseModal('fn-modal-aho')">Cancelar</button>
@@ -5044,9 +5051,9 @@
     document.querySelectorAll('.fn-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('fn-sec-' + name).style.display = 'block';
     el.classList.add('active');
-    ({dashboard:fnLoadDash, ingresos:fnLoadIG, recurrentes:fnLoadRec, seguros:fnLoadSeg, suministros:fnLoadSum,
+    ({dashboard:fnLoadDash, ingresos:fnLoadIngresos, seguros:fnLoadSeg, suministros:fnLoadSum,
       telecom:fnLoadTel, suscripciones:fnLoadSub, prestamos:fnLoadPre, ahorro:fnLoadAho,
-      portfolio:fnLoadPort, presupuesto:fnLoadBudget})[name]?.();
+      portfolio:fnLoadPort, movimientos:fnLoadIG})[name]?.();
   }
 
   function fnOpenModal(id, data=null) {
@@ -5283,66 +5290,273 @@
     } catch(e) { console.error('Error generando recurrentes:', e); }
   }
 
-  async function fnLoadDash() {
-    // Primero generar pendientes del mes
-    await fnCheckRecurrentes();
+  let fnDashView = 'mes'; // 'mes' | 'anio'
 
-    const now = new Date();
-    const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
-    const uid = currentUser?.id;
-    if (!uid) return;
+  function fnDashTab(tab) {
+    fnDashView = tab;
+    document.getElementById('fn-dash-tab-mes').className = 'btn ' + (tab==='mes'?'btn-primary':'btn-ghost');
+    document.getElementById('fn-dash-tab-anio').className = 'btn ' + (tab==='anio'?'btn-primary':'btn-ghost');
+    fnLoadDash();
+  }
+
+  // Helper: normalizar importe mensual según frecuencia
+  function fnToMensual(importe, frecuencia) {
+    const f = frecuencia || 'mensual';
+    if (f === 'anual') return importe / 12;
+    if (f === 'semestral') return importe / 6;
+    if (f === 'trimestral') return importe / 3;
+    if (f === 'bimensual') return importe / 2;
+    return importe; // mensual
+  }
+
+  async function fnLoadDash() {
+    const uid = currentUser?.id; if (!uid) return;
     try {
-      const [ig, subs, pres, port] = await Promise.all([
-        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${lastDayOfMonth(parseInt(y), parseInt(m))}`),
+      const [ings, subs, pres, segs, sums, tels, ahoInvs] = await Promise.all([
+        fnDbGet('ingresos_recurrentes', `user_id=eq.${uid}&activo=eq.true`),
         fnDbGet('suscripciones', `user_id=eq.${uid}&activa=eq.true`),
         fnDbGet('prestamos', `user_id=eq.${uid}`),
-        fnDbGet('portfolio', `user_id=eq.${uid}`)
+        fnDbGet('seguros', `user_id=eq.${uid}`),
+        fnDbGet('suministros', `user_id=eq.${uid}`),
+        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`),
+        fnDbGet('objetivos_ahorro', `user_id=eq.${uid}`)
       ]);
-      const confirmados = ig.filter(r => r.estado !== 'pendiente');
-      const pendientes = ig.filter(r => r.estado === 'pendiente');
-      const ingresos = confirmados.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
-      const gastos = confirmados.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
-      const bal = ingresos - gastos;
-      const subsM = subs.reduce((s,r)=>{let c=Number(r.coste||0);if(r.frecuencia==='anual')c/=12;if(r.frecuencia==='trimestral')c/=3;return s+c;},0);
-      const presM = pres.reduce((s,r)=>s+Number(r.cuota_mensual||0),0);
-      const portV = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_actual||0),0);
-      const portC = port.reduce((s,r)=>s+Number(r.participaciones||0)*Number(r.precio_medio||0),0);
-      const portR = portC > 0 ? (portV-portC)/portC*100 : 0;
 
-      document.getElementById('fn-dash-ingresos').textContent = fnFmt(ingresos);
-      document.getElementById('fn-dash-gastos').textContent = fnFmt(gastos);
-      const bEl = document.getElementById('fn-dash-balance');
-      bEl.textContent = fnFmt(bal); bEl.className = 'fn-val ' + (bal >= 0 ? 'green' : 'red');
-      const pEl = document.getElementById('fn-dash-pendientes');
-      pEl.textContent = pendientes.length;
-      document.getElementById('fn-dash-fijos').textContent = fnFmt(subsM + presM);
-      document.getElementById('fn-dash-portfolio').textContent = fnFmt(portV);
-      const rEl = document.getElementById('fn-dash-rent');
-      rEl.textContent = fnFmtN(portR) + '%'; rEl.className = 'fn-val ' + (portR >= 0 ? 'green' : 'red');
-      document.getElementById('fn-dash-subs').textContent = fnFmt(subsM);
+      const mul = fnDashView === 'anio' ? 12 : 1;
+      const lbl = fnDashView === 'anio' ? 'Anual' : 'Mensual';
 
-      // Próximos pagos = movimientos pendientes del mes
-      const pEl2 = document.getElementById('fn-dash-pagos');
-      const tipoIcons = {suscripcion:'🔄',prestamo:'🏦',seguro:'🛡️',suministro:'⚡',telecom:'📱',ingreso_recurrente:'💰'};
-      pEl2.innerHTML = pendientes.length
-        ? pendientes.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(p=>`
-          <div class="fn-payment-item" style="cursor:pointer" onclick="fnNav('ingresos', document.querySelector('.fn-tab:nth-child(2)'));document.getElementById('fn-ig-estado').value='pendiente';fnLoadIG()">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="fn-payment-icon" style="background:${p.tipo==='ingreso'?'#ecfdf5':'#fef2f2'};color:${p.tipo==='ingreso'?'var(--green)':'var(--red)'}">
-                ${tipoIcons[p.recurrente_tipo]||'💳'}
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:500">${p.descripcion||p.categoria}</div>
-                <div style="font-size:11px;color:var(--text-3)">${fnFmtD(p.fecha)} · Pendiente de confirmar</div>
-              </div>
+      // Calcular totales mensuales
+      const ingM = ings.reduce((s,r) => s + fnToMensual(Number(r.importe||0), r.frecuencia), 0);
+      const subsM = subs.reduce((s,r) => s + fnToMensual(Number(r.coste||0), r.frecuencia), 0);
+      const presM = pres.reduce((s,r) => s + Number(r.cuota_mensual||0), 0);
+      const segM = segs.reduce((s,r) => {
+        if (r.modo_anual === 'mensual') return s + Number(r.prima_anual||0)/12;
+        return s + Number(r.prima_anual||0)/12; // siempre mensualizar
+      }, 0);
+      const sumM = sums.reduce((s,r) => s + fnToMensual(Number(r.importe||0), r.frecuencia), 0);
+      const telM = tels.reduce((s,r) => s + Number(r.coste_mensual||0), 0);
+      const ahoM = ahoInvs.filter(r=>r.tipo==='ahorro').reduce((s,r) => s + Number(r.importe_mensual||0), 0);
+      const invM = ahoInvs.filter(r=>r.tipo==='inversion').reduce((s,r) => s + Number(r.importe_mensual||0), 0);
+
+      const gastosFijosM = subsM + presM + segM + sumM + telM;
+      const totalGastosM = gastosFijosM + ahoM + invM;
+      const disponibleM = ingM - totalGastosM;
+
+      // Renderizar tabla
+      const row = (label, val, color='', bold=false, sep=false) => {
+        const style = bold ? 'font-weight:700;font-size:15px;' : '';
+        const sepStyle = sep ? 'border-top:2px solid var(--border);' : '';
+        return `<tr style="${sepStyle}">
+          <td style="padding:10px 16px;font-size:13px;color:var(--text-2);${style}">${label}</td>
+          <td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:600;color:${color||'var(--text)'};${style}">${fnFmt(val*mul)}</td>
+          <td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:600;color:${color||'var(--text)'};${style}">${fnFmt(val*12)}</td>
+        </tr>`;
+      };
+
+      document.getElementById('fn-dash-col-label').textContent = 'Mensual';
+      document.getElementById('fn-dash-col-label2').textContent = 'Anual';
+
+      document.getElementById('fn-dash-tabla').innerHTML = `
+        ${row('💚 Ingresos estimados', ingM, 'var(--green)', true)}
+        ${row('🔄 Suscripciones', subsM, 'var(--red)')}
+        ${row('🏦 Préstamos', presM, 'var(--red)')}
+        ${row('🛡️ Seguros', segM, 'var(--red)')}
+        ${row('⚡ Suministros', sumM, 'var(--red)')}
+        ${row('📱 Telecom', telM, 'var(--red)')}
+        ${row('📊 Total gastos fijos', gastosFijosM, 'var(--red)', true)}
+        ${row('🏦 Ahorro', ahoM, '#6366f1')}
+        ${row('📈 Inversión', invM, '#6366f1')}
+        <tr style="border-top:2px solid var(--border);background:${disponibleM>=0?'#ecfdf5':'#fef2f2'}">
+          <td style="padding:14px 16px;font-size:15px;font-weight:700;color:var(--text)">💡 Disponible real</td>
+          <td style="padding:14px 16px;text-align:right;font-size:18px;font-weight:800;color:${disponibleM>=0?'var(--green)':'var(--red)'}">${fnFmt(disponibleM)}</td>
+          <td style="padding:14px 16px;text-align:right;font-size:18px;font-weight:800;color:${disponibleM>=0?'var(--green)':'var(--red)'}">${fnFmt(disponibleM*12)}</td>
+        </tr>`;
+
+      // Desglose gastos
+      const cats = [
+        {l:'Suscripciones', v:subsM, c:'#f59e0b'},
+        {l:'Préstamos', v:presM, c:'#ef4444'},
+        {l:'Seguros', v:segM, c:'#10b981'},
+        {l:'Suministros', v:sumM, c:'#4f46e5'},
+        {l:'Telecom', v:telM, c:'#8b5cf6'},
+      ].filter(c=>c.v>0);
+
+      document.getElementById('fn-dash-desglose').innerHTML = cats.length ? cats.map(c => {
+        const pct = gastosFijosM > 0 ? Math.round(c.v/gastosFijosM*100) : 0;
+        return `<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span style="color:var(--text-2)">${c.l}</span>
+            <span style="font-weight:600;color:var(--text)">${fnFmt(c.v)} <span style="color:var(--text-3);font-weight:400">(${pct}%)</span></span>
+          </div>
+          <div style="background:var(--border);border-radius:3px;height:6px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${c.c};border-radius:3px"></div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="color:var(--text-3);font-size:13px">Sin gastos configurados</div>';
+
+      // Resumen
+      const tasaAhorro = ingM > 0 ? Math.round((ahoM+invM)/ingM*100) : 0;
+      const tasaGasto = ingM > 0 ? Math.round(gastosFijosM/ingM*100) : 0;
+      document.getElementById('fn-dash-resumen').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text-2)">Tasa de ahorro+inversión</span>
+            <span style="font-size:15px;font-weight:700;color:var(--accent)">${tasaAhorro}%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text-2)">Gastos fijos / ingresos</span>
+            <span style="font-size:15px;font-weight:700;color:${tasaGasto>70?'var(--red)':'var(--amber)'}">${tasaGasto}%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text-2)">Fuentes de ingreso</span>
+            <span style="font-size:15px;font-weight:700;color:var(--text)">${ings.length}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text-2)">Gastos fijos mensuales</span>
+            <span style="font-size:15px;font-weight:700;color:var(--red)">${fnFmt(gastosFijosM)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">Disponible real/mes</span>
+            <span style="font-size:16px;font-weight:800;color:${disponibleM>=0?'var(--green)':'var(--red)'}">${fnFmt(disponibleM)}</span>
+          </div>
+        </div>`;
+
+    } catch(e) { console.error('fnLoadDash error:', e); }
+  }
+
+  // INGRESOS RECURRENTES
+  async function fnOpenModalRec(tipo) {
+    document.getElementById('fn-f-rec-id').value = '';
+    document.getElementById('fn-f-rec-tipo').value = tipo || 'ingreso';
+    document.getElementById('fn-f-rec-nom').value = '';
+    document.getElementById('fn-f-rec-imp').value = '';
+    document.getElementById('fn-f-rec-fre').value = 'mensual';
+    document.getElementById('fn-f-rec-dia').value = '';
+    document.getElementById('fn-f-rec-mes').value = '1';
+    document.getElementById('fn-f-rec-act').value = 'true';
+    document.getElementById('fn-f-rec-not').value = '';
+    document.getElementById('fn-modal-rec-t').textContent = tipo === 'ingreso' ? 'Nuevo ingreso recurrente' : 'Nuevo gasto recurrente';
+    fnOpenModal('fn-modal-rec');
+  }
+
+  async function fnLoadIngresos() {
+    const uid = currentUser?.id; if(!uid) return;
+    try {
+      const rows = await fnDbGet('ingresos_recurrentes', `user_id=eq.${uid}`);
+      const totalM = rows.filter(r=>r.activo).reduce((s,r) => s + fnToMensual(Number(r.importe||0), r.frecuencia), 0);
+      const totalA = totalM * 12;
+      const activos = rows.filter(r=>r.activo).length;
+
+      document.getElementById('fn-ing-total-mes').textContent = fnFmt(totalM);
+      document.getElementById('fn-ing-total-anio').textContent = fnFmt(totalA);
+      document.getElementById('fn-ing-count').textContent = activos;
+
+      const freqLabel = f => ({mensual:'Mensual',bimensual:'Bimensual',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'}[f]||f||'Mensual');
+
+      document.getElementById('fn-ing-list').innerHTML = rows.length ? rows.map(r => {
+        const mensual = fnToMensual(Number(r.importe||0), r.frecuencia);
+        const rJson = JSON.stringify(r).replace(/"/g,'&quot;');
+        return `<div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius);padding:12px 16px;${!r.activo?'opacity:0.5':''}">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${r.nombre}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${freqLabel(r.frecuencia)} · Día ${r.dia_cobro||'—'} · ${r.categoria||'Otros'}</div>
+            ${r.notas ? `<div style="font-size:11px;color:var(--text-3)">${r.notas}</div>` : ''}
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:16px;font-weight:700;color:var(--green)">+${fnFmt(r.importe)}</div>
+            ${r.frecuencia !== 'mensual' ? `<div style="font-size:11px;color:var(--text-3)">${fnFmt(mensual)}/mes</div>` : ''}
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="icon-btn" onclick='fnEditRec(JSON.parse(this.dataset.r))' data-r="${rJson}">✎</button>
+            <button class="icon-btn danger" onclick="fnDel('ingresos_recurrentes','${r.id}',fnLoadIngresos)">🗑</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align:center;padding:40px;color:var(--text-3);font-size:13px">💚 Sin ingresos configurados</div>';
+    } catch(e) { fnAlert('Error','error'); }
+  }
+
+  function fnEditRec(r) {
+    document.getElementById('fn-f-rec-id').value = r.id;
+    document.getElementById('fn-f-rec-tipo').value = r.tipo || 'ingreso';
+    document.getElementById('fn-f-rec-nom').value = r.nombre || '';
+    document.getElementById('fn-f-rec-imp').value = r.importe || '';
+    document.getElementById('fn-f-rec-cat').value = r.categoria || 'Salario';
+    document.getElementById('fn-f-rec-fre').value = r.frecuencia || 'mensual';
+    document.getElementById('fn-f-rec-dia').value = r.dia_cobro || '';
+    document.getElementById('fn-f-rec-mes').value = r.mes_cobro || '1';
+    document.getElementById('fn-f-rec-act').value = r.activo ? 'true' : 'false';
+    document.getElementById('fn-f-rec-not').value = r.notas || '';
+    document.getElementById('fn-modal-rec-t').textContent = 'Editar ingreso';
+    fnOpenModal('fn-modal-rec');
+  }
+
+  // AHORRO E INVERSIÓN
+  function fnEditAho(r) {
+    document.getElementById('fn-f-aho-id').value = r.id;
+    document.getElementById('fn-f-aho-tipo').value = r.tipo || 'ahorro';
+    document.getElementById('fn-f-aho-nom').value = r.nombre || '';
+    document.getElementById('fn-f-aho-imp').value = r.importe_mensual || '';
+    document.getElementById('fn-f-aho-dia').value = r.dia_cobro || '';
+    document.getElementById('fn-f-aho-not').value = r.notas || '';
+    document.getElementById('fn-modal-aho-t').textContent = 'Editar ahorro/inversión';
+    fnOpenModal('fn-modal-aho');
+  }
+
+  // MOVIMIENTOS (oculto)
+  async function fnLoadIG() {
+    const uid = currentUser?.id; if(!uid) return;
+    const mes = document.getElementById('fn-ig-mes').value;
+    const anio = document.getElementById('fn-ig-anio').value;
+    const tipo = document.getElementById('fn-ig-tipo').value;
+    const estado = document.getElementById('fn-ig-estado')?.value || '';
+    let qs = `user_id=eq.${uid}`;
+    if (mes && anio) qs += `&fecha=gte.${anio}-${mes}-01&fecha=lte.${lastDayOfMonth(parseInt(anio), parseInt(mes))}`;
+    else if (anio) qs += `&fecha=gte.${anio}-01-01&fecha=lte.${anio}-12-31`;
+    if (tipo) qs += `&tipo=eq.${tipo}`;
+    if (estado) qs += `&estado=eq.${estado}`;
+    try {
+      const rows = await fnDbGet('ingresos_gastos', qs);
+      const ySel = document.getElementById('fn-ig-anio');
+      if (ySel.options.length <= 1) {
+        [...new Set(rows.map(r=>r.fecha?.split('-')[0]).filter(Boolean))].sort().reverse()
+          .forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); });
+      }
+      const confirmados = rows.filter(r=>r.estado!=='pendiente');
+      const ing = confirmados.filter(r=>r.tipo==='ingreso').reduce((s,r)=>s+Number(r.importe||0),0);
+      const gas = confirmados.filter(r=>r.tipo==='gasto').reduce((s,r)=>s+Number(r.importe||0),0);
+      const pen = rows.filter(r=>r.estado==='pendiente').length;
+      document.getElementById('fn-ig-ing').textContent = fnFmt(ing);
+      document.getElementById('fn-ig-gas').textContent = fnFmt(gas);
+      const bEl = document.getElementById('fn-ig-bal');
+      bEl.textContent = fnFmt(ing-gas); bEl.className = 'fn-val ' + (ing-gas>=0?'green':'red');
+      document.getElementById('fn-ig-pen').textContent = pen;
+      const estadoBadge = (e) => {
+        if (e==='pendiente') return '<span style="background:var(--amber-soft);color:var(--amber);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">⏳ PDTE</span>';
+        if (e==='manual') return '<span style="background:var(--accent-soft);color:var(--accent-text);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">MANUAL</span>';
+        return '<span style="background:var(--green-soft);color:var(--green);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">✓ OK</span>';
+      };
+      document.getElementById('fn-ig-tbody').innerHTML = rows.length ? rows.map(r=>`
+        <tr style="${r.estado==='pendiente'?'background:var(--amber-soft)':''}">
+          <td class="fn-td">${estadoBadge(r.estado)}</td>
+          <td class="fn-td">${fnFmtD(r.fecha)}</td>
+          <td class="fn-td"><span class="fn-badge ${r.tipo==='ingreso'?'fn-badge-green':'fn-badge-red'}">${r.tipo}</span></td>
+          <td class="fn-td">${r.categoria||'—'}</td>
+          <td class="fn-td" style="color:var(--text);font-weight:500">${r.descripcion||'—'}</td>
+          <td class="fn-td" style="color:${r.tipo==='ingreso'?'var(--green)':'var(--red)'};font-weight:600">${r.tipo==='ingreso'?'+':'-'}${fnFmt(r.importe)}</td>
+          <td class="fn-td">
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              ${r.estado==='pendiente'?`<button class="btn btn-primary btn-sm" onclick="fnConfirmar('${r.id}')">✓</button>`:''}
+              <button class="icon-btn" onclick='fnEditIG(${JSON.stringify(r)})'>✎</button>
+              <button class="icon-btn danger" onclick="fnDel('ingresos_gastos','${r.id}',fnLoadIG)">🗑</button>
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="font-size:15px;font-weight:600;color:${p.tipo==='ingreso'?'var(--green)':'var(--red)'}">${p.tipo==='ingreso'?'+':'-'}${fnFmt(p.importe)}</div>
-              <span style="font-size:10px;background:var(--amber-soft);color:var(--amber);padding:2px 6px;border-radius:10px;font-weight:600">PDTE</span>
-            </div>
-          </div>`).join('')
-        : '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">✅ No hay movimientos pendientes</div>';
-    } catch(e) { console.error(e); }
+          </td>
+        </tr>`).join('') : `<tr><td colspan="7" class="fn-empty-td">Sin movimientos</td></tr>`;
+    } catch(e) { fnAlert('Error','error'); }
+  }
+
+  async function fnConfirmar(id) {
+    await fnDbPatch('ingresos_gastos', id, { estado: 'confirmado' });
+    fnAlert('Confirmado ✓'); fnLoadIG();
   }
 
   // INGRESOS/GASTOS
@@ -5410,61 +5624,6 @@
   }
 
   // INGRESOS RECURRENTES
-  async function fnLoadRec() {
-    const uid = currentUser?.id; if(!uid) return;
-    try {
-      const [recs, subs, pres, segs, sums, tels] = await Promise.all([
-        fnDbGet('ingresos_recurrentes', `user_id=eq.${uid}`),
-        fnDbGet('suscripciones', `user_id=eq.${uid}`),
-        fnDbGet('prestamos', `user_id=eq.${uid}`),
-        fnDbGet('seguros', `user_id=eq.${uid}`),
-        fnDbGet('suministros', `user_id=eq.${uid}`),
-        fnDbGet('telecomunicaciones', `user_id=eq.${uid}`)
-      ]);
-
-      const freqLabel = f => ({mensual:'Mensual',bimensual:'Bimensual',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'}[f]||f);
-
-      const seccion = (titulo, icono, color, items, tipo) => {
-        if (!items.length) return '';
-        return `<div style="margin-bottom:20px">
-          <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
-            <span>${icono}</span> ${titulo} (${items.length})
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            ${items.map(r => {
-              const nombre = r.nombre || r.operador || r.tipo || '—';
-              const importe = r.importe || r.cuota_mensual || r.coste || r.prima_anual || r.coste_mensual || 0;
-              const freq = freqLabel(r.frecuencia || 'mensual');
-              const dia = r.dia_cobro || r.dia || '—';
-              const activo = r.activo !== false && r.activa !== false;
-              return `<div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid ${color};border-radius:var(--radius);padding:12px 14px;${!activo?'opacity:0.5':''}">
-                <div style="flex:1">
-                  <div style="font-size:13px;font-weight:600">${nombre}</div>
-                  <div style="font-size:11px;color:var(--text-3);margin-top:2px">${freq} · Día ${dia}</div>
-                </div>
-                <div style="font-size:14px;font-weight:700;color:${tipo==='ingreso'?'var(--green)':'var(--red)'}">
-                  ${tipo==='ingreso'?'+':'-'}${fnFmt(importe)}
-                </div>
-                <span style="font-size:10px;background:${activo?'var(--green-soft)':'var(--border-soft)'};color:${activo?'var(--green)':'var(--text-3)'};padding:2px 8px;border-radius:10px;font-weight:600">
-                  ${activo?'Activo':'Inactivo'}
-                </span>
-              </div>`;
-            }).join('')}
-          </div>
-        </div>`;
-      };
-
-      document.getElementById('fn-rec-list').innerHTML =
-        seccion('Ingresos recurrentes propios', '💚', 'var(--green)', recs, 'ingreso') +
-        seccion('Suscripciones', '🔄', '#f59e0b', subs, 'gasto') +
-        seccion('Préstamos', '🏦', '#ef4444', pres, 'gasto') +
-        seccion('Seguros', '🛡️', '#10b981', segs, 'gasto') +
-        seccion('Suministros', '⚡', '#4f46e5', sums, 'gasto') +
-        seccion('Telecom', '📱', '#8b5cf6', tels, 'gasto') ||
-        '<div class="fn-empty-td" style="text-align:center;padding:40px;color:var(--text-3)">Sin recurrentes configurados. Añádelos en sus secciones.</div>';
-    } catch(e) { fnAlert('Error','error'); }
-  }
-
   async function fnSaveRec() {
     const nombre = document.getElementById('fn-f-rec-nom').value.trim();
     if (!nombre) return fnAlert('Escribe un nombre', 'error');
@@ -5688,46 +5847,6 @@
   }
 
   // AHORRO
-  async function fnLoadAho() {
-    const uid = currentUser?.id; if(!uid) return;
-    try {
-      const rows = await fnDbGet('objetivos_ahorro', `user_id=eq.${uid}`);
-      const el = document.getElementById('fn-aho-grid');
-      el.innerHTML = rows.length ? rows.map(r=>{
-        const pct = r.importe_meta > 0 ? Math.min(100, Math.round(r.importe_actual/r.importe_meta*100)) : 0;
-        return `<div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-            <div style="font-size:14px;font-weight:600;color:var(--text)">${r.nombre||'—'}</div>
-            <div style="display:flex;gap:4px">
-              <button class="icon-btn" onclick='fnEditAho(${JSON.stringify(r)})'>✎</button>
-              <button class="icon-btn danger" onclick="fnDel('objetivos_ahorro','${r.id}',fnLoadAho)">🗑</button>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:6px">
-            <span>Ahorrado: <strong style="color:var(--text)">${fnFmt(r.importe_actual)}</strong></span>
-            <span>Meta: ${fnFmt(r.importe_meta)}</span>
-          </div>
-          <div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:var(--green)"></div></div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-3)">
-            <span>${pct}%</span>
-            ${r.fecha_objetivo ? `<span>📅 ${fnFmtD(r.fecha_objetivo)}</span>` : ''}
-          </div>
-          ${r.notas ? `<div style="font-size:12px;color:var(--text-2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border-soft)">${r.notas}</div>` : ''}
-        </div>`;
-      }).join('') : '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">🎯 Sin objetivos de ahorro</div>';
-    } catch(e) { fnAlert('Error','error'); }
-  }
-  function fnEditAho(r) { document.getElementById('fn-modal-aho-t').textContent='Editar Objetivo'; fnOpenModal('fn-modal-aho',r); }
-  async function fnSaveAho() {
-    await fnSaveItem('objetivos_ahorro', {
-      nombre: document.getElementById('fn-f-aho-nom').value,
-      importe_meta: parseFloat(document.getElementById('fn-f-aho-met').value)||0,
-      importe_actual: parseFloat(document.getElementById('fn-f-aho-act').value)||0,
-      fecha_objetivo: document.getElementById('fn-f-aho-fec').value||null,
-      notas: document.getElementById('fn-f-aho-not').value
-    }, 'fn-modal-aho', fnLoadAho);
-  }
-
   // PORTFOLIO
   let fnPortData = [];
   let fnTVCurrentId = null; // id del activo seleccionado en TV
@@ -5912,121 +6031,6 @@
   }
 
   // PRESUPUESTO
-  function fnGetBudgets() { try { return JSON.parse(localStorage.getItem('lifeos_budgets')||'{}'); } catch { return {}; } }
-  function fnSaveBudgets(b) { localStorage.setItem('lifeos_budgets', JSON.stringify(b)); }
-
-  function fnSetBudTab(tab) {
-    fnBudTab = tab;
-    document.getElementById('fn-bud-panel-mes').style.display = tab==='mes'?'block':'none';
-    document.getElementById('fn-bud-panel-anio').style.display = tab==='anio'?'block':'none';
-    document.getElementById('fn-btn-bud-mes').className = 'btn ' + (tab==='mes'?'btn-primary':'btn-ghost');
-    document.getElementById('fn-btn-bud-anio').className = 'btn ' + (tab==='anio'?'btn-primary':'btn-ghost');
-    fnLoadBudget();
-  }
-
-  function fnOpenBudModal(type) {
-    fnBudModalType = type;
-    const b = fnGetBudgets();
-    const key = type === 'mes' ? 'monthly' : 'yearly';
-    document.getElementById('fn-modal-bud-title').textContent = type==='mes' ? 'Presupuesto mensual' : 'Presupuesto anual';
-    document.getElementById('fn-modal-bud-body').innerHTML = `
-      <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label">Límite total (€)</label>
-        <input type="number" id="fn-bud-total-inp" class="form-input" value="${b[key+'_total']||''}" placeholder="0.00" step="0.01">
-      </div>
-      <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px">Por categoría (opcional)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${FN_CATS_GASTO.map(c=>`
-          <div class="form-group">
-            <label class="form-label">${FN_CAT_ICONS[c]||'•'} ${c}</label>
-            <input type="number" id="fn-bud-cat-${c.replace(/[^a-z]/gi,'_')}" class="form-input" value="${b[key+'_cat_'+c]||''}" placeholder="0.00" step="0.01">
-          </div>`).join('')}
-      </div>`;
-    fnOpenModal('fn-modal-bud');
-  }
-
-  function fnSaveBudget() {
-    const b = fnGetBudgets();
-    const key = fnBudModalType === 'mes' ? 'monthly' : 'yearly';
-    b[key+'_total'] = parseFloat(document.getElementById('fn-bud-total-inp').value)||0;
-    FN_CATS_GASTO.forEach(c => {
-      const el = document.getElementById('fn-bud-cat-'+c.replace(/[^a-z]/gi,'_'));
-      b[key+'_cat_'+c] = el ? (parseFloat(el.value)||0) : 0;
-    });
-    fnSaveBudgets(b);
-    fnAlert('Presupuesto guardado ✓');
-    fnCloseModal('fn-modal-bud');
-    fnLoadBudget();
-  }
-
-  async function fnLoadBudget() {
-    const uid = currentUser?.id; if(!uid) return;
-    const b = fnGetBudgets();
-    const now = new Date();
-    const m = String(now.getMonth()+1).padStart(2,'0'), y = now.getFullYear();
-    try {
-      const [rowsM, rowsY] = await Promise.all([
-        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-${m}-01&fecha=lte.${lastDayOfMonth(parseInt(y), parseInt(m))}&tipo=eq.gasto`),
-        fnDbGet('ingresos_gastos', `user_id=eq.${uid}&fecha=gte.${y}-01-01&fecha=lte.${y}-12-31&tipo=eq.gasto`)
-      ]);
-      // Mensual
-      const gasM = rowsM.reduce((s,r)=>s+Number(r.importe||0),0);
-      const limM = b.monthly_total||0;
-      const pctM = limM > 0 ? Math.min(100,Math.round(gasM/limM*100)) : 0;
-      const colM = pctM>=90?'var(--red)':pctM>=70?'var(--amber)':'var(--green)';
-      document.getElementById('fn-bud-mes-limit').textContent = limM ? fnFmt(limM) : 'No definido';
-      document.getElementById('fn-bud-mes-gastado').textContent = fnFmt(gasM);
-      document.getElementById('fn-bud-mes-pct').textContent = limM ? pctM+'%' : '';
-      document.getElementById('fn-bud-mes-pct').style.color = colM;
-      document.getElementById('fn-bud-mes-bar').style.width = pctM+'%';
-      document.getElementById('fn-bud-mes-bar').style.background = colM;
-      document.getElementById('fn-bud-mes-resto').textContent = limM ? (gasM<=limM?`Quedan ${fnFmt(limM-gasM)}`:`⚠️ Superado en ${fnFmt(gasM-limM)}`) : 'Define un límite para ver el progreso';
-      // Categorías mes
-      const catM = {};
-      rowsM.forEach(r=>{catM[r.categoria]=(catM[r.categoria]||0)+Number(r.importe||0);});
-      document.getElementById('fn-bud-mes-cats').innerHTML = FN_CATS_GASTO.map(c=>{
-        const g=catM[c]||0; const l=b['monthly_cat_'+c]||0;
-        const pct=l>0?Math.min(100,Math.round(g/l*100)):0;
-        const col=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
-        return `<div class="fn-bud-cat-row">
-          <div style="font-size:18px;width:24px;text-align:center">${FN_CAT_ICONS[c]||'•'}</div>
-          <div class="fn-bud-cat-info">
-            <div class="fn-bud-cat-name"><span>${c}</span><span style="color:${g>0?'var(--text)':'var(--text-3)'}"><strong>${fnFmt(g)}</strong>${l?' <span style="color:var(--text-3)">/ '+fnFmt(l)+'</span>':''}</span></div>
-            ${l?`<div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:${col}"></div></div>
-            <div class="fn-bud-cat-vals">${pct}% · ${g<=l?'quedan '+fnFmt(l-g):'⚠️ superado '+fnFmt(g-l)}</div>`:'<div class="fn-bud-cat-vals" style="color:var(--text-3)">Sin límite definido</div>'}
-          </div>
-        </div>`;
-      }).join('');
-      // Anual
-      const gasY = rowsY.reduce((s,r)=>s+Number(r.importe||0),0);
-      const limY = b.yearly_total||0;
-      const pctY = limY>0?Math.min(100,Math.round(gasY/limY*100)):0;
-      const colY = pctY>=90?'var(--red)':pctY>=70?'var(--amber)':'var(--green)';
-      document.getElementById('fn-bud-anio-limit').textContent = limY ? fnFmt(limY) : 'No definido';
-      document.getElementById('fn-bud-anio-gastado').textContent = fnFmt(gasY);
-      document.getElementById('fn-bud-anio-pct').textContent = limY ? pctY+'%' : '';
-      document.getElementById('fn-bud-anio-pct').style.color = colY;
-      document.getElementById('fn-bud-anio-bar').style.width = pctY+'%';
-      document.getElementById('fn-bud-anio-bar').style.background = colY;
-      document.getElementById('fn-bud-anio-resto').textContent = limY ? (gasY<=limY?`Quedan ${fnFmt(limY-gasY)}`:`⚠️ Superado en ${fnFmt(gasY-limY)}`) : 'Define un límite para ver el progreso';
-      const catY = {};
-      rowsY.forEach(r=>{catY[r.categoria]=(catY[r.categoria]||0)+Number(r.importe||0);});
-      document.getElementById('fn-bud-anio-cats').innerHTML = FN_CATS_GASTO.map(c=>{
-        const g=catY[c]||0; const l=b['yearly_cat_'+c]||0;
-        const pct=l>0?Math.min(100,Math.round(g/l*100)):0;
-        const col=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
-        return `<div class="fn-bud-cat-row">
-          <div style="font-size:18px;width:24px;text-align:center">${FN_CAT_ICONS[c]||'•'}</div>
-          <div class="fn-bud-cat-info">
-            <div class="fn-bud-cat-name"><span>${c}</span><span style="color:${g>0?'var(--text)':'var(--text-3)'}"><strong>${fnFmt(g)}</strong>${l?' <span style="color:var(--text-3)">/ '+fnFmt(l)+'</span>':''}</span></div>
-            ${l?`<div class="fn-progress-wrap"><div class="fn-progress-bar" style="width:${pct}%;background:${col}"></div></div>
-            <div class="fn-bud-cat-vals">${pct}% · ${g<=l?'quedan '+fnFmt(l-g):'⚠️ superado '+fnFmt(g-l)}</div>`:'<div class="fn-bud-cat-vals" style="color:var(--text-3)">Sin límite definido</div>'}
-          </div>
-        </div>`;
-      }).join('');
-    } catch(e) { console.error(e); }
-  }
-
   // Cerrar modales finanzas al hacer click fuera
   // (se inicializa en init() cuando el DOM ya existe)
 
