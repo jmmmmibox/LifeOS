@@ -1692,7 +1692,7 @@
           <div class="habits-tabs">
             <button class="habits-tab" onclick="switchHabitsTab('hoy')">Hoy</button>
             <button class="habits-tab active" onclick="switchHabitsTab('calendario')">Calendario</button>
-            <button class="habits-tab" onclick="switchHabitsTab('estadisticas')">Estadisticas</button>
+            <button class="habits-tab" onclick="switchHabitsTab('estadisticas')">Estadísticas</button>
           </div>
           <div id="habitsTabHoy" style="display:none">
             <div id="habitsPageContent">
@@ -1704,21 +1704,52 @@
             </div>
           </div>
           <div id="habitsTabCalendario">
-            <div class="card" style="overflow-x:auto">
-              <div class="cal-header">
-                <span class="cal-month" id="calMonthLabel"></span>
-                <div class="cal-nav">
+            <!-- Controles calendario -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+              <div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:var(--radius-sm)">
+                <button class="habits-tab active" id="cal-view-mes-btn" onclick="setCalView('mes')">Mes</button>
+                <button class="habits-tab" id="cal-view-anio-btn" onclick="setCalView('anio')">Año completo</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px" id="cal-nav-controls">
+                <div class="cal-nav" id="cal-mes-nav">
                   <button class="cal-nav-btn" onclick="changeCalMonth(-1)">&#8249;</button>
+                  <span class="cal-month" id="calMonthLabel" style="margin:0 8px"></span>
                   <button class="cal-nav-btn" onclick="changeCalMonth(1)">&#8250;</button>
                 </div>
+                <div style="display:flex;align-items:center;gap:6px" id="cal-anio-nav" style="display:none">
+                  <button class="cal-nav-btn" onclick="changeCalYear(-1)">&#8249;</button>
+                  <span class="cal-month" id="calYearLabel" style="margin:0 8px"></span>
+                  <button class="cal-nav-btn" onclick="changeCalYear(1)">&#8250;</button>
+                </div>
               </div>
-              <div id="calTableWrap"></div>
+            </div>
+            <!-- Vista mes -->
+            <div id="calViewMes">
+              <div class="card" style="overflow-x:auto">
+                <div id="calTableWrap"></div>
+              </div>
+            </div>
+            <!-- Vista año completo -->
+            <div id="calViewAnio" style="display:none">
+              <div class="card" style="overflow-x:auto">
+                <div id="calAnioWrap"></div>
+              </div>
             </div>
           </div>
           <div id="habitsTabEstadisticas" style="display:none">
+            <!-- Selector período -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <div style="display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:var(--radius-sm)">
+                <button class="habits-tab active" id="stats-period-30" onclick="setStatsPeriod(30)">30 días</button>
+                <button class="habits-tab" id="stats-period-90" onclick="setStatsPeriod(90)">90 días</button>
+                <button class="habits-tab" id="stats-period-365" onclick="setStatsPeriod(365)">Este año</button>
+                <button class="habits-tab" id="stats-period-0" onclick="setStatsPeriod(0)">Todo</button>
+              </div>
+              <select id="statsYearFilter" class="form-select" style="width:110px;display:none" onchange="renderHabitsStats()"></select>
+            </div>
             <div class="stats-grid" id="habitsStatsCards"></div>
             <div class="card">
-              <div class="card-title">Cumplimiento por habito -- ultimos 30 dias</div>
+              <div class="card-title" id="habitsRateTitle">Cumplimiento por hábito — últimos 30 días</div>
               <div class="habit-rate-row" id="habitsRateList"></div>
             </div>
           </div>
@@ -3040,7 +3071,7 @@
     closeSidebar();
 
     if (page === 'dashboard') loadDashboard();
-    if (page === 'habits') loadHabitsPage(); renderHabitsCalendar();
+    if (page === 'habits') { loadHabitsPage(); renderHabitsCalendar(); document.getElementById('calYearLabel').textContent = calYear; }
     if (page === 'tasks') loadTasksPage();
     if (page === 'journal') loadJournalPage();
     if (page === 'goals') loadGoalsPage();
@@ -3647,13 +3678,44 @@
     document.getElementById('habitsTabHoy').style.display = tab === 'hoy' ? 'block' : 'none';
     document.getElementById('habitsTabCalendario').style.display = tab === 'calendario' ? 'block' : 'none';
     document.getElementById('habitsTabEstadisticas').style.display = tab === 'estadisticas' ? 'block' : 'none';
-    if (tab === 'calendario') renderHabitsCalendar();
+    if (tab === 'calendario') {
+      if (calView === 'mes') renderHabitsCalendar();
+      else renderHabitsCalAnio();
+    }
     if (tab === 'estadisticas') renderHabitsStats();
+    if (tab === 'hoy') loadHabitsPage();
+  }
+
+  function setCalView(view) {
+    calView = view;
+    document.getElementById('cal-view-mes-btn').classList.toggle('active', view === 'mes');
+    document.getElementById('cal-view-anio-btn').classList.toggle('active', view === 'anio');
+    document.getElementById('calViewMes').style.display = view === 'mes' ? 'block' : 'none';
+    document.getElementById('calViewAnio').style.display = view === 'anio' ? 'block' : 'none';
+    document.getElementById('cal-mes-nav').style.display = view === 'mes' ? '' : 'none';
+    document.getElementById('cal-anio-nav').style.display = view === 'anio' ? '' : 'none';
+    if (view === 'mes') renderHabitsCalendar();
+    else renderHabitsCalAnio();
+  }
+
+  function changeCalYear(dir) {
+    calYear += dir;
+    document.getElementById('calYearLabel').textContent = calYear;
+    renderHabitsCalAnio();
+  }
+
+  function setStatsPeriod(days) {
+    statsPeriod = days;
+    document.querySelectorAll('[id^="stats-period-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById(`stats-period-${days}`)?.classList.add('active');
+    renderHabitsStats();
   }
 
   // ---- CALENDARIO ----
+  let calView = 'mes';
   let calYear = new Date().getFullYear();
   let calMonth = new Date().getMonth();
+  let statsPeriod = 30;
 
   function changeCalMonth(dir) {
     calMonth += dir;
@@ -3748,75 +3810,179 @@
   }
 
   // ---- ESTADISTICAS ----
+  // ---- CALENDARIO ANUAL (estilo GitHub contributions) ----
+  async function renderHabitsCalAnio() {
+    document.getElementById('calYearLabel').textContent = calYear;
+    const { data: habits } = await sb.from('habits').select('*').eq('user_id', currentUser.id).eq('active', true);
+    if (!habits?.length) {
+      document.getElementById('calAnioWrap').innerHTML = '<div class="empty-state"><p>Sin hábitos</p></div>';
+      return;
+    }
+
+    const startDate = `${calYear}-01-01`;
+    const endDate = `${calYear}-12-31`;
+    const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
+      .eq('user_id', currentUser.id).gte('date', startDate).lte('date', endDate).eq('completed', true);
+
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+    // Construir mapa: habit_id -> Set de fechas completadas
+    const logMap = {};
+    habits.forEach(h => logMap[h.id] = new Set());
+    logs?.forEach(l => logMap[l.habit_id]?.add(l.date));
+
+    const today = new Date().toISOString().split('T')[0];
+
+    let html = `<div style="overflow-x:auto">`;
+
+    for (const h of habits) {
+      const completedDates = logMap[h.id];
+      const totalAnio = completedDates.size;
+
+      html += `<div style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:14px">${h.icon||'•'}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${h.name}</span>
+          <span style="font-size:11px;color:var(--text-3);margin-left:4px">${totalAnio} días en ${calYear}</span>
+        </div>
+        <div style="display:flex;gap:2px;align-items:flex-end">`;
+
+      // 12 meses
+      for (let m = 0; m < 12; m++) {
+        const daysInMonth = new Date(calYear, m+1, 0).getDate();
+        html += `<div>
+          <div style="font-size:9px;color:var(--text-3);text-align:center;margin-bottom:3px">${meses[m]}</div>
+          <div style="display:grid;grid-template-columns:repeat(5,10px);gap:2px">`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = `${calYear}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const done = completedDates.has(dateStr);
+          const isFuture = dateStr > today;
+          const color = done ? h.color || 'var(--accent)'
+            : isFuture ? 'transparent'
+            : 'var(--border)';
+          const border = isFuture ? '1px solid var(--border-soft)' : 'none';
+          html += `<div title="${dateStr}" style="width:10px;height:10px;border-radius:2px;background:${color};border:${border}"></div>`;
+        }
+        html += `</div></div>`;
+      }
+      html += `</div></div>`;
+    }
+
+    // Leyenda
+    html += `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--text-3)">
+      <span>Menos</span>
+      <div style="width:10px;height:10px;border-radius:2px;background:var(--border)"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);opacity:.3"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:var(--accent);opacity:.6"></div>
+      <div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div>
+      <span>Más</span>
+    </div></div>`;
+
+    document.getElementById('calAnioWrap').innerHTML = html;
+  }
+
   async function renderHabitsStats() {
     const { data: habits } = await sb.from('habits').select('*').eq('user_id', currentUser.id).eq('active', true);
     if (!habits?.length) {
-      document.getElementById('habitsStatsCards').innerHTML = '<p style="color:var(--text-3);font-size:13px">Sin habitos para mostrar estadisticas.</p>';
+      document.getElementById('habitsStatsCards').innerHTML = '<p style="color:var(--text-3);font-size:13px">Sin hábitos para mostrar estadísticas.</p>';
       document.getElementById('habitsRateList').innerHTML = '';
       return;
     }
 
-    // Logs ultimos 30 dias
     const today = new Date();
-    const d30ago = new Date(); d30ago.setDate(d30ago.getDate() - 29);
-    const start30 = d30ago.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split('T')[0];
 
-    const { data: logs } = await sb.from('habit_logs').select('habit_id,date,completed')
-      .eq('user_id', currentUser.id).gte('date', start30).eq('completed', true);
+    // Calcular fecha inicio según período
+    let startDate = null;
+    let periodLabel = '';
+    if (statsPeriod === 30) { const d = new Date(); d.setDate(d.getDate()-29); startDate = d.toISOString().split('T')[0]; periodLabel = 'últimos 30 días'; }
+    else if (statsPeriod === 90) { const d = new Date(); d.setDate(d.getDate()-89); startDate = d.toISOString().split('T')[0]; periodLabel = 'últimos 90 días'; }
+    else if (statsPeriod === 365) { startDate = `${today.getFullYear()}-01-01`; periodLabel = `año ${today.getFullYear()}`; }
+    else { startDate = null; periodLabel = 'histórico total'; }
+
+    // Logs del período
+    let query = sb.from('habit_logs').select('habit_id,date,completed').eq('user_id', currentUser.id).eq('completed', true);
+    if (startDate) query = query.gte('date', startDate);
+    const { data: logs } = await query;
+
+    // Logs históricos totales (para la columna "total días")
+    const { data: allLogs } = await sb.from('habit_logs').select('habit_id,date,completed')
+      .eq('user_id', currentUser.id).eq('completed', true);
+
+    const logsByHabit = {};
+    const allLogsByHabit = {};
+    habits.forEach(h => { logsByHabit[h.id] = new Set(); allLogsByHabit[h.id] = new Set(); });
+    logs?.forEach(l => logsByHabit[l.habit_id]?.add(l.date));
+    allLogs?.forEach(l => allLogsByHabit[l.habit_id]?.add(l.date));
+
+    // Calcular días del período
+    const periodDays = statsPeriod > 0 ? statsPeriod : (() => {
+      if (!allLogs?.length) return 1;
+      const oldest = allLogs.reduce((min, l) => l.date < min ? l.date : min, allLogs[0].date);
+      return Math.ceil((new Date(todayStr) - new Date(oldest)) / 86400000) + 1;
+    })();
 
     const totalCompletions = logs?.length || 0;
-    const uniqueDays = new Set(logs?.map(l => l.date)).size;
-
-    // Mejor racha global
-    const logsByHabit = {};
-    habits.forEach(h => logsByHabit[h.id] = new Set());
-    logs?.forEach(l => logsByHabit[l.habit_id]?.add(l.date));
+    const totalHistorico = allLogs?.length || 0;
 
     let bestStreak = 0;
+    let bestStreakHabit = '';
     habits.forEach(h => {
-      const s = calcStreak(logsByHabit[h.id]);
-      if (s > bestStreak) bestStreak = s;
+      const s = calcStreak(allLogsByHabit[h.id]);
+      if (s > bestStreak) { bestStreak = s; bestStreakHabit = h.name; }
     });
 
-    // Tasa global
-    const globalRate = habits.length > 0 && uniqueDays > 0
-      ? Math.round((totalCompletions / (habits.length * 30)) * 100)
+    const globalRate = habits.length > 0 && periodDays > 0
+      ? Math.round((totalCompletions / (habits.length * periodDays)) * 100)
       : 0;
 
     document.getElementById('habitsStatsCards').innerHTML = `
       <div class="stat-card">
         <div class="stat-card-label">Tasa global</div>
-        <div class="stat-card-value">${globalRate}%</div>
-        <div class="stat-card-sub">Ultimos 30 dias</div>
+        <div class="stat-card-value">${Math.min(globalRate,100)}%</div>
+        <div class="stat-card-sub">${periodLabel}</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Completados</div>
         <div class="stat-card-value">${totalCompletions}</div>
-        <div class="stat-card-sub">Total en 30 dias</div>
+        <div class="stat-card-sub">${periodLabel}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-label">Mejor racha</div>
-        <div class="stat-card-value">${bestStreak}</div>
-        <div class="stat-card-sub">Dias consecutivos</div>
+        <div class="stat-card-label">Total histórico</div>
+        <div class="stat-card-value">${totalHistorico}</div>
+        <div class="stat-card-sub">Días completados (todos)</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-label">Habitos activos</div>
+        <div class="stat-card-label">Mejor racha activa</div>
+        <div class="stat-card-value">${bestStreak} <span style="font-size:16px">🔥</span></div>
+        <div class="stat-card-sub">${bestStreakHabit || '—'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Hábitos activos</div>
         <div class="stat-card-value">${habits.length}</div>
         <div class="stat-card-sub">Configurados</div>
       </div>`;
 
-    // Tasa por habito
+    document.getElementById('habitsRateTitle').textContent = `Detalle por hábito — ${periodLabel}`;
+
+    // Detalle por hábito
     document.getElementById('habitsRateList').innerHTML = habits.map(h => {
-      const count = logsByHabit[h.id]?.size || 0;
-      const rate = Math.round((count / 30) * 100);
-      const streak = calcStreak(logsByHabit[h.id]);
+      const countPeriodo = logsByHabit[h.id]?.size || 0;
+      const countTotal = allLogsByHabit[h.id]?.size || 0;
+      const rate = Math.min(Math.round((countPeriodo / periodDays) * 100), 100);
+      const streak = calcStreak(allLogsByHabit[h.id]);
       return `<div class="habit-rate-item">
         <div class="habit-rate-header">
           <span class="habit-rate-name">
-            <span style="width:10px;height:10px;border-radius:50%;background:${h.color};display:inline-block"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:${h.color};display:inline-block;flex-shrink:0"></span>
             ${h.icon || ''} ${h.name}
           </span>
-          <span class="habit-rate-pct">${rate}% · racha ${streak}d</span>
+          <div style="display:flex;gap:12px;align-items:center;flex-shrink:0">
+            <span style="font-size:11px;color:var(--text-3)">🔥 racha <strong style="color:var(--text)">${streak}d</strong></span>
+            <span style="font-size:11px;color:var(--text-3)">📅 total <strong style="color:var(--accent)">${countTotal} días</strong></span>
+            <span class="habit-rate-pct">${rate}%</span>
+          </div>
         </div>
         <div class="progress-bar">
           <div class="progress-fill" style="width:${rate}%;background:${h.color}"></div>
