@@ -3756,11 +3756,14 @@
       const isToday = isCurrentMonth && d === todayDay;
       headNums += `<th class="cal-th"><div class="cal-day-num ${isToday ? 'today-num' : ''}">${d}</div></th>`;
     }
-    headNums += '<th class="cal-th" style="min-width:54px;padding-left:10px">Racha</th></tr>';
+    headNums += '<th class="cal-th" style="min-width:54px;padding-left:10px">Racha</th>';
+    headNums += '<th class="cal-th" style="min-width:48px;padding-left:6px">Mes</th></tr>';
 
     // Filas por hábito
     const rows = habits.map(h => {
       const streak = calcStreak(logMap[h.id]);
+      const diasMes = logMap[h.id].size;
+      const diasPosibles = isCurrentMonth ? todayDay : daysInMonth;
       let cells = '';
 
       for (let d = 1; d <= daysInMonth; d++) {
@@ -3770,10 +3773,8 @@
         const isToday = isCurrentMonth && d === todayDay;
 
         if (isFuture) {
-          // Días futuros: no clicables, transparentes
           cells += `<td class="cal-cell"><div class="cal-cell-inner future" style="opacity:0.2;background:var(--border-soft)"></div></td>`;
         } else {
-          // Pasado o hoy: clicable
           const bgStyle = done ? `background:${h.color}` : 'background:var(--border-soft)';
           const todayStyle = isToday ? `outline:2px solid ${h.color};outline-offset:2px;` : '';
           const cursor = 'cursor:pointer;';
@@ -3794,6 +3795,12 @@
         ? `<span class="cal-streak-badge">&#128293; ${streak}d</span>`
         : '<span style="font-size:11px;color:var(--text-3)">—</span>';
 
+      const mesPct = diasPosibles > 0 ? Math.round(diasMes / diasPosibles * 100) : 0;
+      const mesHtml = `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding-left:6px">
+        <span style="font-size:12px;font-weight:700;color:${h.color}">${diasMes}</span>
+        <span style="font-size:10px;color:var(--text-3)">${mesPct}%</span>
+      </div>`;
+
       return `<tr>
         <td>
           <div class="cal-habit-label">
@@ -3803,6 +3810,7 @@
         </td>
         ${cells}
         <td style="padding-left:10px;white-space:nowrap">${streakHtml}</td>
+        <td style="white-space:nowrap">${mesHtml}</td>
       </tr>`;
     }).join('');
 
